@@ -124,10 +124,10 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
                   className="absolute -bottom-2 -right-2 h-6 w-6 bg-bg-tertiary rounded-full border border-border-color flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   aria-label="Read message aloud"
                 >
-                    {audioState[msg.id] === 'loading' ? (
+                    {audioState[message.id] === 'loading' ? (
                         <div className="w-3 h-3 border-2 border-text-muted border-t-transparent rounded-full animate-spin"></div>
                     ) : (
-                        <SpeakerIcon className={`h-4 w-4 ${audioState[msg.id] === 'playing' ? 'text-accent' : 'text-text-muted'}`} />
+                        <SpeakerIcon className={`h-4 w-4 ${audioState[message.id] === 'playing' ? 'text-accent' : 'text-text-muted'}`} />
                     )}
                 </button>
               )}

@@ -43,7 +43,7 @@ const WindowControls: React.FC<{ onClose: () => void; onMinimize: () => void; st
     );
 };
 
-const Window: React.FC<WindowProps> = ({ children, title, id, initialX, initialY, initialWidth, initialHeight, zIndex, isMinimized, isActive, windowStyle, onClose, onMinimize, onFocus }) => {
+const WindowComponent: React.FC<WindowProps> = ({ children, title, id, initialX, initialY, initialWidth, initialHeight, zIndex, isMinimized, isActive, windowStyle, onClose, onMinimize, onFocus }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [position, setPosition] = useState({ x: initialX, y: initialY });
   const [size, setSize] = useState({ width: initialWidth, height: initialHeight });
@@ -181,4 +181,4 @@ const Window: React.FC<WindowProps> = ({ children, title, id, initialX, initialY
   );
 };
 
-export default React.memo(Window);
+export default React.memo(WindowComponent);

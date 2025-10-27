@@ -1,5 +1,5 @@
 import { GoogleGenAI, GenerateContentResponse, Content, Type, Modality, FunctionDeclaration } from "@google/genai";
-import { TravelPlan, Workflow, SystemVoice, WorkflowNode, WorkflowConnection, ExecutionLogEntry, SkillID, Engram, UserAction, DashboardLayout, AppID, SocialPost, SharedContent, DeliveryOption, RideOption, WeatherData, FastFoodRestaurant, CleaningService, NightlifeEvent } from "../types";
+import { TravelPlan, Workflow, SystemVoice, WorkflowNode, WorkflowConnection, ExecutionLogEntry, SkillID, Engram, UserAction, DashboardLayout, AppID, SocialPost, SharedContent, RideOption, WeatherData, FastFoodRestaurant, CleaningService, NightlifeEvent } from "../types";
 import { skills } from '../data/skills';
 
 const API_KEY = process.env.API_KEY;
@@ -741,7 +741,7 @@ export const generateProactiveSuggestion = async (actions: UserAction[]): Promis
             contents: context,
             config: {
                 systemInstruction,
-                responseMimeType: 'application/json',
+                responseMimeType: "application/json",
                 responseSchema: {
                     type: Type.OBJECT,
                     properties: {

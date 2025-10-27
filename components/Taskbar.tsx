@@ -23,7 +23,7 @@ const appIcons: Record<AppID, React.FC<{className: string}>> = {
   luna: LunaIcon,
   karim: KarimIcon,
   scout: ScoutIcon,
-  maya: MayaIcon, // FIX: Changed MayaApp to MayaIcon
+  maya: MayaIcon, 
   workflow: WorkflowIcon,
   travelPlanViewer: TripIcon,
   transcriber: MicrophoneIcon,
@@ -31,10 +31,10 @@ const appIcons: Record<AppID, React.FC<{className: string}>> = {
   jules: JulesIcon,
   voice: VoiceAssistantIcon,
   marketing: MarketingIcon,
-  smartwatch: SmartWatchIcon, // FIX: Changed SmartWatchApp to SmartWatchIcon
+  smartwatch: SmartWatchIcon, 
   workspace: WorkspaceIcon,
   eventLog: EventLogIcon,
-  creatorStudio: CreatorStudioIcon, // FIX: Changed CreatorStudioApp to CreatorStudioIcon
+  creatorStudio: CreatorStudioIcon, 
   skillForge: SkillForgeIcon,
   chronoVault: ChronoVaultIcon,
   cognitoBrowser: BrowserIcon,
@@ -71,7 +71,7 @@ const appIcons: Record<AppID, React.FC<{className: string}>> = {
   nexusGo: NexusGoIcon,
   nexusFeed: NexusChatIcon,
   nexusProfile: NexusProfileIcon,
-  travelServices: TravelServicesIcon, // New
+  travelServices: TravelServicesIcon, 
   pricing: PricingIcon,
 };
 

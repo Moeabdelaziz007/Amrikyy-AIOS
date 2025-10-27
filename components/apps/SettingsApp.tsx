@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
-import { Settings, SettingsAppProps, Theme, WallpaperID, WindowStyle, SystemVoice, DashboardLayout, VoiceOption } from '../../types';
+import { Settings, SettingsAppProps, Theme, WallpaperID, WindowStyle, SystemVoice, DashboardLayout, VoiceOption, CreditTransaction, CreditTransactionType } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { voices } from '../../data/voices';
 // FIX: Replaced non-existent `suggestDashboardLayout` with a mock function.
 import { suggestDashboardLayout } from '../../services/geminiAdvancedService';
 import { useGoogleAuth } from '../../contexts/GoogleAuthContext';
 
-type Section = 'profile' | 'dashboard' | 'billing' | 'appearance' | 'assistant' | 'integrations';
+type Section = 'profile' | 'dashboard' | 'billing' | 'appearance' | 'assistant' | 'integrations' | 'credit_history'; // New section for credit history
 
 const themes: { id: Theme, name: string, image: string }[] = [
-    { id: 'deep-space', name: 'Deep Space', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2IGaJhLUoZ41zzrN4UCLvW6aLVCUgmSA3AEftYEnC_IH7cCkMXHJXQzL0dA_nVza56Z5WIf0M3MegcSjuxksB8sXeBThrpZhkowdYmi0dZ-pgHK0eLL0BRfzNrKBWTQbb9-wlIyHwm8jR-PqE0aHpgbc6q0-KVI3i_Pol8OSgWZBsUQBsFEQVNF6GcN3cRAQ9QXDHq9OO3gVVaeGZwldDOUM_c51hJlZ0OTaWPhWZaP4yUgC3Z87JwfdTV5h3ES6PBe_LqBeROWA' },
+    { id: 'obsidian', name: 'Obsidian', image: '/wallpaper-obsidian.svg' }, // FIX: Added image for obsidian
+    { id: 'deep-space', name: 'Deep Space', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2IGaJhLUoZ41zzrN4UCLvW6aLVCUgmSA3AEftYEnC_IH7cCjMXHJXQzL0dA_nVza56Z5WIf0M3MegcSjuxksB8sXeBThrpZhkowdYmi0dZ-pgHK0eLL0BRfzNrKBWTQbb9-wlIyHwm8jR-PqE0aHpgbc6q0-KVI3i_Pol8OSgWZBsUQBsFEQVNF6GcN3cRAQ9QXDHq9OO3gVVaeGZwldDOUM_c51hJlZ0OTWPhWZaP4yUgC3Z87JwfdTV5h3ES6PBe_LqBeROWA' },
     { id: 'neon-noir', name: 'Neon Noir', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB21J1C02L0kI2P0q1p9A8z7F6E5g4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0' },
     { id: 'synthwave-sunset', name: 'Synthwave Sunset', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD3kL7j5R9w1p0q2o8z7f6e5g4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0' },
     { id: 'zen', name: 'Zen', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDXE2XK8St4NU5jUYsvITfCmYlII-xcXmNacO9gME6nXHjPDCtELW0OI4WPs53ENLPiOTJbh8-SOdPNIfnIGuPZdSaazwEfk0xh1leG0lQijhby7cAJe1x9rg_2S2nTFf-PyM3FL4F_nKobaoAf4VZfgemHpNgWisbPf6xTtiW3OZCGglbFZQ6jL4ckzeprV9ljr70IhfSMg93g2Ywe3G51TBNkcPFZO-Pw-t4Y8jkvKuWMkpOHaC2EqrhW21TQe5dV-AdnQ6mWe0c' },
-    { id: 'playful', name: 'Playful', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBBdrHQlSE7z2ncUwwghHEzjxH8_q7JfsUO-DFdSsyAuIuR9pU6FQErI10sZ42MckNsT8sZfvGNyUISiC80lJCB0kqNKK4nckfQh8dGcw1AjQEnrX_xZd7r020EOSxsMIeyDJB0WWtuGWEous2SKibhWY9j3ax5eFikLawpqx24_oDDemxJsLoe252vvWvcw0dDtl_XQ9SeP9GK48EsJv7GLxReQVYvIYfHh8TwjKFyNR47ygQ_mxe3CDZHk_qFDcl08AU7pfnsZl4' },
+    { id: 'playful', name: 'Playful', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBBdrHQlSE7z2ncUwwghHEzjxH8_q7JfsUO-DFdSsyAuIuR9pU6FQErI10sZ42MckNsT8sZfvGNyUISiC80lJCB0kqNKK4nckfQh8dGcw1AjQEnrX_xZd7r020EOSxsMIeyDJB0WWtuGWEous2SKibhWY9j3ax5eFikLawpqx24_oDDemxJsLoe252vvWvcw0dDtl_XQ9SeP9GK48EsJv7GLxReQVYvIYfHh8TwjKFyNR47ygQ_mxe3CDZHQ_qFDcl08AU7pfnsZl4' },
     { id: 'professional', name: 'Professional', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFK-dQwBx4j7JwBkN0HMVt76IY5_VSmG-oXhjLaMbOn0mCs1FBiKM89RBvAoR2zQn_VrgAol9u0G53rZijmM_2AvYitU0kkNGcNPMWKxOlyvN-5MSGNNxqOjIBlKM3DjFba871JmqYT2uWUU71q3i4GlT6HEHNzYH1wYm_fueEQFhG85r2k0XlJpa9yCT2bMdjOXAR1r3DVb_6phty80dVNON_Z2dkpfebPrHCaHM18P3qs7a5_7X13uHwuCmjNIxkAhCbBh6-8I8' },
 ];
 
 const windowStyles: { id: WindowStyle, name: string }[] = [ { id: 'gemini', name: 'Gemini' }, { id: 'macos', name: 'macOS' }, { id: 'futuristic', name: 'Futuristic' }, { id: 'cyberpunk', name: 'Cyberpunk' }];
-const wallpapers: { id: WallpaperID, name: string }[] = [ { id: '/wallpaper.svg', name: 'Holographic Vista' }, { id: '/wallpaper2.svg', name: 'Solaris Dunes' }, { id: '/wallpaper3.svg', name: 'Cosmic Reef' }];
+const wallpapers: { id: WallpaperID, name: string }[] = [ { id: '/wallpaper.svg', name: 'Holographic Vista' }, { id: '/wallpaper2.svg', name: 'Solaris Dunes' }, { id: '/wallpaper3.svg', name: 'Cosmic Reef' }, { id: '/wallpaper-obsidian.svg', name: 'Obsidian Grid'} ]; // FIX: Added obsidian wallpaper
 const dashboardLayouts: { id: DashboardLayout, name: string}[] = [ {id: 'default', name: 'Default'}, {id: 'work', name: 'Work'}, {id: 'developer', name: 'Developer'} ];
 
-const SettingsApp: React.FC<SettingsAppProps> = ({ settings, onSettingsChange, resetSettings, userAccount, onUserAccountChange, onUpgrade }) => {
+const SettingsApp: React.FC<SettingsAppProps> = ({ settings, onSettingsChange, resetSettings, userAccount, onUserAccountChange, onUpgrade, creditTransactions }) => {
     const { t } = useLanguage();
     const [activeSection, setActiveSection] = useState<Section>('profile');
     const [aiLayoutSuggestion, setAiLayoutSuggestion] = useState('');
@@ -46,6 +47,7 @@ const SettingsApp: React.FC<SettingsAppProps> = ({ settings, onSettingsChange, r
         { id: 'profile', label: t('settings.profile'), icon: 'person' },
         { id: 'dashboard', label: t('settings.dashboard'), icon: 'dashboard' },
         { id: 'billing', label: t('settings.billing'), icon: 'credit_card' },
+        { id: 'credit_history', label: t('nexus_profile.credit_history_tab'), icon: 'currency_exchange' }, // New: Credit History Section
         { id: 'appearance', label: t('settings.appearance'), icon: 'palette' },
         { id: 'assistant', label: t('settings.assistant'), icon: 'smart_toy' },
         { id: 'integrations', label: t('settings.integrations'), icon: 'hub' },
@@ -59,6 +61,8 @@ const SettingsApp: React.FC<SettingsAppProps> = ({ settings, onSettingsChange, r
                 return <DashboardSection settings={settings} onSettingsChange={onSettingsChange} aiLayoutSuggestion={aiLayoutSuggestion} setAiLayoutSuggestion={setAiLayoutSuggestion} handleLayoutSuggestion={handleLayoutSuggestion} isSuggestingLayout={isSuggestingLayout} />;
             case 'billing':
                 return <BillingSection userAccount={userAccount} onUpgrade={onUpgrade} />;
+            case 'credit_history': // New: Render CreditHistorySection
+                return <CreditHistorySection creditTransactions={creditTransactions} />;
             case 'appearance':
                 return <AppearanceSection settings={settings} onSettingsChange={onSettingsChange} />;
             case 'assistant':
@@ -135,11 +139,11 @@ const ProfileSection: React.FC<{userAccount: SettingsAppProps['userAccount']; on
             <SectionHeader title={t('settings.profile')} subtitle={t('settings.profile_desc')} />
             <div className="space-y-4">
                  <div>
-                    <label htmlFor="display-name" className="block text-sm font-medium mb-1">{t('settings.profile_name')}</label>
+                    <label htmlFor="display-name" className="block text-sm font-medium text-text-secondary mb-2">{t('settings.profile_name')}</label>
                     <input type="text" id="display-name" value={userAccount.name} onChange={e => onUserAccountChange({ name: e.target.value })} className="w-full max-w-xs bg-black/10 dark:bg-white/5 p-2 rounded-md border border-border-color" />
                 </div>
                 <div>
-                    <label htmlFor="avatar" className="block text-sm font-medium mb-1">{t('settings.profile_avatar')}</label>
+                    <label htmlFor="avatar" className="block text-sm font-medium text-text-secondary mb-2">{t('settings.profile_avatar')}</label>
                     <input type="text" id="avatar" value={userAccount.avatar} onChange={e => onUserAccountChange({ avatar: e.target.value })} className="w-24 bg-black/10 dark:bg-white/5 p-2 rounded-md border border-border-color text-2xl text-center" />
                 </div>
             </div>
@@ -162,7 +166,7 @@ const DashboardSection: React.FC<{settings: Settings; onSettingsChange: (s: Part
                 </div>
                  <div className="mt-4">
                     <div className="flex gap-2">
-                        <input type="text" value={aiLayoutSuggestion} onChange={e => setAiLayoutSuggestion(e.target.value)} placeholder={t('settings.dashboard_ai_suggestion')} className="flex-grow bg-black/10 dark:bg-white/5 p-2 rounded-md border border-border-color" />
+                        <input type="text" value={aiLayoutSuggestion} onChange={e => setAiLayoutSuggestion(e.target.value)} placeholder={t('settings.dashboard_ai_suggestion')} className="w-full bg-black/10 dark:bg-white/5 p-2 rounded-md border border-border-color" />
                         <button onClick={handleLayoutSuggestion} disabled={isSuggestingLayout} className="px-4 py-2 font-semibold rounded-lg bg-accent text-white disabled:opacity-50">
                             {isSuggestingLayout ? '...' : t('settings.dashboard_ai_button')}
                         </button>
@@ -188,6 +192,59 @@ const BillingSection: React.FC<{userAccount: SettingsAppProps['userAccount']; on
         </div>
     );
 }
+
+// New: CreditHistorySection component
+const CreditHistorySection: React.FC<{ creditTransactions: CreditTransaction[] }> = ({ creditTransactions }) => {
+    const { t } = useLanguage();
+    const getTransactionTypeColor = (type: CreditTransactionType) => {
+        switch (type) {
+            case 'deposit': return 'text-green-400';
+            case 'bonus': return 'text-lime-400';
+            case 'refund': return 'text-cyan-400';
+            case 'purchase':
+            case 'withdrawal':
+            case 'boost': return 'text-red-400';
+            default: return 'text-text-secondary';
+        }
+    };
+    const getTransactionSign = (type: CreditTransactionType) => {
+        switch (type) {
+            case 'deposit':
+            case 'bonus':
+            case 'refund': return '+';
+            case 'purchase':
+            case 'withdrawal':
+            case 'boost': return '-';
+            default: return '';
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <SectionHeader title={t('nexus_profile.credit_history_tab')} subtitle="View your AI Credit transaction history." />
+            <div className="bg-black/20 p-4 rounded-lg border border-border-color">
+                {creditTransactions.length === 0 ? (
+                    <p className="text-sm text-text-muted text-center py-4">No credit transactions yet.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {creditTransactions.map(transaction => (
+                            <div key={transaction.id} className="flex justify-between items-center text-sm">
+                                <div>
+                                    <p className="font-semibold">{transaction.description}</p>
+                                    <p className="text-xs text-text-muted">{new Date(transaction.timestamp).toLocaleString()}</p>
+                                </div>
+                                <span className={`font-bold ${getTransactionTypeColor(transaction.type)}`}>
+                                    {getTransactionSign(transaction.type)}{transaction.amount.toLocaleString()} AI Credits
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 
 const AppearanceSection: React.FC<{settings: Settings; onSettingsChange: (s: Partial<Settings>) => void;}> = ({ settings, onSettingsChange }) => {
     const { t } = useLanguage();

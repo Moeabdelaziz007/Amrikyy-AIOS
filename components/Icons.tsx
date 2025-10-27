@@ -43,6 +43,15 @@ export const TranslateIcon: React.FC<{className?: string}> = ({className}) => (<
 export const NexusGoIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>local_taxi</MaterialIcon>);
 export const NexusProfileIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>account_circle</MaterialIcon>); // New
 export const TravelServicesIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>room_service</MaterialIcon>); // New
+export const HeartbeatIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>favorite</MaterialIcon>); // New
+export const CpuIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>memory</MaterialIcon>); // New
+export const NetworkIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>network_check</MaterialIcon>); // New
+export const StorageIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>hard_drive</MaterialIcon>); // New
+export const BotsIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>robot</MaterialIcon>); // New
+export const LoadIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>speed</MaterialIcon>); // New
+export const UpTimeIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>hourglass_empty</MaterialIcon>); // New
+export const ErrorIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>error</MaterialIcon>); // New
+
 
 // Agent Icons
 export const LunaIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>smart_toy</MaterialIcon>);

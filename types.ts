@@ -1,5 +1,3 @@
-import React from 'react';
-
 // A "Skill" is a discrete capability the AI system can have.
 export type SkillID =
   'gemini-pro-text' | 'image-generation' | 'video-generation' | 'web-search' |
@@ -186,6 +184,18 @@ export interface Settings {
   language: 'en' | 'ar';
 }
 
+// New: Credit Transaction Types
+export type CreditTransactionType = 'purchase' | 'deposit' | 'bonus' | 'withdrawal' | 'boost' | 'refund';
+
+// New: Credit Transaction Interface
+export interface CreditTransaction {
+    id: string;
+    type: CreditTransactionType;
+    amount: number; // Positive for deposit/bonus/refund, negative for withdrawal/boost/purchase
+    timestamp: string; // ISO string
+    description: string;
+}
+
 export interface SettingsAppProps {
   settings: Settings;
   onSettingsChange: (newSettings: Partial<Settings>) => void;
@@ -195,6 +205,7 @@ export interface SettingsAppProps {
   paymentMethods: PaymentMethod[];
   onAddPaymentMethod: (method: PaymentMethod) => void;
   onUpgrade: () => void;
+  creditTransactions: CreditTransaction[]; // New: Pass transaction history
 }
 
 export interface TrendingItem {
@@ -509,4 +520,14 @@ export interface NightlifeEvent {
     vipOptions?: boolean;
     imageUrl?: string;
     reason: string; // AI-generated reason for recommendation
+}
+
+// New: Agent Health & Monitoring
+export type AgentHealthStatus = 'Nominal' | 'Warnings' | 'Critical';
+
+export interface AgentMetrics {
+    currentLoad: number; // Percentage
+    uptime: string; // e.g., "2 days, 5 hours"
+    recentErrors: number;
+    status: AgentHealthStatus;
 }

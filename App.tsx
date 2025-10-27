@@ -1,5 +1,5 @@
 import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
-import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment } from './types';
+import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types';
 import Dock from './components/Dock';
 import AppLauncher from './components/AppLauncher';
 import PoweredByGemini from './components/PoweredByGemini';
@@ -21,136 +21,81 @@ import ProjectsWidget from './components/widgets/ProjectsWidget'; // Explicit re
 import TasksWidget from './components/widgets/TasksWidget'; // Explicit relative import
 import CreatePostModal from './components/CreatePostModal';
 import { bounties as mockBounties } from './data/bounties';
-import LoadingScreen from './components/LoadingScreen';
+import LoadingScreen from './components/LoadingScreen'; // Re-added LoadingScreen import
 import { initialNexusPosts as mockNexusPosts } from './data/nexus'; // Import initial mock Nexus posts
 
 // Lazy load all application components for code-splitting and performance
-const ChatApp = lazy(() => import('./components/apps/ChatApp'));
-const TerminalApp = lazy(() => import('./components/apps/TerminalApp'));
-const FilesApp = lazy(() => import('./components/apps/FilesApp'));
-const SettingsApp = lazy(() => import('./components/apps/SettingsApp'));
-const LunaApp = lazy(() => import('./components/apps/LunaApp'));
-const KarimApp = lazy(() => import('./components/apps/KarimApp'));
-const ScoutApp = lazy(() => import('./components/apps/ScoutApp'));
-const MayaApp = lazy(() => import('./components/apps/MayaApp'));
-const JulesApp = lazy(() => import('./components/apps/JulesApp'));
-const VoiceAssistantApp = lazy(() => import('./components/apps/VoiceAssistantApp'));
-const WorkflowStudioApp = lazy(() => import('./components/apps/WorkflowStudioApp'));
-const TravelAgentApp = lazy(() => import('./components/apps/TravelAgentApp'));
-const MarketingApp = lazy(() => import('./components/apps/MarketingApp'));
-const TravelPlanViewerApp = lazy(() => import('./components/apps/TravelPlanViewerApp'));
-const SearchApp = lazy(() => import('./components/apps/SearchApp'));
-const MapsApp = lazy(() => import('./components/apps/MapsApp'));
-const TranscriberApp = lazy(() => import('./components/apps/TranscriberApp'));
-const VideoAnalyzerApp = lazy(() => import('./components/apps/VideoAnalyzerApp'));
-const ImageGeneratorApp = lazy(() => import('./components/apps/ImageGeneratorApp'));
-const AudioStudioApp = lazy(() => import('./components/apps/AudioStudioApp'));
-const VideoGeneratorApp = lazy(() => import('./components/apps/VideoGeneratorApp'));
-const SmartWatchApp = lazy(() => import('./components/apps/SmartWatchApp'));
-const WorkspaceApp = lazy(() => import('./components/apps/WorkspaceApp'));
-const EventLogApp = lazy(() => import('./components/apps/EventLogApp'));
-const SkillForgeApp = lazy(() => import('./components/apps/SkillForgeApp'));
-const ChronoVaultApp = lazy(() => import('./components/apps/ChronoVaultApp'));
-const CreatorStudioApp = lazy(() => import('./components/apps/CreatorStudioApp'));
-const CognitoBrowserApp = lazy(() => import('./components/apps/CognitoBrowserApp'));
-const AnalyticsHubApp = lazy(() => import('./components/apps/AnalyticsHubApp'));
-const AgentForgeApp = lazy(() => import('./components/apps/AgentForgeApp'));
-const AvatarStudioApp = lazy(() => import('./components/apps/AvatarStudioApp'));
-const AgentProfileApp = lazy(() => import('./components/apps/AgentProfileApp'));
-const StoreApp = lazy(() => import('./components/apps/StoreApp'));
-const NotificationCenterApp = lazy(() => import('./components/apps/NotificationCenterApp'));
-const LiveConversationApp = lazy(() => import('./components/apps/LiveConversationApp'));
-const ImageAnalyzerApp = lazy(() => import('./components/apps/ImageAnalyzerApp'));
-const AgoraApp = lazy(() => import('./components/apps/AgoraApp'));
-const NexusChatApp = lazy(() => import('./components/apps/NexusChatApp'));
-const DevConsoleApp = lazy(() => import('./components/apps/DevConsoleApp'));
-const ApiDocsApp = lazy(() => import('./components/apps/ApiDocsApp'));
-const DevToolkitApp = lazy(() => import('./components/apps/DevToolkitApp'));
-const GrowthHubApp = lazy(() => import('./components/apps/GrowthHubApp'));
-const ResourceHubApp = lazy(() => import('./components/apps/ResourceHubApp'));
-const GeminiAiNewsApp = lazy(() => import('./components/apps/GeminiAiNewsApp'));
-const ControlPanelApp = lazy(() => import('./components/apps/ControlPanelApp'));
-const AtlasApp = lazy(() => import('./components/apps/AtlasApp'));
-const CognitiveCanvasApp = lazy(() => import('./components/apps/CognitiveCanvasApp'));
-const VeridianIdApp = lazy(() => import('./components/apps/VeridianIdApp'));
-const TranslateHubApp = lazy(() => import('./components/apps/TranslateHubApp'));
-const NexusGoApp = lazy(() => import('./components/apps/NexusGoApp'));
-const NexusFeedApp = lazy(() => import('./components/apps/NexusFeedApp')); // Renamed ViralFeedApp to NexusFeedApp
-const NexusProfileApp = lazy(() => import('./components/apps/NexusProfileApp')); // New: Nexus Profile App
-const TravelServicesApp = lazy(() => import('./components/apps/TravelServicesApp')); // New: Travel Services App
 const Window = lazy(() => import('./components/Window'));
 const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget')); // Explicit relative import
 const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget')); // Explicit relative import
 const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget')); // Explicit relative import // Replaced ViralFeedWidget
 const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget')); // Explicit relative import
 const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget')); // Explicit relative import
-const PricingApp = lazy(() => import('./components/apps/SettingsApp'));
-
 
 const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType<any>>> = {
-  chat: ChatApp,
-  terminal: TerminalApp,
-  files: FilesApp,
-  settings: SettingsApp,
-  luna: LunaApp,
-  karim: KarimApp,
-  scout: ScoutApp,
-  maya: MayaApp,
-  jules: JulesApp,
-  voice: VoiceAssistantApp,
-  workflow: WorkflowStudioApp,
-  travelAgent: TravelAgentApp,
-  travelPlanViewer: TravelPlanViewerApp,
-  search: SearchApp,
-  maps: MapsApp,
-  transcriber: TranscriberApp,
-  videoAnalyzer: VideoAnalyzerApp,
-  image: ImageGeneratorApp,
-  audio: AudioStudioApp,
-  video: VideoGeneratorApp,
-  smartwatch: SmartWatchApp,
-  workspace: WorkspaceApp,
-  eventLog: EventLogApp,
-  skillForge: SkillForgeApp,
-  chronoVault: ChronoVaultApp,
-  creatorStudio: CreatorStudioApp,
-  cognitoBrowser: CognitoBrowserApp,
-  analyticsHub: AnalyticsHubApp,
-  agentForge: AgentForgeApp,
-  avatarStudio: AvatarStudioApp,
-  agentProfile: AgentProfileApp,
-  store: StoreApp,
-  notificationCenter: NotificationCenterApp,
-  liveConversation: LiveConversationApp,
-  imageAnalyzer: ImageAnalyzerApp,
-  agora: AgoraApp,
-  nexusChat: NexusChatApp,
-  marketing: MarketingApp,
-  devConsole: DevConsoleApp,
-  apiDocs: ApiDocsApp,
-  devToolkit: DevToolkitApp,
-  growthHub: GrowthHubApp,
-  resourceHub: ResourceHubApp,
-  geminiAiNews: GeminiAiNewsApp,
-  controlPanel: ControlPanelApp,
-  atlasFinance: AtlasApp,
-  cognitiveCanvas: CognitiveCanvasApp,
-  veridianId: VeridianIdApp,
-  translateHub: TranslateHubApp,
-  nexusGo: NexusGoApp,
-  nexusFeed: NexusFeedApp, // New
-  nexusProfile: NexusProfileApp, // New
-  travelServices: TravelServicesApp, // New
+  chat: lazy(() => import('./components/apps/ChatApp')),
+  terminal: lazy(() => import('./components/apps/TerminalApp')),
+  files: lazy(() => import('./components/apps/FilesApp')),
+  settings: lazy(() => import('./components/apps/SettingsApp')),
+  luna: lazy(() => import('./components/apps/LunaApp')),
+  karim: lazy(() => import('./components/apps/KarimApp')),
+  scout: lazy(() => import('./components/apps/ScoutApp')),
+  maya: lazy(() => import('./components/apps/MayaApp')),
+  jules: lazy(() => import('./components/apps/JulesApp')),
+  voice: lazy(() => import('./components/apps/VoiceAssistantApp')),
+  workflow: lazy(() => import('./components/apps/WorkflowStudioApp')),
+  travelAgent: lazy(() => import('./components/apps/TravelAgentApp')),
+  marketing: lazy(() => import('./components/apps/MarketingApp')),
+  travelPlanViewer: lazy(() => import('./components/apps/TravelPlanViewerApp')),
+  search: lazy(() => import('./components/apps/SearchApp')),
+  maps: lazy(() => import('./components/apps/MapsApp')),
+  transcriber: lazy(() => import('./components/apps/TranscriberApp')),
+  videoAnalyzer: lazy(() => import('./components/apps/VideoAnalyzerApp')),
+  image: lazy(() => import('./components/apps/ImageGeneratorApp')),
+  audio: lazy(() => import('./components/apps/AudioStudioApp')),
+  video: lazy(() => import('./components/apps/VideoGeneratorApp')),
+  smartwatch: lazy(() => import('./components/apps/SmartWatchApp')),
+  workspace: lazy(() => import('./components/apps/WorkspaceApp')),
+  eventLog: lazy(() => import('./components/apps/EventLogApp')),
+  skillForge: lazy(() => import('./components/apps/SkillForgeApp')),
+  chronoVault: lazy(() => import('./components/apps/ChronoVaultApp')),
+  creatorStudio: lazy(() => import('./components/apps/CreatorStudioApp')),
+  cognitoBrowser: lazy(() => import('./components/apps/CognitoBrowserApp')),
+  analyticsHub: lazy(() => import('./components/apps/AnalyticsHubApp')),
+  agentForge: lazy(() => import('./components/apps/AgentForgeApp')),
+  avatarStudio: lazy(() => import('./components/apps/AvatarStudioApp')),
+  agentProfile: lazy(() => import('./components/apps/AgentProfileApp')),
+  store: lazy(() => import('./components/apps/StoreApp')),
+  notificationCenter: lazy(() => import('./components/apps/NotificationCenterApp')),
+  liveConversation: lazy(() => import('./components/apps/LiveConversationApp')),
+  imageAnalyzer: lazy(() => import('./components/apps/ImageAnalyzerApp')),
+  agora: lazy(() => import('./components/apps/AgoraApp')),
+  nexusChat: lazy(() => import('./components/apps/NexusChatApp')),
+  devConsole: lazy(() => import('./components/apps/DevConsoleApp')),
+  apiDocs: lazy(() => import('./components/apps/ApiDocsApp')),
+  devToolkit: lazy(() => import('./components/apps/DevToolkitApp')),
+  growthHub: lazy(() => import('./components/apps/GrowthHubApp')),
+  resourceHub: lazy(() => import('./components/apps/ResourceHubApp')),
+  geminiAiNews: lazy(() => import('./components/apps/GeminiAiNewsApp')),
+  controlPanel: lazy(() => import('./components/apps/ControlPanelApp')),
+  atlasFinance: lazy(() => import('./components/apps/AtlasApp')),
+  cognitiveCanvas: lazy(() => import('./components/apps/CognitiveCanvasApp')),
+  veridianId: lazy(() => import('./components/apps/VeridianIdApp')),
+  translateHub: lazy(() => import('./components/apps/TranslateHubApp')),
+  nexusGo: lazy(() => import('./components/apps/NexusGoApp')),
+  nexusFeed: lazy(() => import('./components/apps/NexusFeedApp')), // New
+  nexusProfile: lazy(() => import('./components/apps/NexusProfileApp')), // New
+  travelServices: lazy(() => import('./components/apps/TravelServicesApp')), // New
   // Existing agents
-  atlas: AgentProfileApp,
-  cortex: AgentProfileApp,
-  orion: AgentProfileApp,
-  helios: AgentProfileApp,
-  leo: AgentProfileApp,
-  zara: AgentProfileApp,
-  rex: AgentProfileApp,
-  clio: AgentProfileApp,
-  pricing: PricingApp,
+  atlas: lazy(() => import('./components/apps/AgentProfileApp')),
+  cortex: lazy(() => import('./components/apps/AgentProfileApp')),
+  orion: lazy(() => import('./components/apps/AgentProfileApp')),
+  helios: lazy(() => import('./components/apps/AgentProfileApp')),
+  leo: lazy(() => import('./components/apps/AgentProfileApp')),
+  zara: lazy(() => import('./components/apps/AgentProfileApp')),
+  rex: lazy(() => import('./components/apps/AgentProfileApp')),
+  clio: lazy(() => import('./components/apps/AgentProfileApp')),
+  pricing: lazy(() => import('./components/apps/SettingsApp')),
 };
 
 const DEFAULT_SETTINGS: Settings = {
@@ -173,7 +118,8 @@ const AppLoadingSpinner: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  const [isOSLoaded, setIsOSLoaded] = useState(false);
+  // Removed isOSLoaded state and useEffect that simulated initial loading
+  const [isOSLoaded, setIsOSLoaded] = useState(false); // Re-added isOSLoaded state
   const [windows, setWindows] = useState<WindowInstance[]>([]);
   const [nextZIndex, setNextZIndex] = useState(10);
   const [nextId, setNextId] = useState(1);
@@ -210,6 +156,7 @@ const App: React.FC = () => {
   const [completedBounties, setCompletedBounties] = useState<Set<string>>(new Set());
   const [nexusPosts, setNexusPosts] = useState<NexusPost[]>(mockNexusPosts); // Renamed from viralPosts
   const [currentWeather, setCurrentWeather] = useState<WeatherCondition | null>(null);
+  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]); // New: credit transaction history
 
   const [alarms, setAlarms] = useState<Alarm[]>([
     { id: '1', time: '07:00', label: 'Good Morning!', enabled: true },
@@ -223,12 +170,20 @@ const App: React.FC = () => {
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [gmailMessages, setGmailMessages] = useState<GmailMessage[]>([]);
 
-  // Simulate initial loading of the OS
-  useEffect(() => {
-    const loadTimeout = setTimeout(() => {
-      setIsOSLoaded(true);
-    }, 2000); // Simulate 2-second loading time
-    return () => clearTimeout(loadTimeout);
+  // New: Centralized credit transaction handler
+  const handleCreditTransaction = useCallback((amount: number, type: CreditTransactionType, description: string) => {
+    setUserAccount(prev => ({
+      ...prev,
+      aiCredits: prev.aiCredits + amount, // amount can be negative for withdrawals
+    }));
+    const newTransaction: CreditTransaction = {
+      id: `txn-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      type,
+      amount,
+      timestamp: new Date().toISOString(),
+      description,
+    };
+    setCreditTransactions(prev => [newTransaction, ...prev]);
   }, []);
 
   const handleSuccessfulReferral = useCallback(() => {
@@ -236,18 +191,15 @@ const App: React.FC = () => {
         ...prev,
         referralsCount: (prev.referralsCount || 0) + 1,
         creditsEarnedFromReferrals: (prev.creditsEarnedFromReferrals || 0) + 500,
-        aiCredits: prev.aiCredits + 500,
     }));
+    handleCreditTransaction(500, 'bonus', 'Referral bonus');
     addNotification("Referral successful! 500 AI Credits added.", 'success');
-  }, [addNotification]);
+  }, [addNotification, handleCreditTransaction]);
   
   const handleBonusTask = useCallback((credits: number) => {
-     setUserAccount(prev => ({
-        ...prev,
-        aiCredits: prev.aiCredits + credits,
-    }));
+    handleCreditTransaction(credits, 'bonus', 'Task completion bonus');
     addNotification(`${credits} bonus AI Credits added!`, 'success');
-  }, [addNotification]);
+  }, [addNotification, handleCreditTransaction]);
 
   const handleAddPaymentMethod = useCallback((method: PaymentMethod) => {
     setPaymentMethods(prev => [...prev, method]);
@@ -268,13 +220,13 @@ const App: React.FC = () => {
         addNotification("Insufficient AI Credits to purchase.", 'error');
         return;
     }
-    setUserAccount(prev => ({ ...prev, aiCredits: prev.aiCredits - listing.price }));
+    handleCreditTransaction(-listing.price, 'purchase', `Purchased ${listing.type === 'agent' ? (listing.asset as CustomAgent).name : (listing.asset as Workflow).title}`);
     if (listing.type === 'agent') {
         addCustomAgent(listing.asset as CustomAgent);
     }
     // TODO: Handle workflow installation
     addNotification(`${listing.type === 'agent' ? (listing.asset as CustomAgent).name : (listing.asset as Workflow).title} purchased and installed!`, 'success');
-  }, [userAccount.aiCredits, addNotification, addCustomAgent]);
+  }, [userAccount.aiCredits, addNotification, addCustomAgent, handleCreditTransaction]);
 
   const handleListOnAgora = useCallback((listing: Omit<AgoraListing, 'id' | 'author'>) => {
     const newListing: AgoraListing = {
@@ -290,14 +242,14 @@ const App: React.FC = () => {
     setCompletedBounties(prev => new Set(prev).add(bountyId));
     const bounty = bounties.find(b => b.id === bountyId);
     if(bounty) {
+        handleCreditTransaction(bounty.creditReward, 'bonus', `Completed bounty: ${bounty.title}`);
         setUserAccount(prev => ({
             ...prev,
-            aiCredits: prev.aiCredits + bounty.creditReward,
             creatorScore: (prev.creatorScore || 0) + bounty.creditReward,
         }));
         addNotification(`Bounty complete! +${bounty.creditReward} AI Credits & Creator Score!`, 'success');
     }
-  }, [bounties, addNotification]);
+  }, [bounties, addNotification, handleCreditTransaction]);
 
   const handleShareAndPost = (content: SharedContent, socialPost: SocialPost) => {
       const newPost: NexusPost = {
@@ -333,8 +285,8 @@ const App: React.FC = () => {
                         const becomesViral = newLikes >= 1000;
 
                         if (becomesViral && !wasViral) {
-                             addNotification(`Your post "${post.content.title}" went viral! +500 bonus credits!`, 'success');
-                             setUserAccount(prev => ({...prev, aiCredits: prev.aiCredits + 500}));
+                             handleCreditTransaction(500, 'bonus', `Post "${post.content.title}" went viral!`);
+                             // No need to update userAccount directly here, handleCreditTransaction does it.
                         }
                         
                         return { ...post, likes: newLikes, views: post.views + Math.floor(Math.random() * 200) };
@@ -344,8 +296,15 @@ const App: React.FC = () => {
             });
         }, 5000);
         return () => clearInterval(interval);
-    }, [addNotification, completedBounties, handleCompleteBounty]);
+    }, [addNotification, completedBounties, handleCompleteBounty, handleCreditTransaction]);
 
+  // Simulate OS loading
+  useEffect(() => {
+    const loadingTimer = setTimeout(() => {
+      setIsOSLoaded(true);
+    }, 5000); // Adjust based on desired loading time
+    return () => clearTimeout(loadingTimer);
+  }, []);
 
   useEffect(() => {
     const fetchWorkspaceData = async () => {
@@ -487,9 +446,9 @@ const App: React.FC = () => {
   }, []);
   
   const handleUpgrade = useCallback(() => {
-    setUserAccount(prev => ({ ...prev, tier: 'Pro', aiCredits: 5000 }));
+    handleCreditTransaction(4000, 'deposit', 'Pro plan upgrade'); // Assuming 1000 initial, +4000 for Pro
     addNotification(t('notifications.upgraded_to_pro'), 'success');
-  }, [addNotification, t]);
+  }, [addNotification, t, handleCreditTransaction]);
 
   const openWindow = useCallback((appId: AppID, appProps: any = {}) => {
     logAction(appId, appProps);
@@ -717,14 +676,14 @@ const App: React.FC = () => {
         addNotification(t('*.insufficient_credits_text', { cost }), 'error');
         return false;
     }
-    setUserAccount(prev => ({ ...prev, aiCredits: prev.aiCredits - cost }));
+    handleCreditTransaction(-cost, 'boost', `Boosted post "${nexusPosts.find(p => p.id === postId)?.content.title || 'Unknown Post'}"`);
     addNotification(`Post boosted successfully for ${cost} credits!`, 'success');
     // Simulate increased views immediately
     setNexusPosts(prev => prev.map(post =>
         post.id === postId ? { ...post, views: post.views + 500 } : post
     ));
     return true;
-  }, [userAccount.aiCredits, addNotification, t]);
+  }, [userAccount.aiCredits, addNotification, t, handleCreditTransaction, nexusPosts]);
 
   return (
     <main className="w-screen h-screen overflow-hidden bg-black font-sans">
@@ -792,6 +751,7 @@ const App: React.FC = () => {
                               props.onSuccessfulReferral = handleSuccessfulReferral;
                               props.onBonusTask = handleBonusTask;
                               props.onUpgrade = handleUpgrade;
+                              props.creditTransactions = creditTransactions; // Pass transaction history
                           } else if (window.appId === 'travelAgent') {
                               props.startTravelWorkflow = startTravelWorkflow;
                           } else if (window.appId === 'workflow') {
@@ -856,6 +816,7 @@ const App: React.FC = () => {
                                 props.userAccount = userAccount;
                                 props.nexusPosts = nexusPosts.filter(p => p.osId === userAccount.osId); // Filter for user's posts
                                 props.onOpenApp = openWindow;
+                                props.creditTransactions = creditTransactions; // Pass transaction history
                           } else if (window.appId === 'travelServices') {
                                 props.userAccount = userAccount;
                                 props.onOpenApp = openWindow;
