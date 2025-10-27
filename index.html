@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amrikyy AI OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+             fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+              playful: ['Fredoka', 'sans-serif'],
+            },
+            borderRadius: {
+              'DEFAULT': '0.5rem', 'md': '0.5rem', 'lg': '0.75rem', 'xl': '1rem', 'full': '9999px',
+              '2xl': '1.5rem',
+            },
+            keyframes: {
+              'fade-in': { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' }, },
+              'slide-up': { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' }, },
+              'slide-in-right': { '0%': { transform: 'translateX(100%)', opacity: 0 }, '100%': { transform: 'translateX(0)', opacity: 1 } },
+              'grid-pan': { '0%': { backgroundPosition: '0% 50%' }, '100%': { backgroundPosition: '100% 50%' } },
+              fadeInPop: {'0%':{opacity:'0',transform:'scale(0.9) translateY(-10px)'},'80%':{opacity:'1',transform:'scale(1.02) translateY(5px)'},'100%':{opacity:'1',transform:'scale(1) translateY(0)'}},
+              bouncyExpand: {'0%':{transform:'scaleY(0.95)',opacity:'0.8'},'50%':{transform:'scaleY(1.02)',opacity:'1'},'100%':{transform:'scaleY(1)',opacity:'1'}},
+              wiggle: {'0%, 100%':{transform:'rotate(-3deg)'},'50%':{transform:'rotate(3deg)'}},
+              'reasoning-path': {
+                'from': { 'stroke-dashoffset': '100', opacity: '1' },
+                'to': { 'stroke-dashoffset': '0', opacity: '0' },
+              },
+              'superposition': {
+                '0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
+                '50%': { transform: 'scale(1.5)', opacity: '0.4' },
+              },
+              rain: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' },
+              },
+            },
+            animation: {
+              'fade-in': 'fade-in 0.5s ease-out forwards',
+              'slide-up': 'slide-up 0.5s ease-out forwards',
+              'slide-in-right': 'slide-in-right 0.5s ease-out forwards',
+              'grid-pan': 'grid-pan 60s linear infinite alternate',
+              fadeInPop: 'fadeInPop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2) forwards',
+              bouncyExpand: 'bouncyExpand 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.2) forwards',
+              wiggle: 'wiggle 0.5s ease-in-out infinite alternate',
+              'reasoning-path': 'reasoning-path 2s ease-out forwards',
+              'superposition': 'superposition 1.5s infinite ease-in-out',
+              rain: 'rain 1s linear infinite',
+            }
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        :root {
+          --background-dark: #10111A;
+          --neon-pink: #f000b8;
+          --neon-cyan: #00f0ff;
+          --accent-color: #38BDF8; /* sky-400 */
+        }
+        body { @apply font-sans bg-[--background-dark] text-gray-200; }
+
+        .theme-obsidian body, .theme-deep-space body, .theme-neon-noir body, .theme-synthwave-sunset body {
+           @apply font-sans;
+        }
+        .theme-zen body {
+           @apply bg-[#f8f8f8] text-[#333333];
+        }
+        .theme-playful body {
+            @apply font-playful bg-[#F0F8FF] text-gray-800;
+        }
+        .theme-professional body {
+            @apply font-sans bg-[#f0f2f5] dark:bg-[#1a202c] text-[#2d3748] dark:text-[#e2e8f0];
+        }
+      }
+
+      /* Base Glass Effect */
+      .glass-effect {
+        background: rgba(22, 24, 35, 0.6);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      
+      /* --- OBSIDIAN THEME (NEW DEFAULT) --- */
+      .theme-obsidian .animated-bg-container::before {
+        content: ''; @apply absolute inset-0;
+        background-color: #10111A;
+      }
+      .theme-obsidian .settings-panel, .theme-obsidian .glass-effect {
+         background-color: rgba(22, 24, 35, 0.5);
+         border: 1px solid rgba(56, 189, 248, 0.1);
+         backdrop-filter: blur(16px);
+      }
+      
+      /* --- DEEP SPACE THEME --- */
+      .theme-deep-space .animated-bg-container::before {
+        content: ''; @apply absolute inset-0;
+        background-color: #0A0B12;
+        background-image:
+            radial-gradient(ellipse at 80% 20%, rgba(23, 100, 200, 0.2) 0%, transparent 70%),
+            radial-gradient(ellipse at 20% 80%, rgba(100, 20, 150, 0.2) 0%, transparent 70%);
+        background-attachment: fixed;
+      }
+      .theme-deep-space .settings-panel, .theme-deep-space .glass-effect {
+         background-color: rgba(24, 26, 36, 0.4);
+         border: 1px solid rgba(42, 45, 60, 0.3);
+         backdrop-filter: blur(10px);
+      }
+      
+      /* --- NEON NOIR THEME --- */
+      .theme-neon-noir .animated-bg-container::before {
+        content: ''; @apply absolute inset-0;
+        background-color: #0c0a1d;
+        background-image:
+          radial-gradient(at 20% 20%, hsla(320, 100%, 50%, 0.2) 0px, transparent 50%),
+          radial-gradient(at 80% 0%, hsla(180, 100%, 50%, 0.2) 0px, transparent 50%),
+          radial-gradient(at 80% 80%, hsla(280, 100%, 50%, 0.2) 0px, transparent 50%),
+          linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        background-attachment: fixed;
+      }
+      .theme-neon-noir .settings-panel, .theme-neon-noir .glass-effect {
+        background: rgba(10, 10, 20, 0.5);
+        border: 1px solid var(--neon-pink);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 0 20px var(--neon-pink);
+      }
+
+      /* --- SYNTHWAVE SUNSET THEME --- */
+      .theme-synthwave-sunset .animated-bg-container::before {
+        content: ''; @apply absolute inset-0;
+        background-color: #2c0a3f;
+        background-image: 
+          linear-gradient(to top, rgba(255, 105, 180, 0.4) 0%, rgba(255, 165, 0, 0.3) 50%, rgba(75, 0, 130, 0.6) 100%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ff69b4' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: grid-pan 60s linear infinite alternate;
+      }
+      .theme-synthwave-sunset .settings-panel, .theme-synthwave-sunset .glass-effect {
+         background-color: rgba(60, 20, 80, 0.4);
+         border: 1px solid rgba(255, 105, 180, 0.5);
+         backdrop-filter: blur(10px);
+      }
+      
+      /* --- ZEN THEME --- */
+      .theme-zen .settings-panel {
+          background-color: white;
+          border: 1px solid #cccccc;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      }
+      .theme-zen .settings-sidebar {
+         background-color: #e0e0e0;
+      }
+      /* --- PLAYFUL THEME --- */
+      .theme-playful .settings-panel {
+         background-color: #FFFFFF;
+         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+         border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      .theme-playful .settings-sidebar {
+         border-radius: 0 1.5rem 1.5rem 0;
+      }
+      /* --- PROFESSIONAL THEME --- */
+      .theme-professional .settings-panel {
+         @apply bg-white dark:bg-[#37474f] rounded-md shadow-lg dark:shadow-2xl border border-gray-200 dark:border-[#334155];
+      }
+       .theme-professional .settings-sidebar {
+         @apply bg-white dark:bg-[#1f2937]
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24
+      }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.9.1",
+    "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0",
+    "vite": "https://aistudiocdn.com/vite@^7.1.12",
+    "vitest": "https://aistudiocdn.com/vitest@^4.0.3",
+    "vitest/": "https://aistudiocdn.com/vitest@^4.0.3/",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "url": "https://aistudiocdn.com/url@^0.11.4"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

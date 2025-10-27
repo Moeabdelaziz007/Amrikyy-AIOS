@@ -1,0 +1,9 @@
+{
+  "name": "Copy of Amrikyy AI OS",
+  "description": "The World's First AI-Native Operating System for OS Intelligence. A web-based OS featuring a complete desktop experience, multi-agent AI system powered by Google Gemini, and real-time collaboration.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone",
+    "camera"
+  ]
+}
