@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
 import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types';
 import Dock from './components/Dock.tsx'; // Explicit .tsx extension for troubleshooting module resolution
@@ -11,10 +12,10 @@ import DesktopAppsGrid from './components/DesktopAppsGrid';
 import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons';
 import { useLanguage } from './contexts/LanguageContext';
 import AnimatedBackground from './components/AnimatedBackground';
-import SystemOverviewWidget from './components/widgets/SystemOverviewWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
+import SystemOverviewWidget from './components/SystemOverviewWidget.tsx'; // FIX: Corrected import path
 import { NotificationCenter } from './components/NotificationCenter';
 import { useNotification } from './contexts/NotificationContext';
-import CryptoDashboardWidget from './components/widgets/CryptoDashboardWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
+import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx'; // FIX: Corrected import path
 import { useUserBehavior } from './contexts/UserBehaviorContext';
 import GlobalVoiceControl from './components/GlobalVoiceControl';
 import { useGoogleAuth } from './contexts/GoogleAuthContext';
@@ -372,7 +373,7 @@ const App: React.FC = () => {
   /**
    * Fetches Google Workspace data (Calendar events, Drive files, Gmail messages)
    * when the user signs in. Clears data on sign-out.
-   * Displays loading state while fetching.
+   * Displays loading state while fetching and sends notifications on errors.
    */
   useEffect(() => {
     const fetchWorkspaceData = async () => {
@@ -385,13 +386,13 @@ const App: React.FC = () => {
         ]);
 
         if (results[0].status === 'fulfilled') setCalendarEvents(results[0].value);
-        else addNotification(results[0].reason.message, 'error');
+        else addNotification(results[0].reason?.message || "Failed to fetch calendar events.", 'error', 'System');
         
         if (results[1].status === 'fulfilled') setDriveFiles(results[1].value);
-        else addNotification(results[1].reason.message, 'error');
+        else addNotification(results[1].reason?.message || "Failed to fetch drive files.", 'error', 'System');
 
         if (results[2].status === 'fulfilled') setGmailMessages(results[2].value);
-        else addNotification(results[2].reason.message, 'error');
+        else addNotification(results[2].reason?.message || "Failed to fetch gmail messages.", 'error', 'System');
 
       } else {
         setCalendarEvents([]);
@@ -405,7 +406,7 @@ const App: React.FC = () => {
   
   /**
    * Fetches ambient weather data using geolocation and updates it periodically.
-   * Displays loading state while fetching.
+   * Displays loading state while fetching and handles geolocation errors gracefully.
    */
   useEffect(() => {
     const fetchWeather = () => {
@@ -427,6 +428,8 @@ const App: React.FC = () => {
         },
         (error) => {
           console.warn('Geolocation failed:', error);
+          addNotification('Could not get location. Weather data may be inaccurate.', 'error', 'System');
+          // Provide default/fallback weather data on error
           setCurrentWeather({
             location: 'Unknown',
             temp: 20,
@@ -443,7 +446,7 @@ const App: React.FC = () => {
     fetchWeather();
     const interval = setInterval(fetchWeather, 3600000); // Update every hour
     return () => clearInterval(interval);
-  }, []);
+  }, [addNotification]);
 
   /**
    * Populates `nexusProfile` related state with mock data if it exists and is not already set.

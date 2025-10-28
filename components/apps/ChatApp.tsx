@@ -71,6 +71,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
 
   /**
    * Handles sending a user message to the AI and displaying the response.
+   * Includes error handling for API failures.
    */
   const handleSend = async () => {
     if (input.trim() === '' || isLoading) return;
@@ -79,19 +80,25 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
     setMessages(prev => [...prev, userMessage]);
     
     setIsLoading(true);
-
-    const chatHistory: Content[] = messages.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }]
-    }));
-    
     const currentInput = input;
     setInput('');
-    const aiResponseText = await generateResponse(currentInput, chatHistory);
-    const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
-    
-    setMessages(prev => [...prev, aiMessage]);
-    setIsLoading(false);
+
+    try {
+        const chatHistory: Content[] = messages.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.text }]
+        }));
+        
+        const aiResponseText = await generateResponse(currentInput, chatHistory);
+        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
+        
+        setMessages(prev => [...prev, aiMessage]);
+    } catch (error: any) {
+        const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, I couldn't get a response. ${error.message}` };
+        setMessages(prev => [...prev, errorMessage]);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   /**
@@ -113,6 +120,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
         }
     } catch (error) {
         console.error("Failed to play audio", error);
+        // Optionally add a notification here
     } finally {
         if (isMounted.current) {
             setAudioState(prev => ({ ...prev, [msg.id]: 'idle' }));
@@ -145,7 +153,11 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
                   <SparklesIcon className="h-6 w-6 text-white" />
               </div>
             )}
-            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' : 'bg-bg-secondary text-text-primary rounded-bl-none'}`}>
+            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${
+                msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' 
+                : msg.sender === 'system' ? 'bg-red-500/20 text-red-300 rounded-bl-none'
+                : 'bg-bg-secondary text-text-primary rounded-bl-none'
+            }`}>
               <p className="text-sm">{msg.text}</p>
               {msg.sender === 'ai' && (
                 <button 

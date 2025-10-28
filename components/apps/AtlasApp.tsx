@@ -64,7 +64,7 @@ const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => 
 /**
  * The DashboardView component displays an overview of market indices,
  * a personal watchlist, and recent financial news.
- * It simulates real-time data updates.
+ * It simulates real-time data updates and handles data fetching errors.
  * @returns {JSX.Element} The DashboardView component.
  */
 const DashboardView: React.FC = () => {
@@ -72,15 +72,18 @@ const DashboardView: React.FC = () => {
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>(defaultWatchlist);
     const [news, setNews] = useState<FinancialNews[]>([]);
     const [isLoadingNews, setIsLoadingNews] = useState(true);
+    const [newsError, setNewsError] = useState<string | null>(null);
 
     useEffect(() => {
         // Fetch financial news on component mount
         const fetchNews = async () => {
+            setIsLoadingNews(true);
+            setNewsError(null);
             try {
                 const fetchedNews = await getFinancialNews();
                 setNews(fetchedNews);
-            } catch (error) {
-                console.error(error);
+            } catch (error: any) {
+                setNewsError(error.message || "Failed to load financial news.");
                 setNews([]); // Clear news on error
             } finally {
                 setIsLoadingNews(false);
@@ -130,7 +133,9 @@ const DashboardView: React.FC = () => {
                  <div className="bg-black/20 p-4 rounded-lg border border-border-color">
                     <h3 className="font-bold mb-3">Top News</h3>
                     <div className="space-y-4">
-                        {isLoadingNews ? <p className="text-xs text-text-muted">Loading news...</p> : news.map((item, i) => (
+                        {isLoadingNews ? <p className="text-xs text-text-muted">Loading news...</p> 
+                        : newsError ? <p className="text-xs text-red-400">{newsError}</p>
+                        : news.map((item, i) => (
                              <a key={i} href={item.url} target="_blank" rel="noopener noreferrer" className="block hover:bg-white/5 p-2 rounded-md transition-colors">
                                 <p className="font-semibold text-sm line-clamp-2">{item.title}</p>
                                 <p className="text-xs text-text-muted">{item.source}</p>
@@ -165,8 +170,8 @@ const AnalysisView: React.FC = () => {
         try {
             const result = await getFinancialAnalysis(ticker.toUpperCase());
             setAnalysis(result);
-        } catch (err) {
-            setError('Failed to retrieve analysis. Please check the ticker and try again.');
+        } catch (err: any) {
+            setError(err.message || 'Failed to retrieve analysis. Please check the ticker and try again.');
         } finally {
             setIsLoading(false);
         }
@@ -180,7 +185,7 @@ const AnalysisView: React.FC = () => {
             </div>
             
             {isLoading && <div className="text-center p-8"><SparklesIcon className="w-8 h-8 text-green-400 animate-pulse mx-auto" /> <p>Generating Report...</p></div>}
-            {error && <p className="text-center text-red-400">{error}</p>}
+            {error && <p className="text-center text-red-400" role="alert">{error}</p>}
             
             {analysis && (
                 <div className="space-y-6 animate-fade-in">
@@ -221,7 +226,7 @@ const AnalysisView: React.FC = () => {
 
 /**
  * The AIChatView component provides a chat interface for interacting with the Atlas AI.
- * Users can ask financial questions and receive AI-generated responses, with a disclaimer.
+ * Users can ask financial questions and receive AI-generated responses, with a disclaimer and error handling.
  * @returns {JSX.Element} The AIChatView component.
  */
 const AIChatView: React.FC = () => {
@@ -239,17 +244,24 @@ const AIChatView: React.FC = () => {
         const userMessage: Message = { id: `user-${Date.now()}`, sender: 'user', text: input };
         setMessages(prev => [...prev, userMessage]);
         setIsLoading(true);
-
-        const history: Content[] = messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-        })); 
-        const responseText = await generateResponse(input, history);
-        
-        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: `${responseText}\n\n*Disclaimer: I am an AI assistant and not a financial advisor. All information is for educational purposes only.*` };
-        setMessages(prev => [...prev, aiMessage]);
+        const currentInput = input;
         setInput('');
-        setIsLoading(false);
+
+        try {
+            const history: Content[] = messages.map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.text }]
+            })); 
+            const responseText = await generateResponse(currentInput, history);
+            
+            const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: `${responseText}\n\n*Disclaimer: I am an AI assistant and not a financial advisor. All information is for educational purposes only.*` };
+            setMessages(prev => [...prev, aiMessage]);
+        } catch (error: any) {
+             const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, I couldn't get a response. ${error.message}` };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -258,7 +270,11 @@ const AIChatView: React.FC = () => {
                 {messages.map((msg) => (
                    <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                        {msg.sender === 'ai' && <div className="flex-shrink-0 h-10 w-10 rounded-full bg-stone-600 flex items-center justify-center text-2xl"><FinanceIcon /></div>}
-                       <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-accent text-white' : 'bg-bg-tertiary'}`}>
+                       <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${
+                           msg.sender === 'user' ? 'bg-accent text-white' 
+                           : msg.sender === 'system' ? 'bg-red-500/20 text-red-300'
+                           : 'bg-bg-tertiary'
+                        }`}>
                            <p className="text-sm">{msg.text}</p>
                        </div>
                    </div>

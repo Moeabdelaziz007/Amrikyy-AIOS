@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI, GenerateContentResponse, Content, Type, Modality, FunctionDeclaration } from "@google/genai";
 import { TravelPlan, Workflow, SystemVoice, WorkflowNode, WorkflowConnection, ExecutionLogEntry, SkillID, Engram, UserAction, DashboardLayout, AppID, SocialPost, SharedContent, RideOption, WeatherData, FastFoodRestaurant, CleaningService, NightlifeEvent, CurrentWeather, ForecastDay, FinancialNews, FinancialAnalysis, FlightOption, FlightSearchDetails, TrendingItem, CustomAgent } from "../types";
 import { skills } from '../data/skills';
@@ -740,7 +741,8 @@ export const synthesizeMemory = async (prompt: string, engrams: Engram[]): Promi
 // FIX: Added missing function interpretVoiceCommand
 export const interpretVoiceCommand = async (transcript: string): Promise<{ action: 'open' | 'close', target: AppID | 'all' }> => {
     if (!API_KEY) {
-        if (transcript.toLowerCase().includes('open chat')) return { action: 'open', target: 'chat' };
+// FIX: Use AppID enum member instead of string literal.
+        if (transcript.toLowerCase().includes('open chat')) return { action: 'open', target: AppID.chat };
         return { action: 'open', target: AppID.chat };
     }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
@@ -770,7 +772,8 @@ export const interpretVoiceCommand = async (transcript: string): Promise<{ actio
 // FIX: Added missing function generateProactiveSuggestion
 export const generateProactiveSuggestion = async (actions: UserAction[]): Promise<{ title: string, suggestions: { text: string, actionAppId?: AppID }[] }> => {
     if (!API_KEY) {
-        return { title: 'Mock Suggestions', suggestions: [{ text: 'Open the travel planner?', actionAppId: 'travelAgent' }] };
+// FIX: Use AppID enum member instead of string literal.
+        return { title: 'Mock Suggestions', suggestions: [{ text: 'Open the travel planner?', actionAppId: AppID.travelAgent }] };
     }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const prompt = `Based on the user's recent actions: ${JSON.stringify(actions)}, provide a title and a list of 1-2 proactive suggestions. Each suggestion should have text and an optional actionAppId.`;

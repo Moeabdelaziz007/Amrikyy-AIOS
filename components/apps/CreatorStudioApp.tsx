@@ -137,14 +137,20 @@ const AIAssistantView: React.FC = () => {
         const userMessage: Message = { id: `user-${Date.now()}`, sender: 'user', text: input };
         setMessages(prev => [...prev, userMessage]);
         setIsLoading(true);
-
-        const history: Content[] = []; 
-        const responseText = await generateResponse(`As a business strategist named Atlas, answer this: ${input}`, history);
-        
-        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: responseText };
-        setMessages(prev => [...prev, aiMessage]);
+        const currentInput = input;
         setInput('');
-        setIsLoading(false);
+
+        try {
+            const history: Content[] = []; 
+            const responseText = await generateResponse(`As a business strategist named Atlas, answer this: ${currentInput}`, history);
+            const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: responseText };
+            setMessages(prev => [...prev, aiMessage]);
+        } catch (error: any) {
+            const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, I couldn't get a response. ${error.message}` };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -153,7 +159,11 @@ const AIAssistantView: React.FC = () => {
                  {messages.map((msg) => (
                     <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {msg.sender === 'ai' && <div className="flex-shrink-0 h-10 w-10 rounded-full bg-stone-600 flex items-center justify-center text-2xl">{atlasAgent?.icon}</div>}
-                        <div className={`max-w-[80%] p-3 rounded-lg ${msg.sender === 'user' ? 'bg-accent text-white' : 'bg-bg-tertiary'}`}>
+                        <div className={`max-w-[80%] p-3 rounded-lg ${
+                            msg.sender === 'user' ? 'bg-accent text-white' 
+                            : msg.sender === 'system' ? 'bg-red-500/20 text-red-300'
+                            : 'bg-bg-tertiary'
+                        }`}>
                             <p className="text-sm">{msg.text}</p>
                         </div>
                     </div>

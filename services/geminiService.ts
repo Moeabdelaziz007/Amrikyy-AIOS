@@ -38,8 +38,8 @@ export const generateResponse = async (prompt: string, history: Content[]): Prom
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     if (error instanceof Error) {
-        return `An error occurred while contacting the AI: ${error.message}`;
+        throw new Error(`An error occurred while contacting the AI: ${error.message}`);
     }
-    return "An unknown error occurred while contacting the AI.";
+    throw new Error("An unknown error occurred while contacting the AI.");
   }
 };
