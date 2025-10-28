@@ -1,10 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import { WeatherCondition } from '../types';
 
+/**
+ * Props for the AnimatedBackground component.
+ */
 interface AnimatedBackgroundProps {
+    /** The current weather condition, which may influence background animations (e.g., rain). */
     weatherCondition?: WeatherCondition | null;
 }
 
+/**
+ * The AnimatedBackground component renders dynamic background effects based on mouse movement and weather conditions.
+ * It uses two canvas elements: one for particle animation and one for rain effects.
+ * @param {AnimatedBackgroundProps} props - The component props.
+ * @returns {JSX.Element} The animated background component.
+ */
 const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherCondition }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rainCanvasRef = useRef<HTMLCanvasElement>(null); // New canvas for rain
@@ -20,6 +30,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
 
         let animationFrameId: number;
 
+        /**
+         * Resizes the canvas to match the window dimensions.
+         */
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -28,12 +41,19 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
+        /**
+         * Updates the mouse position.
+         * @param {MouseEvent} event - The mouse event.
+         */
         const handleMouseMove = (event: MouseEvent) => {
             mouse.current.x = event.clientX;
             mouse.current.y = event.clientY;
         };
         window.addEventListener('mousemove', handleMouseMove);
 
+        /**
+         * Represents a single particle in the background animation.
+         */
         class Particle {
             x: number;
             y: number;
@@ -41,6 +61,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
             speedX: number;
             speedY: number;
 
+            /**
+             * Creates an instance of Particle.
+             */
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
@@ -49,6 +72,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
                 this.speedY = Math.random() * 1 - 0.5;
             }
 
+            /**
+             * Updates the particle's position.
+             */
             update() {
                 if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
                 if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
@@ -56,6 +82,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
                 this.y += this.speedY;
             }
 
+            /**
+             * Draws the particle on the canvas.
+             */
             draw() {
                 if(!ctx) return;
                 ctx.fillStyle = 'rgba(59, 130, 246, 0.5)';
@@ -68,6 +97,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
         let particlesArray: Particle[] = [];
         const numberOfParticles = 100;
 
+        /**
+         * Initializes the array of particles.
+         */
         function init() {
             particlesArray = [];
             for (let i = 0; i < numberOfParticles; i++) {
@@ -76,6 +108,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
         }
         init();
         
+        /**
+         * Draws lines connecting nearby particles.
+         */
         function connect() {
             if(!ctx) return;
             let opacityValue = 1;
@@ -97,6 +132,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
             }
         }
 
+        /**
+         * The main animation loop for particles.
+         */
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < particlesArray.length; i++) {
@@ -126,6 +164,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
         let rainAnimationFrameId: number;
         let rainDrops: RainDrop[] = [];
 
+        /**
+         * Resizes the rain canvas and re-initializes rain drops.
+         */
         const resizeRainCanvas = () => {
             rainCanvas.width = window.innerWidth;
             rainCanvas.height = window.innerHeight;
@@ -140,6 +181,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
         window.addEventListener('resize', resizeRainCanvas);
         resizeRainCanvas();
 
+        /**
+         * Represents a single raindrop in the rain animation.
+         */
         class RainDrop {
             x: number;
             y: number;
@@ -147,6 +191,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
             speed: number;
             opacity: number;
 
+            /**
+             * Creates an instance of RainDrop.
+             */
             constructor() {
                 this.x = Math.random() * rainCanvas.width;
                 this.y = Math.random() * rainCanvas.height;
@@ -155,6 +202,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
                 this.opacity = Math.random() * 0.5 + 0.3;
             }
 
+            /**
+             * Updates the raindrop's position, looping it when it goes off-screen.
+             */
             update() {
                 this.y += this.speed;
                 this.x += this.speed * 0.2; // Slight diagonal for realism
@@ -164,6 +214,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
                 }
             }
 
+            /**
+             * Draws the raindrop on the canvas.
+             */
             draw() {
                 if(!rainCtx) return;
                 rainCtx.strokeStyle = `rgba(100, 180, 255, ${this.opacity})`; // Bluish rain color
@@ -175,6 +228,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
             }
         }
         
+        /**
+         * The main animation loop for rain.
+         */
         const animateRain = () => {
             rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
             if (weatherCondition === 'Rainy' || weatherCondition === 'Stormy') {
@@ -197,9 +253,9 @@ const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ weatherConditio
 
     return (
         <>
-            <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10" />
+            <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10" aria-hidden="true" />
             {(weatherCondition === 'Rainy' || weatherCondition === 'Stormy') && (
-                <canvas ref={rainCanvasRef} className="fixed top-0 left-0 w-full h-full -z-10 opacity-70" />
+                <canvas ref={rainCanvasRef} className="fixed top-0 left-0 w-full h-full -z-10 opacity-70" aria-hidden="true" />
             )}
         </>
     );

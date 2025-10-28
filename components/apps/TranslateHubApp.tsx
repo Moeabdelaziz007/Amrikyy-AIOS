@@ -6,10 +6,20 @@ import { generateSpeech, translateText, transcribeAudio } from '../../services/g
 import { decode, playDecodedAudio, encode } from '../../utils/audioUtils';
 import { fileToBase64 } from '../../utils/fileUtils'; // Import fileToBase64
 
+/**
+ * Defines the available tabs within the Translate Hub application.
+ */
 type Tab = 'text' | 'conversation';
+/**
+ * Defines the audio state for the conversation translation view.
+ */
 type AudioState = 'idle' | 'listening' | 'translating' | 'speaking';
 
+/**
+ * Props for the TranslateHubApp component.
+ */
 interface TranslateHubAppProps {
+    /** Speech synthesis settings for the AI assistant. */
     speechSettings: {
         voice: SystemVoice;
         rate: number;
@@ -17,6 +27,9 @@ interface TranslateHubAppProps {
     };
 }
 
+/**
+ * List of supported languages for translation, including their code and display name.
+ */
 const languages = [
     { code: 'en', name: 'English' },
     { code: 'es', name: 'Spanish' },
@@ -32,7 +45,13 @@ const languages = [
     { code: 'hi', name: 'Hindi' },
 ];
 
-const TranslateHubApp: React.FC<TranslateHubAppProps> = ({ speechSettings }) => {
+/**
+ * The TranslateHubApp component provides AI-powered text and conversation translation capabilities.
+ * Users can translate text between languages or engage in real-time spoken translation.
+ * @param {TranslateHubAppProps} props - The component props.
+ * @returns {JSX.Element} The TranslateHubApp component.
+ */
+export const TranslateHubApp: React.FC<TranslateHubAppProps> = ({ speechSettings }) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<Tab>('text');
 
@@ -56,6 +75,15 @@ const TranslateHubApp: React.FC<TranslateHubAppProps> = ({ speechSettings }) => 
     );
 };
 
+/**
+ * Reusable button component for switching between tabs.
+ * @param {object} props - The component props.
+ * @param {Tab} props.id - The unique ID of the tab.
+ * @param {Tab} props.activeTab - The currently active tab.
+ * @param {(tab: Tab) => void} props.setActiveTab - Callback to set the active tab.
+ * @param {string} props.label - The display label for the tab button.
+ * @returns {JSX.Element} The tab button component.
+ */
 const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => void, label: string}> = ({ id, activeTab, setActiveTab, label }) => (
     <button
         onClick={() => setActiveTab(id)}
@@ -65,6 +93,12 @@ const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => 
     </button>
 );
 
+/**
+ * The TextTranslateView component provides a user interface for text-based translation.
+ * Users can input text, select source and target languages, get a translation, and play the translated text as speech.
+ * @param {TranslateHubAppProps} props - The component props, including speech settings.
+ * @returns {JSX.Element} The TextTranslateView component.
+ */
 const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) => {
     const { t } = useLanguage();
     const [inputText, setInputText] = useState('');
@@ -76,11 +110,16 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
     const audioContextRef = useRef<AudioContext | null>(null);
 
     useEffect(() => {
+      // Clean up audio context on component unmount
       return () => {
         audioContextRef.current?.close();
       }
     }, []);
 
+    /**
+     * Initializes or resumes the Web Audio API context.
+     * This is typically called on a user gesture to bypass browser autoplay policies.
+     */
     const initAudioContext = () => {
         if (!audioContextRef.current) {
             audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -90,6 +129,10 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
         }
     }
 
+    /**
+     * Handles the text translation process.
+     * Sends the input text to the AI translation service and displays the result.
+     */
     const handleTranslate = async () => {
         if (!inputText.trim() || isLoading) return;
         setIsLoading(true);
@@ -105,6 +148,10 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
         }
     };
 
+    /**
+     * Handles playing the given text as speech using the AI text-to-speech service.
+     * @param {string} text - The text to convert to speech.
+     */
     const handleSpeak = async (text: string) => {
         if (!text || isSpeaking) return;
         initAudioContext();
@@ -134,6 +181,7 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
                         value={sourceLang} 
                         onChange={e => setSourceLang(e.target.value)} 
                         className="bg-black/20 border border-white/10 rounded-md p-2 text-sm focus:ring-1 focus:ring-primary-cyan focus:outline-none"
+                        aria-label={t('translate_hub.source_language')}
                     >
                         <option value="auto">Detect Language</option>
                         {languages.map(lang => <option key={lang.code} value={lang.code}>{lang.name}</option>)}
@@ -146,6 +194,7 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
                     rows={8}
                     className="w-full flex-grow bg-white/5 border border-white/10 rounded-lg p-3 text-text-primary focus:ring-2 focus:ring-primary-cyan focus:outline-none resize-none"
                     disabled={isLoading}
+                    aria-label="Text to translate"
                 />
             </div>
 
@@ -158,6 +207,7 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
                         onChange={e => setTargetLang(e.target.value)} 
                         className="bg-black/20 border border-white/10 rounded-md p-2 text-sm focus:ring-1 focus:ring-primary-cyan focus:outline-none"
                         disabled={isLoading}
+                        aria-label={t('translate_hub.target_language')}
                     >
                         {languages.map(lang => <option key={lang.code} value={lang.code}>{lang.name}</option>)}
                     </select>
@@ -169,6 +219,7 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
                         placeholder={t('translate_hub.output_placeholder')}
                         rows={8}
                         className="w-full h-full bg-black/20 border border-white/10 rounded-lg p-3 text-text-primary resize-none focus:outline-none"
+                        aria-label="Translated text output"
                     />
                      <button
                         onClick={() => handleSpeak(outputText)}
@@ -177,7 +228,7 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
                         aria-label="Speak translated text"
                     >
                         {isSpeaking ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" role="status"><span className="sr-only">Loading...</span></div>
                         ) : (
                             <SpeakerIcon className="w-5 h-5" />
                         )}
@@ -187,9 +238,10 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
                     onClick={handleTranslate}
                     disabled={isLoading || !inputText.trim()}
                     className="w-full flex items-center justify-center gap-2 py-3 font-bold rounded-lg bg-gradient-to-r from-primary-cyan to-primary-blue hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label={t('translate_hub.translate_button')}
                 >
                     {isLoading ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" role="status"><span className="sr-only">Loading...</span></div>
                     ) : (
                         <SendIcon className="w-5 h-5" />
                     )}
@@ -200,6 +252,12 @@ const TextTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) =
     );
 };
 
+/**
+ * The ConversationTranslateView component provides a user interface for real-time voice translation.
+ * Users can record their speech, get a transcription, a translation, and listen to the translated speech.
+ * @param {TranslateHubAppProps} props - The component props, including speech settings.
+ * @returns {JSX.Element} The ConversationTranslateView component.
+ */
 const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSettings }) => {
     const { t } = useLanguage();
     const [audioState, setAudioState] = useState<AudioState>('idle');
@@ -228,6 +286,10 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
         };
     }, []);
 
+    /**
+     * Initializes or resumes the Web Audio API context.
+     * This is typically called on a user gesture to bypass browser autoplay policies.
+     */
     const initAudioContext = () => {
         if (!audioContextRef.current) {
             audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -237,6 +299,10 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
         }
     }
 
+    /**
+     * Starts recording audio from the user's microphone.
+     * Sets up the MediaRecorder and relevant event handlers.
+     */
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -246,10 +312,10 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
                 audioChunksRef.current.push(event.data);
             };
             mediaRecorderRef.current.onstop = processConversation;
-            audioChunksRef.current = [];
+            audioChunksRef.current = []; // Clear previous chunks
             mediaRecorderRef.current.start();
             setAudioState('listening');
-            setTranscribedText('');
+            setTranscribedText(''); // Clear previous results
             setTranslatedText('');
             setError(null);
         } catch (err) {
@@ -259,6 +325,10 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
         }
     };
 
+    /**
+     * Stops the audio recording.
+     * Triggers the conversation processing logic.
+     */
     const stopRecording = () => {
         if (mediaRecorderRef.current && audioState === 'listening') {
             mediaRecorderRef.current.stop();
@@ -270,6 +340,9 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
         }
     };
 
+    /**
+     * Processes the recorded audio: transcribes, translates, and synthesizes speech.
+     */
     const processConversation = async () => {
         if (audioChunksRef.current.length === 0) {
             setAudioState('idle');
@@ -283,7 +356,7 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
             // 1. Transcribe audio
             const base64Audio = await fileToBase64(audioFile);
             const transcript = await transcribeAudio(base64Audio.split(',')[1], audioFile.type);
-            if (!isMounted.current) return;
+            if (!isMounted.current) return; // Ensure component is still mounted
             setTranscribedText(transcript);
 
             // 2. Translate the transcribed text
@@ -312,6 +385,10 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
         }
     };
 
+    /**
+     * Toggles the listening state (start/stop recording).
+     * @event
+     */
     const handleToggleListening = () => {
         if (audioState === 'listening') {
             stopRecording();
@@ -320,6 +397,10 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
         }
     };
 
+    /**
+     * Returns the current status message based on the audio state.
+     * @returns {string} The status message.
+     */
     const getStatusMessage = () => {
         switch (audioState) {
             case 'listening': return t('translate_hub.listening');
@@ -337,6 +418,7 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
                     onChange={e => setSourceLang(e.target.value)} 
                     className="bg-black/20 border border-white/10 rounded-md p-2 text-sm focus:ring-1 focus:ring-primary-cyan focus:outline-none"
                     disabled={audioState !== 'idle'}
+                    aria-label={t('translate_hub.source_language')}
                 >
                     {languages.map(lang => <option key={lang.code} value={lang.code}>{lang.name}</option>)}
                 </select>
@@ -346,6 +428,7 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
                     onChange={e => setTargetLang(e.target.value)} 
                     className="bg-black/20 border border-white/10 rounded-md p-2 text-sm focus:ring-1 focus:ring-primary-cyan focus:outline-none"
                     disabled={audioState !== 'idle'}
+                    aria-label={t('translate_hub.target_language')}
                 >
                     {languages.map(lang => <option key={lang.code} value={lang.code}>{lang.name}</option>)}
                 </select>
@@ -359,27 +442,28 @@ const ConversationTranslateView: React.FC<TranslateHubAppProps> = ({ speechSetti
                     disabled={audioState === 'translating'}
                     className={`relative size-32 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-lg
                         ${audioState === 'listening' ? 'bg-red-600' : 'bg-primary-blue hover:bg-primary-blue/80'} disabled:bg-gray-500`}
+                    aria-label={audioState === 'listening' ? t('translate_hub.stop_speaking') : t('translate_hub.start_speaking')}
                 >
                     <MicrophoneIcon className="w-12 h-12" />
                 </button>
                 {getStatusMessage() && (
-                    <div className="absolute -bottom-8 px-3 py-1 bg-black/50 rounded-lg text-sm whitespace-nowrap">
+                    <div className="absolute -bottom-8 px-3 py-1 bg-black/50 rounded-lg text-sm whitespace-nowrap" role="status">
                         {getStatusMessage()}
                     </div>
                 )}
             </div>
 
-            {error && <p className="text-red-400 mt-4">{error}</p>}
+            {error && <p className="text-red-400 mt-4" role="alert">{error}</p>}
 
             <div className="w-full max-w-lg mt-4 space-y-4">
                 {transcribedText && (
-                    <div className="bg-black/20 p-3 rounded-lg border border-white/10 text-left">
+                    <div className="bg-black/20 p-3 rounded-lg border border-white/10 text-left" aria-live="polite">
                         <p className="text-xs text-text-muted">{t('translate_hub.source_language')} ({sourceLang.toUpperCase()})</p>
                         <p className="text-sm">{transcribedText}</p>
                     </div>
                 )}
                 {translatedText && (
-                    <div className="bg-black/20 p-3 rounded-lg border border-white/10 text-left">
+                    <div className="bg-black/20 p-3 rounded-lg border border-white/10 text-left" aria-live="polite">
                         <p className="text-xs text-text-muted">{t('translate_hub.target_language')} ({targetLang.toUpperCase()})</p>
                         <p className="text-sm">{translatedText}</p>
                     </div>

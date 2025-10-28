@@ -3,11 +3,23 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { UserAccount, CurrentWeather } from '../types';
 import WeatherDetailModal from './WeatherDetailModal'; // New: Import WeatherDetailModal
 
+/**
+ * Props for the SystemOverviewWidget component.
+ */
 interface SystemOverviewWidgetProps {
+    /** The current user account details. */
     userAccount: UserAccount;
-    currentWeather: CurrentWeather | null; // New: Pass current weather
+    /** The current weather conditions, or null if not available. */
+    currentWeather: CurrentWeather | null;
 }
 
+/**
+ * The SystemOverviewWidget displays a personalized greeting, current time,
+ * user's AI credit balance, and current weather conditions.
+ * It also provides a way to view detailed weather information.
+ * @param {SystemOverviewWidgetProps} props - The component props.
+ * @returns {JSX.Element} The SystemOverviewWidget component.
+ */
 const SystemOverviewWidget: React.FC<SystemOverviewWidgetProps> = ({ userAccount, currentWeather }) => {
     const { t } = useLanguage();
     const [time, setTime] = useState(new Date());
@@ -18,6 +30,10 @@ const SystemOverviewWidget: React.FC<SystemOverviewWidgetProps> = ({ userAccount
         return () => clearInterval(timerId);
     }, []);
 
+    /**
+     * Generates a time-based greeting (Good morning, afternoon, evening) for the user.
+     * @returns {string} The personalized greeting string.
+     */
     const getGreeting = () => {
         const hour = time.getHours();
         const name = userAccount.name || 'User';

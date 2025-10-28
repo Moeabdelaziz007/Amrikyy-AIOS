@@ -3,7 +3,7 @@ import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automatio
 import Dock from './components/Dock';
 import AppLauncher from './components/AppLauncher';
 import PoweredByGemini from './components/PoweredByGemini';
-import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget'; // Explicit relative import
+import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget'; // FIX: Ensure explicit relative import to resolve module specifier issues.
 import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService';
 import { createCalendarEventFromPlan } from './services/geminiAdvancedService';
 import DesktopAppsGrid from './components/DesktopAppsGrid';
@@ -23,6 +23,7 @@ import CreatePostModal from './components/CreatePostModal';
 import { bounties as mockBounties } from './data/bounties';
 import LoadingScreen from './components/LoadingScreen'; // Re-added LoadingScreen import
 import { initialNexusPosts as mockNexusPosts } from './data/nexus'; // Import initial mock Nexus posts
+import { TranslationKey } from './i18n';
 
 // Lazy load all application components for code-splitting and performance
 const Window = lazy(() => import('./components/Window'));
@@ -32,72 +33,79 @@ const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget'
 const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget')); // Explicit relative import
 const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget')); // Explicit relative import
 
+/**
+ * A mapping of AppIDs to their corresponding lazy-loaded React components.
+ * This enables code-splitting for application components.
+ */
 const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType<any>>> = {
-  chat: lazy(() => import('./components/apps/ChatApp')),
-  terminal: lazy(() => import('./components/apps/TerminalApp')),
-  files: lazy(() => import('./components/apps/FilesApp')),
-  settings: lazy(() => import('./components/apps/SettingsApp')),
-  luna: lazy(() => import('./components/apps/LunaApp')),
-  karim: lazy(() => import('./components/apps/KarimApp')),
-  scout: lazy(() => import('./components/apps/ScoutApp')),
-  maya: lazy(() => import('./components/apps/MayaApp')),
-  jules: lazy(() => import('./components/apps/JulesApp')),
-  voice: lazy(() => import('./components/apps/VoiceAssistantApp')),
-  workflow: lazy(() => import('./components/apps/WorkflowStudioApp')),
-  travelAgent: lazy(() => import('./components/apps/TravelAgentApp')),
-  marketing: lazy(() => import('./components/apps/MarketingApp')),
-  travelPlanViewer: lazy(() => import('./components/apps/TravelPlanViewerApp')),
-  search: lazy(() => import('./components/apps/SearchApp')),
-  maps: lazy(() => import('./components/apps/MapsApp')),
-  transcriber: lazy(() => import('./components/apps/TranscriberApp')),
-  videoAnalyzer: lazy(() => import('./components/apps/VideoAnalyzerApp')),
-  image: lazy(() => import('./components/apps/ImageGeneratorApp')),
-  audio: lazy(() => import('./components/apps/AudioStudioApp')),
-  video: lazy(() => import('./components/apps/VideoGeneratorApp')),
-  smartwatch: lazy(() => import('./components/apps/SmartWatchApp')),
-  workspace: lazy(() => import('./components/apps/WorkspaceApp')),
-  eventLog: lazy(() => import('./components/apps/EventLogApp')),
-  skillForge: lazy(() => import('./components/apps/SkillForgeApp')),
-  chronoVault: lazy(() => import('./components/apps/ChronoVaultApp')),
-  creatorStudio: lazy(() => import('./components/apps/CreatorStudioApp')),
-  cognitoBrowser: lazy(() => import('./components/apps/CognitoBrowserApp')),
-  analyticsHub: lazy(() => import('./components/apps/AnalyticsHubApp')),
-  agentForge: lazy(() => import('./components/apps/AgentForgeApp')),
-  avatarStudio: lazy(() => import('./components/apps/AvatarStudioApp')),
-  agentProfile: lazy(() => import('./components/apps/AgentProfileApp')),
-  store: lazy(() => import('./components/apps/StoreApp')),
-  notificationCenter: lazy(() => import('./components/apps/NotificationCenterApp')),
-  liveConversation: lazy(() => import('./components/apps/LiveConversationApp')),
-  imageAnalyzer: lazy(() => import('./components/apps/ImageAnalyzerApp')),
-  agora: lazy(() => import('./components/apps/AgoraApp')),
-  nexusChat: lazy(() => import('./components/apps/NexusChatApp')),
-  devConsole: lazy(() => import('./components/apps/DevConsoleApp')),
-  apiDocs: lazy(() => import('./components/apps/ApiDocsApp')),
-  devToolkit: lazy(() => import('./components/apps/DevToolkitApp')),
-  growthHub: lazy(() => import('./components/apps/GrowthHubApp')),
-  resourceHub: lazy(() => import('./components/apps/ResourceHubApp')),
-  geminiAiNews: lazy(() => import('./components/apps/GeminiAiNewsApp')),
-  controlPanel: lazy(() => import('./components/apps/ControlPanelApp')),
-  atlasFinance: lazy(() => import('./components/apps/AtlasApp')),
-  cognitiveCanvas: lazy(() => import('./components/apps/CognitiveCanvasApp')),
-  veridianId: lazy(() => import('./components/apps/VeridianIdApp')),
-  translateHub: lazy(() => import('./components/apps/TranslateHubApp')),
-  nexusGo: lazy(() => import('./components/apps/NexusGoApp')),
-  nexusFeed: lazy(() => import('./components/apps/NexusFeedApp')), // New
-  nexusProfile: lazy(() => import('./components/apps/NexusProfileApp')), // New
-  travelServices: lazy(() => import('./components/apps/TravelServicesApp')), // New
-  // Existing agents
-  atlas: lazy(() => import('./components/apps/AgentProfileApp')),
-  cortex: lazy(() => import('./components/apps/AgentProfileApp')),
-  orion: lazy(() => import('./components/apps/AgentProfileApp')),
-  helios: lazy(() => import('./components/apps/AgentProfileApp')),
-  leo: lazy(() => import('./components/apps/AgentProfileApp')),
-  zara: lazy(() => import('./components/apps/AgentProfileApp')),
-  rex: lazy(() => import('./components/apps/AgentProfileApp')),
-  clio: lazy(() => import('./components/apps/AgentProfileApp')),
-  pricing: lazy(() => import('./components/apps/SettingsApp')),
+  [AppID.chat]: lazy(() => import('./components/apps/ChatApp')),
+  [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp')),
+  [AppID.files]: lazy(() => import('./components/apps/FilesApp')),
+  [AppID.settings]: lazy(() => import('./components/apps/SettingsApp')),
+  [AppID.luna]: lazy(() => import('./components/apps/LunaApp')),
+  [AppID.karim]: lazy(() => import('./components/apps/KarimApp')),
+  [AppID.scout]: lazy(() => import('./components/apps/ScoutApp')),
+  [AppID.maya]: lazy(() => import('./components/apps/MayaApp')),
+  [AppID.jules]: lazy(() => import('./components/apps/JulesApp')),
+  [AppID.voice]: lazy(() => import('./components/apps/VoiceAssistantApp')),
+  [AppID.workflow]: lazy(() => import('./components/apps/WorkflowStudioApp')),
+  [AppID.travelAgent]: lazy(() => import('./components/apps/TravelAgentApp')),
+  [AppID.marketing]: lazy(() => import('./components/apps/MarketingApp')),
+  [AppID.travelPlanViewer]: lazy(() => import('./components/apps/TravelPlanViewerApp')),
+  [AppID.search]: lazy(() => import('./components/apps/SearchApp')),
+  [AppID.maps]: lazy(() => import('./components/apps/MapsApp')),
+  [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp')),
+  [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp')),
+  [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp')),
+  [AppID.audio]: lazy(() => import('./components/apps/AudioStudioApp')),
+  [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp')),
+  [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp')),
+  [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp')),
+  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')), // Corrected import path
+  [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp')),
+  [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp')),
+  [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp')),
+  [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp')),
+  [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp')),
+  [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp')),
+  [AppID.avatarStudio]: lazy(() => import('./components/apps/AvatarStudioApp')),
+  [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.store]: lazy(() => import('./components/apps/StoreApp')),
+  [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp')),
+  [AppID.liveConversation]: lazy(() => import('./components/apps/LiveConversationApp')),
+  [AppID.imageAnalyzer]: lazy(() => import('./components/apps/ImageAnalyzerApp')),
+  [AppID.agora]: lazy(() => import('./components/apps/AgoraApp')),
+  [AppID.nexusChat]: lazy(() => import('./components/apps/NexusChatApp')),
+  [AppID.devConsole]: lazy(() => import('./components/apps/DevConsoleApp')),
+  [AppID.apiDocs]: lazy(() => import('./components/apps/ApiDocsApp')),
+  [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp')),
+  [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp')),
+  [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp')),
+  [AppID.geminiAiNews]: lazy(() => import('./components/apps/GeminiAiNewsApp')),
+  [AppID.controlPanel]: lazy(() => import('./components/apps/ControlPanelApp')),
+  [AppID.atlasFinance]: lazy(() => import('./components/apps/AtlasApp')),
+  [AppID.cognitiveCanvas]: lazy(() => import('./components/apps/CognitiveCanvasApp')),
+  [AppID.veridianId]: lazy(() => import('./components/apps/VeridianIdApp')),
+  [AppID.translateHub]: lazy(() => import('./components/apps/TranslateHubApp')),
+  [AppID.nexusGo]: lazy(() => import('./components/apps/NexusGoApp')),
+  [AppID.nexusFeed]: lazy(() => import('./components/apps/NexusFeedApp')),
+  [AppID.nexusProfile]: lazy(() => import('./components/apps/NexusProfileApp')),
+  [AppID.travelServices]: lazy(() => import('./components/apps/TravelServicesApp')),
+  // Existing agents (AgentProfileApp is a generic viewer for them)
+  [AppID.atlas]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.cortex]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.orion]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.helios]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.leo]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.zara]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.rex]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.clio]: lazy(() => import('./components/apps/AgentProfileApp')),
+  [AppID.pricing]: lazy(() => import('./components/apps/SettingsApp')),
 };
 
+/**
+ * Default settings for the operating system's appearance and behavior.
+ */
 const DEFAULT_SETTINGS: Settings = {
   theme: 'obsidian',
   wallpaper: '/wallpaper-obsidian.svg',
@@ -111,15 +119,23 @@ const DEFAULT_SETTINGS: Settings = {
   language: 'en',
 };
 
+/**
+ * A simple loading spinner component to display while application components are lazy-loaded.
+ * @returns {JSX.Element} The loading spinner.
+ */
 const AppLoadingSpinner: React.FC = () => (
     <div className="w-full h-full flex items-center justify-center bg-transparent">
         <div className="w-8 h-8 border-4 border-[var(--accent-color)] border-t-transparent rounded-full animate-spin"></div>
     </div>
 );
 
+/**
+ * The main application component representing the Amrikyy AI OS desktop.
+ * Manages global state for windows, settings, user account, notifications, and app interactions.
+ * @returns {JSX.Element} The rendered Amrikyy AI OS.
+ */
 const App: React.FC = () => {
-  // Removed isOSLoaded state and useEffect that simulated initial loading
-  const [isOSLoaded, setIsOSLoaded] = useState(false); // Re-added isOSLoaded state
+  const [isOSLoaded, setIsOSLoaded] = useState(false);
   const [windows, setWindows] = useState<WindowInstance[]>([]);
   const [nextZIndex, setNextZIndex] = useState(10);
   const [nextId, setNextId] = useState(1);
@@ -154,23 +170,28 @@ const App: React.FC = () => {
   
   const [bounties, setBounties] = useState<CreatorBounty[]>(mockBounties);
   const [completedBounties, setCompletedBounties] = useState<Set<string>>(new Set());
-  const [nexusPosts, setNexusPosts] = useState<NexusPost[]>(mockNexusPosts); // Renamed from viralPosts
+  const [nexusPosts, setNexusPosts] = useState<NexusPost[]>(mockNexusPosts);
   const [currentWeather, setCurrentWeather] = useState<WeatherCondition | null>(null);
-  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]); // New: credit transaction history
+  const [creditTransactions, setCreditTransactions] = useState<CreditTransaction[]>([]);
 
   const [alarms, setAlarms] = useState<Alarm[]>([
     { id: '1', time: '07:00', label: 'Good Morning!', enabled: true },
     { id: '2', time: '09:00', label: 'Team Standup', enabled: false },
   ]);
   const [automations, setAutomations] = useState<Automation[]>([
-     { id: '1', trigger: 'Time is 08:00', action: { appId: 'chat', task: 'Open and say good morning' } }
+     { id: '1', trigger: 'Time is 08:00', action: { appId: AppID.chat, task: 'Open and say good morning' } }
   ]);
   
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [gmailMessages, setGmailMessages] = useState<GmailMessage[]>([]);
 
-  // New: Centralized credit transaction handler
+  /**
+   * Handles a credit transaction, updating the user's AI credits and transaction history.
+   * @param {number} amount - The amount of credits for the transaction (can be negative for withdrawals).
+   * @param {CreditTransactionType} type - The type of credit transaction.
+   * @param {string} description - A description of the transaction.
+   */
   const handleCreditTransaction = useCallback((amount: number, type: CreditTransactionType, description: string) => {
     setUserAccount(prev => ({
       ...prev,
@@ -186,6 +207,9 @@ const App: React.FC = () => {
     setCreditTransactions(prev => [newTransaction, ...prev]);
   }, []);
 
+  /**
+   * Handles a successful referral, granting bonus credits and updating user account.
+   */
   const handleSuccessfulReferral = useCallback(() => {
     setUserAccount(prev => ({
         ...prev,
@@ -196,16 +220,29 @@ const App: React.FC = () => {
     addNotification("Referral successful! 500 AI Credits added.", 'success');
   }, [addNotification, handleCreditTransaction]);
   
+  /**
+   * Awards bonus credits for completing a task.
+   * @param {number} credits - The amount of bonus credits to award.
+   */
   const handleBonusTask = useCallback((credits: number) => {
     handleCreditTransaction(credits, 'bonus', 'Task completion bonus');
     addNotification(`${credits} bonus AI Credits added!`, 'success');
   }, [addNotification, handleCreditTransaction]);
 
+  /**
+   * Adds a new payment method to the user's account.
+   * @param {PaymentMethod} method - The payment method to add.
+   */
   const handleAddPaymentMethod = useCallback((method: PaymentMethod) => {
     setPaymentMethods(prev => [...prev, method]);
     addNotification(`Payment method ${method.type} added successfully.`, 'success');
   }, [addNotification]);
 
+  /**
+   * Adds a custom or community agent to the list of available agents.
+   * Prevents adding duplicates.
+   * @param {CustomAgent | CommunityAgent} agent - The agent to add.
+   */
   const addCustomAgent = useCallback((agent: CustomAgent | CommunityAgent) => {
     setCustomAgents(prev => {
         if (prev.some(a => a.id === agent.id)) return prev;
@@ -215,6 +252,11 @@ const App: React.FC = () => {
     addNotification(t('notifications.agent_installed', { agentName: agent.name }), 'success');
   }, [addNotification, t]);
 
+  /**
+   * Handles the purchase of an item from the Agora Marketplace.
+   * Deducts credits and installs the asset if successful.
+   * @param {AgoraListing} listing - The listing to purchase.
+   */
   const handlePurchase = useCallback((listing: AgoraListing) => {
     if (userAccount.aiCredits < listing.price) {
         addNotification("Insufficient AI Credits to purchase.", 'error');
@@ -228,6 +270,10 @@ const App: React.FC = () => {
     addNotification(`${listing.type === 'agent' ? (listing.asset as CustomAgent).name : (listing.asset as Workflow).title} purchased and installed!`, 'success');
   }, [userAccount.aiCredits, addNotification, addCustomAgent, handleCreditTransaction]);
 
+  /**
+   * Lists an asset on the Agora Marketplace.
+   * @param {Omit<AgoraListing, 'id' | 'author'>} listing - The listing details (excluding ID and author, which are generated).
+   */
   const handleListOnAgora = useCallback((listing: Omit<AgoraListing, 'id' | 'author'>) => {
     const newListing: AgoraListing = {
         ...listing,
@@ -238,6 +284,10 @@ const App: React.FC = () => {
     addNotification("Your asset has been listed on the Agora Marketplace!", 'success');
   }, [userAccount.name, addNotification]);
   
+  /**
+   * Marks a bounty as complete, awards credits and updates creator score.
+   * @param {string} bountyId - The ID of the bounty to complete.
+   */
   const handleCompleteBounty = useCallback((bountyId: string) => {
     setCompletedBounties(prev => new Set(prev).add(bountyId));
     const bounty = bounties.find(b => b.id === bountyId);
@@ -251,16 +301,21 @@ const App: React.FC = () => {
     }
   }, [bounties, addNotification, handleCreditTransaction]);
 
+  /**
+   * Handles sharing content and posting it to the Nexus Feed.
+   * @param {SharedContent} content - The content to be shared.
+   * @param {SocialPost} socialPost - The social media post details.
+   */
   const handleShareAndPost = (content: SharedContent, socialPost: SocialPost) => {
       const newPost: NexusPost = {
         id: `post-${Date.now()}`,
         author: userAccount.name,
-        osId: userAccount.osId, // Include OS ID for NexusProfile
+        osId: userAccount.osId,
         content,
         socialPost,
         likes: 0,
         views: 0,
-        comments: [], // Initialize with no comments
+        comments: [],
       };
       setNexusPosts(prev => [newPost, ...prev]);
       setShareContent(null);
@@ -272,7 +327,10 @@ const App: React.FC = () => {
       }
   };
   
-   // Simulate Nexus feed activity (likes/views)
+   /**
+    * Simulates Nexus feed activity (likes/views) to make the feed dynamic.
+    * This effect runs every 5 seconds.
+    */
     useEffect(() => {
         const interval = setInterval(() => {
             setNexusPosts(prevPosts => {
@@ -286,7 +344,6 @@ const App: React.FC = () => {
 
                         if (becomesViral && !wasViral) {
                              handleCreditTransaction(500, 'bonus', `Post "${post.content.title}" went viral!`);
-                             // No need to update userAccount directly here, handleCreditTransaction does it.
                         }
                         
                         return { ...post, likes: newLikes, views: post.views + Math.floor(Math.random() * 200) };
@@ -298,7 +355,10 @@ const App: React.FC = () => {
         return () => clearInterval(interval);
     }, [addNotification, completedBounties, handleCompleteBounty, handleCreditTransaction]);
 
-  // Simulate OS loading
+  /**
+   * Simulates the operating system's loading process.
+   * Sets `isOSLoaded` to `true` after a delay.
+   */
   useEffect(() => {
     const loadingTimer = setTimeout(() => {
       setIsOSLoaded(true);
@@ -306,6 +366,10 @@ const App: React.FC = () => {
     return () => clearTimeout(loadingTimer);
   }, []);
 
+  /**
+   * Fetches Google Workspace data (Calendar events, Drive files, Gmail messages)
+   * when the user signs in. Clears data on sign-out.
+   */
   useEffect(() => {
     const fetchWorkspaceData = async () => {
       if (isSignedIn) {
@@ -333,7 +397,9 @@ const App: React.FC = () => {
     fetchWorkspaceData();
   }, [isSignedIn, addNotification]);
   
-  // Ambient weather data fetching and setting
+  /**
+   * Fetches ambient weather data using geolocation and updates it periodically.
+   */
   useEffect(() => {
     const fetchWeather = () => {
       navigator.geolocation.getCurrentPosition(
@@ -369,63 +435,100 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  /**
+   * Populates `nexusProfile` related state with mock data if it is not already set.
+   * This ensures basic user account information is available for display purposes.
+   */
+  useEffect(() => {
+    setUserAccount(prev => {
+        if (!prev.osId) {
+            return {
+                ...prev,
+                osId: 'AMRIYY-OS-USER-7890',
+                name: 'User',
+                avatar: '👩‍🚀',
+                joinDate: new Date().toISOString().split('T')[0],
+                trustScore: 75,
+                // Other defaults if needed
+            };
+        }
+        return prev;
+    });
+  }, []);
+
+  /**
+   * Memoized object containing localized titles for all applications.
+   */
   const appTitles: Record<string, string> = useMemo(() => ({
-    chat: t('app_titles.chat'),
-    terminal: t('app_titles.terminal'),
-    files: t('app_titles.files'),
-    settings: t('app_titles.settings'),
-    luna: t('app_titles.luna'),
-    karim: t('app_titles.karim'),
-    scout: t('app_titles.scout'),
-    maya: t('app_titles.maya'),
-    jules: t('app_titles.jules'),
-    voice: t('app_titles.voice'),
-    workflow: t('app_titles.workflow'),
-    travelAgent: t('app_titles.travelAgent'),
-    marketing: t('app_titles.marketing'),
-    travelPlanViewer: t('app_titles.travelPlanViewer'),
-    search: t('app_titles.search'),
-    maps: t('app_titles.maps'),
-    transcriber: t('app_titles.transcriber'),
-    videoAnalyzer: t('app_titles.videoAnalyzer'),
-    image: t('app_titles.image'),
-    audio: t('app_titles.audio'),
-    video: t('app_titles.video'),
-    smartwatch: t('app_titles.smartwatch'),
-    workspace: t('app_titles.workspace'),
-    eventLog: t('app_titles.eventLog'),
-    skillForge: t('app_titles.skillForge'),
-    chronoVault: t('app_titles.chronoVault'),
-    creatorStudio: t('app_titles.creatorStudio'),
-    cognitoBrowser: t('app_titles.cognitoBrowser'),
-    analyticsHub: t('app_titles.analyticsHub'),
-    agentForge: t('app_titles.agentForge'),
-    avatarStudio: t('app_titles.avatarStudio'),
-    agentProfile: t('app_titles.agentProfile'),
-    store: t('app_titles.store'),
-    notificationCenter: t('app_titles.notificationCenter'),
-    liveConversation: t('app_titles.liveConversation'),
-    imageAnalyzer: t('app_titles.imageAnalyzer'),
-    agora: t('app_titles.agora'),
-    nexusChat: t('app_titles.nexusChat'),
-    devConsole: t('app_titles.devConsole'),
-    apiDocs: t('app_titles.apiDocs'),
-    devToolkit: t('app_titles.devToolkit'),
-    growthHub: t('app_titles.growthHub'),
-    resourceHub: t('app_titles.resourceHub'),
-    geminiAiNews: t('app_titles.geminiAiNews'),
-    controlPanel: t('app_titles.controlPanel'),
-    atlasFinance: t('app_titles.atlasFinance'),
-    cognitiveCanvas: t('app_titles.cognitiveCanvas'),
-    veridianId: t('app_titles.veridianId'),
-    translateHub: t('app_titles.translateHub'),
-    nexusGo: t('app_titles.nexusGo'),
-    nexusFeed: t('app_titles.nexusFeed'), // New
-    nexusProfile: t('app_titles.nexusProfile'), // New
-    travelServices: t('app_titles.travelServices'), // New
-    'pricing': t('app_titles.pricing'),
+    [AppID.chat]: t('app_titles.chat'),
+    [AppID.terminal]: t('app_titles.terminal'),
+    [AppID.files]: t('app_titles.files'),
+    [AppID.settings]: t('app_titles.settings'),
+    [AppID.luna]: t('app_titles.luna'),
+    [AppID.karim]: t('app_titles.karim'),
+    [AppID.scout]: t('app_titles.scout'),
+    [AppID.maya]: t('app_titles.maya'),
+    [AppID.jules]: t('app_titles.jules'),
+    [AppID.voice]: t('app_titles.voice'),
+    [AppID.workflow]: t('app_titles.workflow'),
+    [AppID.travelAgent]: t('app_titles.travelAgent'),
+    [AppID.marketing]: t('app_titles.marketing'),
+    [AppID.travelPlanViewer]: t('app_titles.travelPlanViewer'),
+    [AppID.search]: t('app_titles.search'),
+    [AppID.maps]: t('app_titles.maps'),
+    [AppID.transcriber]: t('app_titles.transcriber'),
+    [AppID.videoAnalyzer]: t('app_titles.videoAnalyzer'),
+    [AppID.image]: t('app_titles.image'),
+    [AppID.audio]: t('app_titles.audio'),
+    [AppID.video]: t('app_titles.video'),
+    [AppID.smartwatch]: t('app_titles.smartwatch'),
+    [AppID.workspace]: t('app_titles.workspace'),
+    [AppID.eventLog]: t('app_titles.eventLog'),
+    [AppID.skillForge]: t('app_titles.skillForge'),
+    [AppID.chronoVault]: t('app_titles.chronoVault'),
+    [AppID.creatorStudio]: t('app_titles.creatorStudio'),
+    [AppID.cognitoBrowser]: t('app_titles.cognitoBrowser'),
+    [AppID.analyticsHub]: t('app_titles.analyticsHub'),
+    [AppID.agentForge]: t('app_titles.agentForge'),
+    [AppID.avatarStudio]: t('app_titles.avatarStudio'),
+    [AppID.agentProfile]: t('app_titles.agentProfile'),
+    [AppID.store]: t('app_titles.store'),
+    [AppID.notificationCenter]: t('app_titles.notificationCenter'),
+    [AppID.liveConversation]: t('app_titles.liveConversation'),
+    [AppID.imageAnalyzer]: t('app_titles.imageAnalyzer'),
+    [AppID.agora]: t('app_titles.agora'),
+    [AppID.nexusChat]: t('app_titles.nexusChat'),
+    [AppID.devConsole]: t('app_titles.devConsole'),
+    [AppID.apiDocs]: t('app_titles.apiDocs'),
+    [AppID.devToolkit]: t('app_titles.devToolkit'),
+    [AppID.growthHub]: t('app_titles.growthHub'),
+    [AppID.resourceHub]: t('app_titles.resourceHub'),
+    [AppID.geminiAiNews]: t('app_titles.geminiAiNews'),
+    [AppID.controlPanel]: t('app_titles.controlPanel'),
+    [AppID.atlasFinance]: t('app_titles.atlasFinance'),
+    [AppID.cognitiveCanvas]: t('app_titles.cognitiveCanvas'),
+    [AppID.veridianId]: t('app_titles.veridianId'),
+    [AppID.translateHub]: t('app_titles.translateHub'),
+    [AppID.nexusGo]: t('app_titles.nexusGo'),
+    [AppID.nexusFeed]: t('app_titles.nexusFeed'),
+    [AppID.nexusProfile]: t('app_titles.nexusProfile'),
+    [AppID.travelServices]: t('app_titles.travelServices'),
+    [AppID.pricing]: t('app_titles.pricing'),
+    // Agent aliases pointing to AgentProfileApp
+    // FIX: Cast string literals to TranslationKey to fix TypeScript type errors.
+    [AppID.atlas]: t('app_titles.atlas' as TranslationKey),
+    [AppID.cortex]: t('app_titles.cortex' as TranslationKey),
+    [AppID.orion]: t('app_titles.orion' as TranslationKey),
+    [AppID.helios]: t('app_titles.helios' as TranslationKey),
+    [AppID.leo]: t('app_titles.leo' as TranslationKey),
+    [AppID.zara]: t('app_titles.zara' as TranslationKey),
+    [AppID.rex]: t('app_titles.rex' as TranslationKey),
+    [AppID.clio]: t('app_titles.clio' as TranslationKey),
   }), [t]);
 
+  /**
+   * Updates the global settings and applies theme/language changes to the document.
+   */
   useEffect(() => {
     document.documentElement.className = '';
     document.documentElement.classList.add(`theme-${settings.theme}`);
@@ -433,23 +536,42 @@ const App: React.FC = () => {
     setLanguage(settings.language);
   }, [settings.theme, settings.accentColor, settings.language, setLanguage]);
 
+  /**
+   * Callback function to update specific settings.
+   * @param {Partial<Settings>} newSettings - The partial new settings to merge.
+   */
   const handleSettingsChange = useCallback((newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   }, []);
   
+  /**
+   * Callback function to update user account details.
+   * @param {Partial<UserAccount>} newAccount - The partial new user account details to merge.
+   */
   const handleUserAccountChange = useCallback((newAccount: Partial<UserAccount>) => {
     setUserAccount(prev => ({...prev, ...newAccount}));
   }, []);
 
+  /**
+   * Resets all settings to their default values.
+   */
   const resetSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
   }, []);
   
+  /**
+   * Handles the logic for upgrading the user's plan.
+   */
   const handleUpgrade = useCallback(() => {
     handleCreditTransaction(4000, 'deposit', 'Pro plan upgrade'); // Assuming 1000 initial, +4000 for Pro
     addNotification(t('notifications.upgraded_to_pro'), 'success');
   }, [addNotification, t, handleCreditTransaction]);
 
+  /**
+   * Opens a new application window or focuses an existing one.
+   * @param {AppID} appId - The ID of the application to open.
+   * @param {any} [appProps={}] - Optional props to pass to the application component.
+   */
   const openWindow = useCallback((appId: AppID, appProps: any = {}) => {
     logAction(appId, appProps);
     setIsAppLauncherOpen(false);
@@ -463,15 +585,15 @@ const App: React.FC = () => {
         );
       }
 
-      const windowAppId = customAgent ? 'agentProfile' : appId;
+      const windowAppId = customAgent ? AppID.agentProfile : appId;
 
       // Determine window size based on screen size for responsiveness
       const isSmallScreen = window.innerWidth < 768;
       const defaultWidth = isSmallScreen ? window.innerWidth * 0.95 : 800;
       const defaultHeight = isSmallScreen ? window.innerHeight * 0.95 : 600;
 
-      const appSpecificWidth = ['agentProfile', 'luna', 'karim', 'scout', 'maya', 'jules', 'liveConversation', 'veridianId', 'nexusProfile'].includes(windowAppId) ? (isSmallScreen ? window.innerWidth * 0.9 : 500) : defaultWidth;
-      const appSpecificHeight = ['agentProfile', 'luna', 'karim', 'scout', 'maya', 'jules', 'liveConversation', 'veridianId', 'nexusProfile'].includes(windowAppId) ? (isSmallScreen ? window.innerHeight * 0.9 : 700) : defaultHeight;
+      const appSpecificWidth = [AppID.agentProfile, AppID.luna, AppID.karim, AppID.scout, AppID.maya, AppID.jules, AppID.liveConversation, AppID.veridianId, AppID.nexusProfile].includes(windowAppId) ? (isSmallScreen ? window.innerWidth * 0.9 : 500) : defaultWidth;
+      const appSpecificHeight = [AppID.agentProfile, AppID.luna, AppID.karim, AppID.jules, AppID.maya, AppID.scout, AppID.liveConversation, AppID.veridianId, AppID.nexusProfile].includes(windowAppId) ? (isSmallScreen ? window.innerHeight * 0.9 : 700) : defaultHeight;
 
       const newWindow: WindowInstance = {
         id: nextId,
@@ -492,28 +614,49 @@ const App: React.FC = () => {
     setNextZIndex(prev => prev + 1);
   }, [nextId, nextZIndex, customAgents, t, appTitles, logAction]);
 
+  /**
+   * Executes a command string, typically from a terminal or voice input.
+   * @param {string} command - The command string (e.g., "open chat").
+   */
   const executeCommand = useCallback((command: string) => {
     const [action, target] = command.split(' ');
     if (action === 'open' && target) {
       const appId = target.toLowerCase() as AppID;
-      if(Object.keys(appTitles).includes(appId)) {
+      if(Object.values(AppID).includes(appId)) { // Ensure target is a valid AppID
         openWindow(appId);
       }
     } else if(action === 'close' && target === 'all') {
       setWindows([]);
     }
-  }, [openWindow, appTitles]);
+  }, [openWindow]);
 
+  /**
+   * Callback for when a workflow completes, potentially opening a new app with the result.
+   * @param {any} result - The result of the completed workflow.
+   */
   const handleWorkflowComplete = useCallback((result: any) => {
     if (result && 'destination' in result) { // Check if it's a TravelPlan
-        openWindow('travelPlanViewer', { plan: result });
+        openWindow(AppID.travelPlanViewer, { plan: result });
     }
   }, [openWindow]);
 
+  /**
+   * Initiates the execution of a workflow by opening the Workflow Studio app.
+   * @param {Workflow} workflow - The workflow to execute.
+   * @param {any} [details] - Additional details for the executing workflow.
+   */
   const executeWorkflow = useCallback((workflow: Workflow, details?: any) => {
-      openWindow('workflow', { workflow, isExecuting: true, executingDetails: details });
+      openWindow(AppID.workflow, { workflow, isExecuting: true, executingDetails: details });
   }, [openWindow]);
 
+  /**
+   * Starts a travel planning workflow with provided details.
+   * @param {object} details - The travel plan details.
+   * @param {string} details.destination - The travel destination.
+   * @param {string} details.startDate - The start date of the trip.
+   * @param {string} details.endDate - The end date of the trip.
+   * @param {string} details.budget - The budget for the trip.
+   */
   const startTravelWorkflow = useCallback(async (details: { destination: string, startDate: string, endDate: string, budget: string }) => {
       const travelWorkflow: Workflow = {
         title: `Generating Travel Plan for ${details.destination}`,
@@ -527,6 +670,10 @@ const App: React.FC = () => {
       executeWorkflow(travelWorkflow, details);
   }, [executeWorkflow]);
 
+  /**
+   * Handles adding a generated travel plan to the calendar.
+   * @param {TravelPlan} plan - The travel plan to add.
+   */
   const handleAddToCalendar = useCallback(async (plan: TravelPlan) => {
     try {
         const events = await createCalendarEventFromPlan(plan);
@@ -539,41 +686,61 @@ const App: React.FC = () => {
     }
   }, [addNotification]);
   
+  /**
+   * Closes a specific window.
+   * @param {number} id - The ID of the window to close.
+   */
   const closeWindow = (id: number) => {
     setWindows(windows.filter(w => w.id !== id));
   };
 
+  /**
+   * Minimizes a specific window.
+   * @param {number} id - The ID of the window to minimize.
+   */
   const minimizeWindow = (id: number) => {
     setWindows(windows.map(w => w.id === id ? { ...w, isMinimized: true } : w));
   };
 
+  /**
+   * Restores a minimized window.
+   * @param {number} id - The ID of the window to restore.
+   */
   const restoreWindow = (id: number) => {
     setWindows(windows.map(w => w.id === id ? { ...w, isMinimized: false, zIndex: nextZIndex } : w));
     setNextZIndex(prev => prev + 1);
   };
 
+  /**
+   * Brings a window to the front by updating its z-index.
+   * @param {number} id - The ID of the window to focus.
+   */
   const focusWindow = (id: number) => {
     setWindows(windows.map(w => w.id === id ? { ...w, zIndex: nextZIndex } : w));
     setNextZIndex(prev => prev + 1);
   };
   
+  /** The ID of the currently active (focused) window. */
   const activeWindowId = windows.length > 0 ? windows.filter(w => !w.isMinimized).sort((a, b) => b.zIndex - a.zIndex)[0]?.id : null;
   
+  /**
+   * Memoized list of applications displayed on the desktop grid.
+   */
   const desktopApps = useMemo(() => [
-    { id: 'creatorStudio', name: t('desktop_apps.creatorStudio'), icon: CreatorStudioIcon },
-    { id: 'cognitoBrowser', name: t('desktop_apps.cognitoBrowser'), icon: BrowserIcon },
-    { id: 'travelAgent', name: t('desktop_apps.travelAgent'), icon: TripIcon },
-    { id: 'travelServices', name: t('app_titles.travelServices'), icon: TravelServicesIcon }, // New
-    { id: 'workflow', name: t('desktop_apps.workflow'), icon: WorkflowIcon },
-    { id: 'atlasFinance', name: t('app_titles.atlasFinance'), icon: FinanceIcon },
-    { id: 'cognitiveCanvas', name: t('app_titles.cognitiveCanvas'), icon: CognitiveCanvasIcon },
-    { id: 'geminiAiNews', name: t('app_titles.geminiAiNews'), icon: NewsIcon },
-    { id: 'veridianId', name: t('app_titles.veridianId'), icon: VeridianIdIcon },
-    { id: 'nexusProfile', name: t('app_titles.nexusProfile'), icon: NexusProfileIcon }, // New
-    { id: 'nexusGo', name: t('app_titles.nexusGo'), icon: NexusGoIcon },
-    { id: 'translateHub', name: t('app_titles.translateHub'), icon: TranslateIcon },
-    { id: 'controlPanel', name: t('app_titles.controlPanel'), icon: ControlPanelIcon },
-    { id: 'agentForge', name: t('desktop_apps.agentForge'), icon: AgentForgeIcon },
+    { id: AppID.creatorStudio, name: t('desktop_apps.creatorStudio'), icon: CreatorStudioIcon },
+    { id: AppID.cognitoBrowser, name: t('desktop_apps.cognitoBrowser'), icon: BrowserIcon },
+    { id: AppID.travelAgent, name: t('desktop_apps.travelAgent'), icon: TripIcon },
+    { id: AppID.travelServices, name: t('app_titles.travelServices'), icon: TravelServicesIcon },
+    { id: AppID.workflow, name: t('desktop_apps.workflow'), icon: WorkflowIcon },
+    { id: AppID.atlasFinance, name: t('app_titles.atlasFinance'), icon: FinanceIcon },
+    { id: AppID.cognitiveCanvas, name: t('app_titles.cognitiveCanvas'), icon: CognitiveCanvasIcon },
+    { id: AppID.geminiAiNews, name: t('app_titles.geminiAiNews'), icon: NewsIcon },
+    { id: AppID.veridianId, name: t('app_titles.veridianId'), icon: VeridianIdIcon },
+    { id: AppID.nexusProfile, name: t('app_titles.nexusProfile'), icon: NexusProfileIcon },
+    { id: AppID.nexusGo, name: t('app_titles.nexusGo'), icon: NexusGoIcon },
+    { id: AppID.translateHub, name: t('app_titles.translateHub'), icon: TranslateIcon },
+    { id: AppID.controlPanel, name: t('app_titles.controlPanel'), icon: ControlPanelIcon },
+    { id: AppID.agentForge, name: t('desktop_apps.agentForge'), icon: AgentForgeIcon },
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
@@ -581,40 +748,43 @@ const App: React.FC = () => {
     }))
   ], [customAgents, t]);
 
+  /**
+   * Memoized list of all applications available in the app launcher.
+   */
   const allAppsForLauncher = useMemo(() => [
-    { id: 'store', name: t('app_launcher.store'), icon: StoreIcon },
-    { id: 'creatorStudio', name: t('app_launcher.creatorStudio'), icon: CreatorStudioIcon },
-    { id: 'cognitoBrowser', name: t('app_launcher.cognitoBrowser'), icon: BrowserIcon },
-    { id: 'chat', name: t('app_launcher.chat'), icon: ChatIcon },
-    { id: 'voice', name: t('app_launcher.voice'), icon: VoiceAssistantIcon },
-    { id: 'travelAgent', name: t('app_launcher.travelAgent'), icon: TripIcon },
-    { id: 'travelServices', name: t('app_titles.travelServices'), icon: TravelServicesIcon }, // New
-    { id: 'workspace', name: t('app_launcher.workspace'), icon: WorkspaceIcon },
-    { id: 'smartwatch', name: t('app_launcher.smartwatch'), icon: SmartWatchIcon },
-    { id: 'marketing', name: t('app_launcher.marketing'), icon: MarketingIcon },
-    { id: 'workflow', name: t('app_launcher.workflow'), icon: WorkflowIcon },
-    { id: 'agentForge', name: t('app_launcher.agentForge'), icon: AgentForgeIcon },
-    { id: 'atlasFinance', name: t('app_launcher.atlasFinance'), icon: FinanceIcon },
-    { id: 'cognitiveCanvas', name: t('app_launcher.cognitiveCanvas'), icon: CognitiveCanvasIcon },
-    { id: 'veridianId', name: t('app_titles.veridianId'), icon: VeridianIdIcon },
-    { id: 'nexusProfile', name: t('app_titles.nexusProfile'), icon: NexusProfileIcon }, // New
-    { id: 'translateHub', name: t('app_titles.translateHub'), icon: TranslateIcon },
-    { id: 'nexusGo', name: t('app_titles.nexusGo'), icon: NexusGoIcon },
-    { id: 'nexusFeed', name: t('app_titles.nexusFeed'), icon: NexusChatIcon }, // New
-    { id: 'avatarStudio', name: t('app_launcher.avatarStudio'), icon: AvatarStudioIcon },
-    { id: 'skillForge', name: t('app_launcher.skillForge'), icon: SkillForgeIcon },
-    { id: 'chronoVault', name: t('app_launcher.chronoVault'), icon: ChronoVaultIcon },
-    { id: 'eventLog', name: t('app_launcher.eventLog'), icon: EventLogIcon },
-    { id: 'notificationCenter', name: t('app_launcher.notificationCenter'), icon: NotificationCenterIcon },
-    { id: 'jules', name: t('app_launcher.jules'), icon: JulesIcon },
-    { id: 'files', name: t('app_launcher.files'), icon: FileIcon },
-    { id: 'settings', name: t('app_launcher.settings'), icon: SettingsIcon },
-    { id: 'controlPanel', name: t('app_launcher.controlPanel'), icon: ControlPanelIcon },
-    { id: 'terminal', name: t('app_launcher.terminal'), icon: TerminalIcon },
-    { id: 'devToolkit', name: t('app_launcher.devToolkit'), icon: DevToolkitIcon },
-    { id: 'growthHub', name: t('app_launcher.growthHub'), icon: GrowthHubIcon },
-    { id: 'resourceHub', name: t('app_launcher.resourceHub'), icon: ResourceHubIcon },
-    { id: 'geminiAiNews', name: t('app_launcher.geminiAiNews'), icon: NewsIcon },
+    { id: AppID.store, name: t('app_launcher.store'), icon: StoreIcon },
+    { id: AppID.creatorStudio, name: t('app_launcher.creatorStudio'), icon: CreatorStudioIcon },
+    { id: AppID.cognitoBrowser, name: t('app_launcher.cognitoBrowser'), icon: BrowserIcon },
+    { id: AppID.chat, name: t('app_launcher.chat'), icon: ChatIcon },
+    { id: AppID.voice, name: t('app_launcher.voice'), icon: VoiceAssistantIcon },
+    { id: AppID.travelAgent, name: t('app_launcher.travelAgent'), icon: TripIcon },
+    { id: AppID.travelServices, name: t('app_titles.travelServices'), icon: TravelServicesIcon },
+    { id: AppID.workspace, name: t('app_launcher.workspace'), icon: WorkspaceIcon },
+    { id: AppID.smartwatch, name: t('app_launcher.smartwatch'), icon: SmartWatchIcon },
+    { id: AppID.marketing, name: t('app_launcher.marketing'), icon: MarketingIcon },
+    { id: AppID.workflow, name: t('app_launcher.workflow'), icon: WorkflowIcon },
+    { id: AppID.agentForge, name: t('app_launcher.agentForge'), icon: AgentForgeIcon },
+    { id: AppID.atlasFinance, name: t('app_launcher.atlasFinance'), icon: FinanceIcon },
+    { id: AppID.cognitiveCanvas, name: t('app_launcher.cognitiveCanvas'), icon: CognitiveCanvasIcon },
+    { id: AppID.veridianId, name: t('app_titles.veridianId'), icon: VeridianIdIcon },
+    { id: AppID.nexusProfile, name: t('app_titles.nexusProfile'), icon: NexusProfileIcon },
+    { id: AppID.translateHub, name: t('app_titles.translateHub'), icon: TranslateIcon },
+    { id: AppID.nexusGo, name: t('app_titles.nexusGo'), icon: NexusGoIcon },
+    { id: AppID.nexusFeed, name: t('app_titles.nexusFeed'), icon: NexusChatIcon },
+    { id: AppID.avatarStudio, name: t('app_launcher.avatarStudio'), icon: AvatarStudioIcon },
+    { id: AppID.skillForge, name: t('app_launcher.skillForge'), icon: SkillForgeIcon },
+    { id: AppID.chronoVault, name: t('app_launcher.chronoVault'), icon: ChronoVaultIcon },
+    { id: AppID.eventLog, name: t('app_launcher.eventLog'), icon: EventLogIcon },
+    { id: AppID.notificationCenter, name: t('app_launcher.notificationCenter'), icon: NotificationCenterIcon },
+    { id: AppID.jules, name: t('app_launcher.jules'), icon: JulesIcon },
+    { id: AppID.files, name: t('app_launcher.files'), icon: FileIcon },
+    { id: AppID.settings, name: t('app_launcher.settings'), icon: SettingsIcon },
+    { id: AppID.terminal, name: t('app_launcher.terminal'), icon: TerminalIcon },
+    { id: AppID.devToolkit, name: t('app_launcher.devToolkit'), icon: DevToolkitIcon },
+    { id: AppID.growthHub, name: t('app_launcher.growthHub'), icon: GrowthHubIcon },
+    { id: AppID.resourceHub, name: t('app_launcher.resourceHub'), icon: ResourceHubIcon },
+    { id: AppID.geminiAiNews, name: t('app_launcher.geminiAiNews'), icon: NewsIcon },
+    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), icon: ControlPanelIcon }, // Removed duplicate controlPanel
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
@@ -622,6 +792,11 @@ const App: React.FC = () => {
     }))
   ], [customAgents, t]);
 
+  /**
+   * Renders the appropriate dashboard widgets based on the selected layout.
+   * @param {DashboardLayout} layout - The current dashboard layout.
+   * @returns {JSX.Element} The set of dashboard widgets.
+   */
   const renderDashboardWidgets = (layout: DashboardLayout) => {
     switch(layout) {
       case 'work':
@@ -659,18 +834,33 @@ const App: React.FC = () => {
     return <LoadingScreen userAccountName={userAccount.name} />;
   }
 
+  /**
+   * Handles liking a Nexus post.
+   * @param {string} postId - The ID of the post to like.
+   */
   const handleLikePost = useCallback((postId: string) => {
     setNexusPosts(prev => prev.map(post =>
       post.id === postId ? { ...post, likes: post.likes + 1 } : post
     ));
   }, []);
 
+  /**
+   * Adds a new comment to a Nexus post.
+   * @param {string} postId - The ID of the post to comment on.
+   * @param {NexusComment} comment - The comment object to add.
+   */
   const handleAddComment = useCallback((postId: string, comment: NexusComment) => {
     setNexusPosts(prev => prev.map(post =>
       post.id === postId ? { ...post, comments: [...post.comments, comment] } : post
     ));
   }, []);
 
+  /**
+   * Boosts a Nexus post, deducting credits and simulating increased views.
+   * @param {string} postId - The ID of the post to boost.
+   * @param {number} cost - The credit cost to boost the post.
+   * @returns {boolean} True if the boost was successful, false otherwise (e.g., insufficient credits).
+   */
   const handleBoostPost = useCallback((postId: string, cost: number) => {
     if (userAccount.aiCredits < cost) {
         addNotification(t('*.insufficient_credits_text', { cost }), 'error');
@@ -740,7 +930,7 @@ const App: React.FC = () => {
                           if (!AppComponent) return null;
                           const props: any = window.appProps || {};
 
-                          if (window.appId === 'settings') {
+                          if (window.appId === AppID.settings) {
                               props.settings = settings;
                               props.onSettingsChange = handleSettingsChange;
                               props.resetSettings = resetSettings;
@@ -751,77 +941,78 @@ const App: React.FC = () => {
                               props.onSuccessfulReferral = handleSuccessfulReferral;
                               props.onBonusTask = handleBonusTask;
                               props.onUpgrade = handleUpgrade;
-                              props.creditTransactions = creditTransactions; // Pass transaction history
-                          } else if (window.appId === 'travelAgent') {
+                              props.creditTransactions = creditTransactions;
+                          } else if (window.appId === AppID.travelAgent) {
                               props.startTravelWorkflow = startTravelWorkflow;
-                          } else if (window.appId === 'workflow') {
+                          } else if (window.appId === AppID.workflow) {
                               props.onComplete = handleWorkflowComplete;
-                          } else if (window.appId === 'voice') {
+                          } else if (window.appId === AppID.voice) {
                               props.onExecuteWorkflow = executeWorkflow;
-                          } else if (window.appId === 'travelPlanViewer') {
+                          } else if (window.appId === AppID.travelPlanViewer) {
                               props.onAddToCalendar = handleAddToCalendar;
                               props.onShare = setShareContent;
-                          } else if (window.appId === 'smartwatch') {
+                          } else if (window.appId === AppID.smartwatch) {
                               props.alarms = alarms;
                               props.setAlarms = setAlarms;
                               props.automations = automations;
                               props.setAutomations = setAutomations;
-                          } else if (['chat', 'audio', 'translateHub', 'liveConversation'].includes(window.appId)) {
+                          } else if ([AppID.chat, AppID.audio, AppID.translateHub, AppID.liveConversation].includes(window.appId)) {
                               props.speechSettings = { 
                                 voice: settings.voice, 
                                 rate: settings.speechRate,
                                 pitch: settings.speechPitch,
                               };
-                          } else if (window.appId === 'agentForge' || window.appId === 'avatarStudio') {
+                          } else if (window.appId === AppID.agentForge || window.appId === AppID.avatarStudio) {
                               props.onAddAgent = addCustomAgent;
                               props.onClose = () => closeWindow(window.id);
-                          } else if (window.appId === 'store') {
+                          } else if (window.appId === AppID.store) {
                               props.onAddAgent = addCustomAgent;
                               props.installedAgents = customAgents;
                               props.userAccount = userAccount;
                               props.onOpenApp = openWindow;
-                          } else if (window.appId === 'agora') {
+                          } else if (window.appId === AppID.agora) {
                               props.userAccount = userAccount;
                               props.customAgents = customAgents;
                               props.listings = agoraListings;
                               props.onList = handleListOnAgora;
                               props.onPurchase = handlePurchase;
-                          } else if (window.appId === 'creatorStudio') {
+                          } else if (window.appId === AppID.creatorStudio) {
                                 props.projects = projects;
-                                props.tasks = tasks;
-                                props.onAddProject = (p: Project) => { setProjects(prev => [p, ...prev]); logAction('creatorStudio', { event: 'project_created', projectName: p.name }); };
-                                props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]);
+                                props.tasks = tasks; // Ensure tasks are passed to CreatorStudio
+                                props.onAddProject = (p: Project) => { setProjects(prev => [p, ...prev]); logAction(AppID.creatorStudio, { event: 'project_created', projectName: p.name }); };
+                                props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]); // Ensure onAddTask is passed
                                 props.onShare = setShareContent;
-                          } else if (window.appId === 'growthHub') {
+                                props.onOpenApp = openWindow;
+                          } else if (window.appId === AppID.growthHub) {
                                 props.userAccount = userAccount;
                                 props.bounties = bounties;
                                 props.completedBounties = completedBounties;
                                 props.onCompleteBounty = handleCompleteBounty;
-                          } else if (window.appId === 'veridianId') {
+                          } else if (window.appId === AppID.veridianId) {
                                 props.userAccount = userAccount;
-                          } else if (window.appId === 'video') {
+                          } else if (window.appId === AppID.video) {
                                 props.userAccount = userAccount;
                                 props.setUserAccount = setUserAccount;
-                          } else if (window.appId === 'nexusGo') {
+                          } else if (window.appId === AppID.nexusGo) {
                                 props.onOpenApp = openWindow;
                                 props.userAccount = userAccount;
-                          } else if (window.appId === 'nexusFeed') {
+                          } else if (window.appId === AppID.nexusFeed) {
                                 props.userAccount = userAccount;
                                 props.nexusPosts = nexusPosts;
                                 props.onLikePost = handleLikePost;
                                 props.onAddComment = handleAddComment;
                                 props.onBoostPost = handleBoostPost;
                                 props.onCreatePost = setShareContent; // Open CreatePostModal
-                          } else if (window.appId === 'nexusProfile') {
+                          } else if (window.appId === AppID.nexusProfile) {
                                 props.userAccount = userAccount;
                                 props.nexusPosts = nexusPosts.filter(p => p.osId === userAccount.osId); // Filter for user's posts
                                 props.onOpenApp = openWindow;
-                                props.creditTransactions = creditTransactions; // Pass transaction history
-                          } else if (window.appId === 'travelServices') {
+                                props.creditTransactions = creditTransactions;
+                          } else if (window.appId === AppID.travelServices) {
                                 props.userAccount = userAccount;
                                 props.onOpenApp = openWindow;
                           }
-                          else if (window.appId === 'cognitiveCanvas') {
+                          else if (window.appId === AppID.cognitiveCanvas) {
                                 props.speechSettings = { 
                                     voice: settings.voice, 
                                     rate: settings.speechRate,

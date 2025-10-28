@@ -2,14 +2,27 @@ import React from 'react';
 import { AppID, WindowInstance } from '../types';
 import { ChatIcon, TripIcon, TerminalIcon, FileIcon, SettingsIcon, ImageIcon, VideoIcon, SearchIcon, MapIcon, LunaIcon, KarimIcon, ScoutIcon, MayaIcon, WorkflowIcon, MicrophoneIcon, VideoAnalyzeIcon, JulesIcon, VoiceAssistantIcon, SmartWatchIcon, WorkspaceIcon, EventLogIcon, CreatorStudioIcon, SkillForgeIcon, ChronoVaultIcon, BrowserIcon, AtlasIcon, CortexIcon, OrionIcon, AnalyticsHubIcon, AgentForgeIcon, StoreIcon, PricingIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AudioStudioIcon, AvatarStudioIcon, MarketingIcon, DevToolkitIcon, AgoraIcon, NexusChatIcon, HeliosIcon, DevConsoleIcon, ApiIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, TravelServicesIcon } from './Icons';
 
+/**
+ * Props for the Taskbar component.
+ * @deprecated This component is deprecated and replaced by the `Dock` component.
+ */
 interface TaskbarProps {
+  /** An array of currently open window instances. */
   openWindows: WindowInstance[];
+  /** Callback function to open an application. */
   onOpen: (appId: AppID) => void;
+  /** Callback function to restore a minimized window. */
   onRestore: (id: number) => void;
+  /** Callback function to bring a window to focus. */
   onFocus: (id: number) => void;
+  /** The ID of the currently active (focused) window. */
   activeWindowId: number | null;
 }
 
+/**
+ * A mapping of AppIDs to their corresponding React Icon components for the Taskbar.
+ * @deprecated This mapping is part of the deprecated Taskbar component.
+ */
 const appIcons: Record<AppID, React.FC<{className: string}>> = {
   chat: ChatIcon,
   travelAgent: TripIcon,
@@ -75,7 +88,13 @@ const appIcons: Record<AppID, React.FC<{className: string}>> = {
   pricing: PricingIcon,
 };
 
-
+/**
+ * The Taskbar component is a legacy component that has been replaced by the `Dock` component.
+ * It currently renders `null` to ensure it does not appear in the UI.
+ * @deprecated Use `Dock` instead.
+ * @param {TaskbarProps} props - The component props (not actively used as it renders null).
+ * @returns {null} Renders nothing.
+ */
 const Taskbar: React.FC<TaskbarProps> = ({ openWindows, onOpen, onRestore, onFocus, activeWindowId }) => {
   return null; // This is a legacy component, replaced by Dock. Kept for type safety.
 };

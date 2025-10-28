@@ -1,57 +1,109 @@
 import React from 'react';
 import { AppID, WindowInstance, TaskbarTheme } from '../types';
-import { AnalyticsHubIcon, CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkspaceIcon, WorkflowIcon, SkillForgeIcon, SettingsIcon, AgentForgeIcon, StoreIcon, NotificationCenterIcon, AvatarStudioIcon, AudioStudioIcon, DevToolkitIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, TravelServicesIcon } from './Icons';
+import { AnalyticsHubIcon, CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkspaceIcon, WorkflowIcon, SkillForgeIcon, SettingsIcon, AgentForgeIcon, StoreIcon, NotificationCenterIcon, AvatarStudioIcon, AudioStudioIcon, DevToolkitIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, TravelServicesIcon, MarketingIcon, FlightsIcon } from './Icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
+/**
+ * Props for the Dock component.
+ */
 interface DockProps {
+  /** An array of currently open window instances. */
   openWindows: WindowInstance[];
+  /** Callback function to open an application. */
   onOpen: (appId: AppID) => void;
+  /** Callback function to restore a minimized window. */
   onRestore: (id: number) => void;
+  /** Callback function to bring a window to focus. */
   onFocus: (id: number) => void;
+  /** The ID of the currently active (focused) window. */
   activeWindowId: number | null;
+  /** Callback function to toggle the visibility of the App Launcher. */
   onToggleLauncher: () => void;
+  /** The theme applied to the taskbar. */
   taskbarTheme: TaskbarTheme;
+  /** An array of AppIDs representing frequently used applications. */
   frequentApps: AppID[];
 }
 
+/**
+ * A mapping of AppIDs to their corresponding React Icon components.
+ */
 const appIcons: Record<string, React.FC<{className?: string}>> = {
-  analyticsHub: AnalyticsHubIcon,
-  creatorStudio: CreatorStudioIcon,
-  cognitoBrowser: BrowserIcon,
-  chat: ChatIcon,
-  travelAgent: TripIcon,
-  travelServices: TravelServicesIcon, // New
-  workspace: WorkspaceIcon,
-  workflow: WorkflowIcon,
-  skillForge: SkillForgeIcon,
-  agentForge: AgentForgeIcon,
-  avatarStudio: AvatarStudioIcon,
-  audio: AudioStudioIcon,
-  settings: SettingsIcon,
-  store: StoreIcon,
-  notificationCenter: NotificationCenterIcon,
-  agora: AgoraIcon,
-  nexusChat: NexusChatIcon,
-  marketing: MarketingIcon,
-  devConsole: DevConsoleIcon,
-  apiDocs: ApiIcon,
-  devToolkit: DevToolkitIcon,
-  growthHub: GrowthHubIcon,
-  resourceHub: ResourceHubIcon,
-  geminiAiNews: NewsIcon,
-  atlasFinance: FinanceIcon,
-  cognitiveCanvas: CognitiveCanvasIcon,
-  veridianId: VeridianIdIcon,
-  translateHub: TranslateIcon,
-  nexusGo: NexusGoIcon,
-  nexusFeed: NexusChatIcon, // Use NexusChatIcon for NexusFeed
-  nexusProfile: NexusProfileIcon, // New
+  [AppID.analyticsHub]: AnalyticsHubIcon,
+  [AppID.creatorStudio]: CreatorStudioIcon,
+  [AppID.cognitoBrowser]: BrowserIcon,
+  [AppID.chat]: ChatIcon,
+  [AppID.travelAgent]: TripIcon,
+  [AppID.travelServices]: TravelServicesIcon,
+  [AppID.workspace]: WorkspaceIcon,
+  [AppID.workflow]: WorkflowIcon,
+  [AppID.skillForge]: SkillForgeIcon,
+  [AppID.agentForge]: AgentForgeIcon,
+  [AppID.avatarStudio]: AvatarStudioIcon,
+  [AppID.audio]: AudioStudioIcon,
+  [AppID.settings]: SettingsIcon,
+  [AppID.store]: StoreIcon,
+  [AppID.notificationCenter]: NotificationCenterIcon,
+  [AppID.agora]: AgoraIcon,
+  [AppID.nexusChat]: NexusChatIcon,
+  [AppID.marketing]: MarketingIcon,
+  [AppID.devConsole]: DevConsoleIcon,
+  [AppID.apiDocs]: ApiIcon,
+  [AppID.devToolkit]: DevToolkitIcon,
+  [AppID.growthHub]: GrowthHubIcon,
+  [AppID.resourceHub]: ResourceHubIcon,
+  [AppID.geminiAiNews]: NewsIcon,
+  [AppID.atlasFinance]: FinanceIcon,
+  [AppID.cognitiveCanvas]: CognitiveCanvasIcon,
+  [AppID.veridianId]: VeridianIdIcon,
+  [AppID.translateHub]: TranslateIcon,
+  [AppID.nexusGo]: NexusGoIcon,
+  [AppID.nexusFeed]: NexusChatIcon, // Corrected to NexusChatIcon for feed
+  [AppID.nexusProfile]: NexusProfileIcon,
+  // Ensure all AppIDs that might appear in the dock have a corresponding icon here.
+  // Add more specific agent icons if needed, e.g., LunaIcon, KarimIcon
+  [AppID.image]: ImageIcon,
+  [AppID.video]: VideoIcon,
+  [AppID.search]: SearchIcon,
+  [AppID.maps]: MapIcon,
+  [AppID.transcriber]: MicrophoneIcon,
+  [AppID.videoAnalyzer]: VideoAnalyzeIcon,
+  [AppID.smartwatch]: SmartWatchIcon,
+  [AppID.eventLog]: EventLogIcon,
+  [AppID.chronoVault]: ChronoVaultIcon,
+  [AppID.liveConversation]: LiveConversationIcon,
+  [AppID.imageAnalyzer]: ImageAnalyzerIcon,
+  [AppID.controlPanel]: ControlPanelIcon,
+  [AppID.pricing]: PricingIcon,
+  [AppID.atlas]: AnalyticsHubIcon, // Placeholder, usually AgentProfileApp handles
+  [AppID.cortex]: CognitiveCanvasIcon, // Placeholder
+  [AppID.orion]: AnalyticsHubIcon, // Placeholder
+  [AppID.helios]: NewsIcon, // Placeholder
+  [AppID.leo]: MarketingIcon, // Placeholder
+  [AppID.zara]: MarketingIcon, // Placeholder
+  [AppID.rex]: MarketingIcon, // Placeholder
+  [AppID.clio]: MarketingIcon, // Placeholder
+  [AppID.jules]: AnalyticsHubIcon, // Placeholder
+  [AppID.luna]: TripIcon, // Placeholder
+  [AppID.karim]: FinanceIcon, // Placeholder
+  [AppID.scout]: SearchIcon, // Placeholder
+  [AppID.maya]: ChatIcon, // Placeholder
 };
 
-
+/**
+ * The Dock component displays a row of application icons at the bottom of the screen.
+ * It allows users to launch apps, switch between open windows, and access the app launcher.
+ * @param {DockProps} props - The component props.
+ * @returns {JSX.Element} The rendered Dock component.
+ */
 const Dock: React.FC<DockProps> = ({ openWindows, onOpen, onRestore, onFocus, activeWindowId, onToggleLauncher, frequentApps }) => {
   const { t } = useLanguage();
 
+  /**
+   * Handles clicking an app icon in the dock.
+   * Opens a new window, restores a minimized one, or focuses an existing one.
+   * @param {AppID} appId - The ID of the application clicked.
+   */
   const handleAppClick = (appId: AppID) => {
     const window = openWindows.find(w => w.appId === appId);
     if (window) {
@@ -65,28 +117,34 @@ const Dock: React.FC<DockProps> = ({ openWindows, onOpen, onRestore, onFocus, ac
     }
   };
 
+  /**
+   * Defines the primary applications displayed in the dock.
+   */
   const apps: { id: AppID; name: string; }[] = [
-      { id: 'creatorStudio', name: t('dock.creatorStudio') },
-      { id: 'store', name: t('dock.store') },
-      { id: 'cognitoBrowser', name: t('dock.cognitoBrowser') },
-      { id: 'atlasFinance', name: t('dock.atlasFinance') },
-      { id: 'cognitiveCanvas', name: t('dock.cognitiveCanvas') },
-      { id: 'geminiAiNews', name: t('dock.geminiAiNews') },
-      { id: 'veridianId', name: t('app_titles.veridianId') },
-      { id: 'nexusProfile', name: t('app_titles.nexusProfile') }, // New
-      { id: 'nexusFeed', name: t('app_titles.nexusFeed') }, // New
-      { id: 'translateHub', name: t('app_titles.translateHub') },
-      { id: 'nexusGo', name: t('app_titles.nexusGo') },
-      { id: 'travelAgent', name: t('dock.travelAgent') },
-      { id: 'travelServices', name: t('app_titles.travelServices') }, // New
-      { id: 'workflow', name: t('dock.workflow')},
-      { id: 'agentForge', name: t('dock.agentForge') },
-      { id: 'growthHub', name: t('dock.growthHub') },
-      { id: 'resourceHub', name: t('dock.resourceHub') },
-      { id: 'notificationCenter', name: t('dock.notificationCenter') },
-      { id: 'settings', name: t('dock.settings') },
+      { id: AppID.creatorStudio, name: t('dock.creatorStudio') },
+      { id: AppID.store, name: t('dock.store') },
+      { id: AppID.cognitoBrowser, name: t('dock.cognitoBrowser') },
+      { id: AppID.atlasFinance, name: t('dock.atlasFinance') },
+      { id: AppID.cognitiveCanvas, name: t('dock.cognitiveCanvas') },
+      { id: AppID.geminiAiNews, name: t('dock.geminiAiNews') },
+      { id: AppID.veridianId, name: t('app_titles.veridianId') },
+      { id: AppID.nexusProfile, name: t('app_titles.nexusProfile') },
+      { id: AppID.nexusFeed, name: t('app_titles.nexusFeed') },
+      { id: AppID.translateHub, name: t('app_titles.translateHub') },
+      { id: AppID.nexusGo, name: t('app_titles.nexusGo') },
+      { id: AppID.travelAgent, name: t('dock.travelAgent') },
+      { id: AppID.travelServices, name: t('app_titles.travelServices') },
+      { id: AppID.workflow, name: t('dock.workflow')},
+      { id: AppID.agentForge, name: t('dock.agentForge') },
+      { id: AppID.growthHub, name: t('dock.growthHub') },
+      { id: AppID.resourceHub, name: t('dock.resourceHub') },
+      { id: AppID.notificationCenter, name: t('dock.notificationCenter') },
+      { id: AppID.settings, name: t('dock.settings') },
   ];
   
+  /**
+   * Filters and maps frequent applications for display with a "Suggested" label.
+   */
   const frequentAppDefs = frequentApps
     .map(appId => {
       const appDef = apps.find(a => a.id === appId);

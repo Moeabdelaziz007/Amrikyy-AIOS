@@ -46,12 +46,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
 
             // Simulate progress for current stage
             const step = 100 / (currentStage.duration / 50); // Update every 50ms
-            progressInterval = setInterval(() => {
+            progressInterval = window.setInterval(() => {
                 setProgress(prev => Math.min(100, prev + step));
             }, 50);
 
             // Move to next stage after duration
-            stageTimer = setTimeout(() => {
+            stageTimer = window.setTimeout(() => {
                 clearInterval(progressInterval);
                 setCurrentStageIndex(prev => prev + 1);
             }, currentStage.duration);
@@ -63,7 +63,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
             clearTimeout(stageTimer);
             clearInterval(progressInterval);
         };
-    }, [currentStageIndex, loadingStages.length]);
+    }, [currentStageIndex, loadingStages]);
 
     // Mouse parallax effect
     useEffect(() => {
@@ -94,7 +94,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
     }, []);
 
     // FIX: Ensure labelKey is treated as TranslationKey when passed to t()
-    const currentStageLabel = t(loadingStages[currentStageIndex]?.labelKey as TranslationKey || 'loading_screen.all_systems_ready');
+    const currentStageLabel = t(loadingStages[currentStageIndex]?.labelKey || 'loading_screen.all_systems_ready');
 
     return (
         <div
@@ -118,7 +118,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
                     )}
                 </p>
                 {currentStageIndex < loadingStages.length && (
-                    <div className="w-64 h-2 bg-gray-700 rounded-full mt-4 mx-auto">
+                    <div className="w-64 h-2 bg-gray-700 rounded-full mt-4 mx-auto" role="progressbar" aria-label="Loading progress">
                         <div
                             className="h-full bg-primary-cyan rounded-full transition-all duration-300 ease-out"
                             style={{ width: `${progress}%` }}

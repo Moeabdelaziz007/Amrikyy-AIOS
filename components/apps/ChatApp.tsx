@@ -6,9 +6,16 @@ import { playDecodedAudio, decode } from '../../utils/audioUtils';
 import { SendIcon, SparklesIcon, SpeakerIcon } from '../Icons';
 import { Content } from '@google/genai';
 
+/**
+ * Type definition for the audio playback state.
+ */
 type AudioState = 'idle' | 'loading' | 'playing';
 
+/**
+ * Props for the ChatApp component.
+ */
 interface ChatAppProps {
+  /** Speech synthesis settings for the AI assistant. */
   speechSettings: {
     voice: SystemVoice;
     rate: number;
@@ -16,6 +23,12 @@ interface ChatAppProps {
   };
 }
 
+/**
+ * The ChatApp component provides an interface for interacting with an AI assistant.
+ * It displays conversation history, allows text input, and can play AI responses as speech.
+ * @param {ChatAppProps} props - The component props.
+ * @returns {JSX.Element} The ChatApp component.
+ */
 const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
   const [messages, setMessages] = useState<Message[]>([
     { id: 'initial-1', sender: 'ai', text: "Hello! I'm Maya, your AI travel assistant. How can I help you plan your next adventure today?" }
@@ -35,6 +48,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
     };
   }, []);
   
+  /**
+   * Initializes or resumes the Web Audio API context.
+   */
   const initAudioContext = () => {
        if (!audioContextRef.current) {
           audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -44,12 +60,18 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
        }
   }
 
+  /**
+   * Scrolls the chat messages to the bottom.
+   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(scrollToBottom, [messages]);
 
+  /**
+   * Handles sending a user message to the AI and displaying the response.
+   */
   const handleSend = async () => {
     if (input.trim() === '' || isLoading) return;
 
@@ -72,28 +94,36 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
     setIsLoading(false);
   };
 
-  const handlePlayAudio = async (message: Message) => {
+  /**
+   * Handles playing the audio for an AI message.
+   * @param {Message} msg - The AI message to play.
+   */
+  const handlePlayAudio = async (msg: Message) => {
     initAudioContext();
     if (!audioContextRef.current) return;
-    if (audioState[message.id] === 'loading' || audioState[message.id] === 'playing') return;
+    if (audioState[msg.id] === 'loading' || audioState[msg.id] === 'playing') return;
 
-    setAudioState(prev => ({ ...prev, [message.id]: 'loading' }));
+    setAudioState(prev => ({ ...prev, [msg.id]: 'loading' }));
     try {
         const { voice, rate, pitch } = speechSettings;
-        const base64Audio = await generateSpeech(message.text, voice, rate, pitch);
+        const base64Audio = await generateSpeech(msg.text, voice, rate, pitch);
         if (base64Audio && isMounted.current && audioContextRef.current) {
-            setAudioState(prev => ({ ...prev, [message.id]: 'playing' }));
+            setAudioState(prev => ({ ...prev, [msg.id]: 'playing' }));
             await playDecodedAudio(decode(base64Audio), audioContextRef.current);
         }
     } catch (error) {
         console.error("Failed to play audio", error);
     } finally {
         if (isMounted.current) {
-            setAudioState(prev => ({ ...prev, [message.id]: 'idle' }));
+            setAudioState(prev => ({ ...prev, [msg.id]: 'idle' }));
         }
     }
   };
 
+  /**
+   * Handles key press events for the input field, specifically for 'Enter' to send messages.
+   * @param {React.KeyboardEvent<HTMLInputElement>} e - The keyboard event.
+   */
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSend();
@@ -124,10 +154,10 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
                   className="absolute -bottom-2 -right-2 h-6 w-6 bg-bg-tertiary rounded-full border border-border-color flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   aria-label="Read message aloud"
                 >
-                    {audioState[message.id] === 'loading' ? (
+                    {audioState[msg.id] === 'loading' ? (
                         <div className="w-3 h-3 border-2 border-text-muted border-t-transparent rounded-full animate-spin"></div>
                     ) : (
-                        <SpeakerIcon className={`h-4 w-4 ${audioState[message.id] === 'playing' ? 'text-accent' : 'text-text-muted'}`} />
+                        <SpeakerIcon className={`h-4 w-4 ${audioState[msg.id] === 'playing' ? 'text-accent' : 'text-text-muted'}`} />
                     )}
                 </button>
               )}

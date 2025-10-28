@@ -1,4 +1,4 @@
-import { CreatorBounty } from '../types';
+import { CreatorBounty, AppID } from '../types';
 
 export const bounties: CreatorBounty[] = [
     {
@@ -26,7 +26,8 @@ export const bounties: CreatorBounty[] = [
         creditReward: 50,
         action: {
             type: 'open_app',
-            appId: 'resourceHub'
+            // FIX: Use AppID enum member directly
+            appId: AppID.resourceHub
         }
     },
     {
@@ -37,7 +38,7 @@ export const bounties: CreatorBounty[] = [
         action: {
             type: 'open_app',
             // FIX: Corrected AppID from non-existent 'promptWeaver' to 'workflow' which matches the description.
-            appId: 'workflow'
+            appId: AppID.workflow
         }
     },
 ];

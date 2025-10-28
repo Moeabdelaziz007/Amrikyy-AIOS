@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { MapIcon, SparklesIcon } from '../Icons';
 import { mapsSearch } from '../../services/geminiAdvancedService';
 
+/**
+ * The MapsApp component provides an AI-powered interface for searching geographical information.
+ * It uses the user's current geolocation and Google Maps for grounding.
+ * @returns {JSX.Element} The MapsApp component.
+ */
 const MapsApp: React.FC = () => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -9,6 +14,7 @@ const MapsApp: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [response, setResponse] = useState<string | null>(null);
 
+    // Fetches the user's current geolocation on component mount.
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -25,6 +31,10 @@ const MapsApp: React.FC = () => {
         );
     }, []);
 
+    /**
+     * Handles sending a map-related query to the AI.
+     * Requires user's location to be available.
+     */
     const handleSend = async () => {
         if (!input || isLoading || !location) return;
         setIsLoading(true);
@@ -55,36 +65,4 @@ const MapsApp: React.FC = () => {
                 {isLoading ? (
                     <div className="flex items-center gap-3 justify-center text-emerald-400">
                         <SparklesIcon className="w-6 h-6 animate-pulse" />
-                        <p>Searching for places...</p>
-                    </div>
-                ) : response ? (
-                    <p className="text-sm text-text-primary">{response}</p>
-                ) : (
-                    <p className="text-sm text-text-muted text-center">Your results will appear here.</p>
-                )}
-            </div>
-        </div>
-         <div className="p-4 border-t border-white/10 flex-shrink-0">
-            <div className="flex gap-4">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="e.g., Good Italian restaurants nearby"
-                    disabled={isLoading || !location}
-                    className="flex-grow h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-text-primary focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all duration-300"
-                />
-                <button 
-                    onClick={handleSend}
-                    disabled={isLoading || !input || !location}
-                    className="h-12 px-6 font-bold rounded-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Search
-                </button>
-            </div>
-        </div>
-      </div>
-    );
-};
-  
-export default MapsApp;
+                        <p>Searching

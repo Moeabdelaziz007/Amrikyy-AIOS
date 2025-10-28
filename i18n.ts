@@ -307,6 +307,20 @@ export const translations = {
     'travel_services.current_location': 'Using current location', // New
     'travel_services.error_location': 'Failed to get location. Please enable location services.', // New
 
+    'travel_agent.flights_tab': 'Flights', // New
+    'travel_agent.flight_input_placeholder': 'e.g., London, UK', // New
+    'travel_agent.find_flights': 'Find Flights', // New
+    'travel_agent.no_flights_results': 'No flights found for your search.', // New
+    'travel_agent.loading_flights': 'Searching for flights...', // New
+    'travel_agent.round_trip': 'Round Trip', // New
+    'travel_agent.one_way': 'One-Way', // New
+    'travel_agent.passengers': 'Passengers', // New
+    'travel_agent.cabin_class': 'Cabin Class', // New
+    'travel_agent.economy': 'Economy', // New
+    'travel_agent.premium_economy': 'Premium Economy', // New
+    'travel_agent.business': 'Business', // New
+    'travel_agent.first_class': 'First Class', // New
+
     'loading_screen.welcome_message': 'Welcome to Amrikyy AI OS. Your AI-native experience awaits...', // New
     'loading_screen.init_ai_core': 'Initializing AI Core...',
     'loading_screen.loading_ui_components': 'Loading UI Components...',
@@ -318,44 +332,44 @@ export const translations = {
     'language_code': 'en',
   },
   ar: {
-    'app_titles.chat': 'محادثة Amrikyy AI',
-    'app_titles.terminal': 'طرفية',
+    'app_titles.chat': 'دردشة Amrikyy AI',
+    'app_titles.terminal': 'الطرفية',
     'app_titles.files': 'مستكشف الملفات',
     'app_titles.settings': 'إعدادات النظام',
-    'app_titles.luna': 'عميل: لونا',
-    'app_titles.karim': 'عميل: كريم',
-    'app_titles.scout': 'عميل: سكاوت',
-    'app_titles.maya': 'عميل: مايا',
-    'app_titles.jules': 'عميل: جول',
-    'app_titles.voice': 'مساعد صوتي ذكي',
+    'app_titles.luna': 'الوكيلة: لونا',
+    'app_titles.karim': 'الوكيل: كريم',
+    'app_titles.scout': 'الوكيل: سكاوت',
+    'app_titles.maya': 'الوكيلة: مايا',
+    'app_titles.jules': 'الوكيل: جول',
+    'app_titles.voice': 'المساعد الصوتي بالذكاء الاصطناعي',
     'app_titles.workflow': 'استوديو سير العمل',
-    'app_titles.travelAgent': 'وكيل سفر محترف',
+    'app_titles.travelAgent': 'وكيل السفر الاحترافي',
     'app_titles.marketing': 'مقر التسويق',
-    'app_titles.travelPlanViewer': 'خطة سفر ذكية',
-    'app_titles.search': 'بحث ذكي',
-    'app_titles.maps': 'خرائط ذكية',
-    'app_titles.transcriber': 'محول الصوت إلى نص',
+    'app_titles.travelPlanViewer': 'خطة السفر بالذكاء الاصطناعي',
+    'app_titles.search': 'البحث بالذكاء الاصطناعي',
+    'app_titles.maps': 'خرائط بالذكاء الاصطناعي',
+    'app_titles.transcriber': 'ناسخ الصوت',
     'app_titles.videoAnalyzer': 'محلل الفيديو',
     'app_titles.image': 'مولد الصور',
     'app_titles.audio': 'استوديو الصوت',
     'app_titles.video': 'استوديو فيديو Veo',
-    'app_titles.smartwatch': 'ساعة ذكية',
-    'app_titles.workspace': 'مساحة عمل تعاونية',
+    'app_titles.smartwatch': 'الساعة الذكية',
+    'app_titles.workspace': 'مساحة العمل التعاونية',
     'app_titles.eventLog': 'سجل أحداث النظام',
-    'app_titles.skillForge': 'مهارات النظام',
+    'app_titles.skillForge': 'مَشغَل المهارات',
     'app_titles.chronoVault': 'المحرك الكمومي',
     'app_titles.creatorStudio': 'استوديو المبدعين',
     'app_titles.cognitoBrowser': 'متصفح كوجنيتو',
     'app_titles.analyticsHub': 'مركز التحليلات',
-    'app_titles.agentForge': 'ورشة العملاء',
-    'app_titles.avatarStudio': 'استوديو الأفاتار',
-    'app_titles.agentProfile': 'ملف العميل',
+    'app_titles.agentForge': 'ورشة الوكلاء',
+    'app_titles.avatarStudio': 'استوديو الصور الرمزية',
+    'app_titles.agentProfile': 'ملف الوكيل',
     'app_titles.store': 'متجر Gemini',
     'app_titles.notificationCenter': 'مركز الإشعارات',
     'app_titles.liveConversation': 'محادثة مباشرة',
     'app_titles.imageAnalyzer': 'محلل الصور',
     'app_titles.agora': 'سوق أغورا',
-    'app_titles.nexusChat': 'دردشة نيكسوس الحية',
+    'app_titles.nexusChat': 'دردشة نيكسوس المباشرة',
     'app_titles.devConsole': 'وحدة تحكم المطور',
     'app_titles.apiDocs': 'مرجع API',
     'app_titles.devToolkit': 'مجموعة أدوات المطور',
@@ -365,15 +379,15 @@ export const translations = {
     'app_titles.controlPanel': 'لوحة التحكم',
     'app_titles.atlasFinance': 'أطلس المالية',
     'app_titles.cognitiveCanvas': 'اللوحة الإدراكية',
-    'app_titles.veridianId': 'معرف Veridian',
-    'app_titles.translateHub': 'مركز الترجمة الذكي',
+    'app_titles.veridianId': 'هوية Veridian',
+    'app_titles.translateHub': 'مركز الترجمة',
     'app_titles.nexusGo': 'NexusGo',
-    'app_titles.nexusFeed': 'موجز نيكسوس', // New
-    'app_titles.nexusProfile': 'ملف نيكسوس', // New
-    'app_titles.travelServices': 'خدمات السفر', // New
+    'app_titles.nexusFeed': 'موجز نيكسوس',
+    'app_titles.nexusProfile': 'ملف نيكسوس',
+    'app_titles.travelServices': 'خدمات السفر بالذكاء الاصطناعي',
     'app_titles.pricing': 'الأسعار والخطط',
 
-    'agent_prefix.agent': 'عميل',
+    'agent_prefix.agent': 'وكيل',
 
     'desktop.greeting.morning': 'صباح الخير، {name}',
     'desktop.greeting.afternoon': 'مساء الخير، {name}',
@@ -385,25 +399,25 @@ export const translations = {
     'dock.store': 'المتجر',
     'dock.cognitoBrowser': 'متصفح كوجنيتو',
     'dock.travelAgent': 'وكيل السفر',
-    'dock.travelServices': 'خدمات السفر', // New
+    'dock.travelServices': 'خدمات السفر',
     'dock.workflow': 'استوديو سير العمل',
-    'dock.skillForge': 'مهارات النظام',
-    'dock.agentForge': 'ورشة العملاء',
-    'dock.avatarStudio': 'استوديو الأفاتار',
+    'dock.skillForge': 'مَشغَل المهارات',
+    'dock.agentForge': 'ورشة الوكلاء',
+    'dock.avatarStudio': 'استوديو الصور الرمزية',
     'dock.audio': 'استوديو الصوت',
     'dock.notificationCenter': 'الإشعارات',
     'dock.settings': 'الإعدادات',
-    'dock.devToolkit': 'أدوات المطور',
+    'dock.devToolkit': 'مجموعة أدوات المطور',
     'dock.growthHub': 'مركز النمو',
     'dock.resourceHub': 'مركز الموارد',
     'dock.geminiAiNews': 'أخبار AI',
     'dock.atlasFinance': 'أطلس المالية',
     'dock.cognitiveCanvas': 'اللوحة الإدراكية',
     'dock.controlPanel': 'لوحة التحكم',
-    'dock.veridianId': 'معرف Veridian',
-    'dock.nexusProfile': 'ملف نيكسوس', // New
-    'dock.nexusFeed': 'موجز نيكسوس', // New
-    'dock.translateHub': 'ترجمة',
+    'dock.veridianId': 'هوية Veridian',
+    'dock.nexusProfile': 'ملف نيكسوس',
+    'dock.nexusFeed': 'موجز نيكسوس',
+    'dock.translateHub': 'الترجمة',
     'dock.nexusGo': 'NexusGo',
     'dock.suggested': 'مقترح: {appName}',
     
@@ -413,14 +427,14 @@ export const translations = {
     'settings.profile_avatar': 'الصورة الرمزية (إيموجي)',
     'settings.dashboard': 'لوحة التحكم',
     'settings.dashboard_desc': 'تخصيص تخطيط سطح المكتب والأدوات.',
-    'settings.dashboard_preset': 'إعدادات مسبقة للوحة التحكم',
+    'settings.dashboard_preset': 'الإعدادات المسبقة للوحة التحكم',
     'settings.dashboard_preset_desc': 'اختر تخطيطًا يناسب سير عملك.',
     'settings.dashboard_default': 'افتراضي',
     'settings.dashboard_work': 'عمل',
     'settings.dashboard_developer': 'مطور',
     'settings.dashboard_ai_suggestion': 'صف لوحة التحكم المثالية لك...',
     'settings.dashboard_ai_button': 'اقترح بالذكاء الاصطناعي',
-    'settings.billing': 'الاشتراك والفواتير',
+    'settings.billing': 'الاشتراك والفوترة',
     'settings.billing_desc': 'إدارة خطتك وطرق الدفع.',
     'settings.payments': 'طرق الدفع',
     'settings.payments_desc': 'إضافة وإدارة خيارات الدفع الخاصة بك.',
@@ -429,56 +443,61 @@ export const translations = {
     'settings.theme': 'السمة',
     'settings.window': 'نمط النافذة',
     'settings.wallpaper': 'خلفية الشاشة',
-    'settings.assistant': 'المساعد الذكي',
-    'settings.assistant_description': 'تكوين الصوت واللغة وسلوك المساعد الذكي الخاص بك.',
+    'settings.assistant': 'مساعد الذكاء الاصطناعي',
+    'settings.assistant_description': 'تكوين الصوت واللغة وسلوك مساعد الذكاء الاصطناعي الخاص بك.',
     'settings.speech_rate': 'سرعة الكلام',
     'settings.speech_rate_desc': 'يضبط سرعة صوت الذكاء الاصطناعي.',
     'settings.speech_pitch': 'طبقة الصوت',
     'settings.speech_pitch_desc': 'يضبط طبقة صوت الذكاء الاصطناعي.',
     'settings.integrations': 'التكاملات',
-    'settings.integrations_desc': 'اربط حساباتك الخارجية لتحسين نظام التشغيل.',
+    'settings.integrations_desc': 'ربط حسابات خارجية لتحسين نظام التشغيل.',
     'settings.google_account': 'حساب Google',
     'settings.google_connect': 'ربط',
     'settings.google_disconnect': 'قطع الاتصال',
     'settings.google_connected_as': 'متصل كـ {email}',
-    'settings.referrals': 'ادع واكسب',
+    'settings.referrals': 'ادعُ واكسب',
 
     'desktop_apps.creatorStudio': 'استوديو المبدعين',
     'desktop_apps.cognitoBrowser': 'كوجنيتو',
-    'desktop_apps.chat': 'دردشة ذكية',
+    'desktop_apps.chat': 'دردشة AI',
     'desktop_apps.liveConversation': 'محادثة مباشرة',
     'desktop_apps.imageAnalyzer': 'محلل الصور',
     'desktop_apps.travelAgent': 'مخطط الرحلات',
-    'desktop_apps.travelServices': 'خدمات السفر', // New
-    'desktop_apps.workflow': 'استوديو العمل',
-    'desktop_apps.agentForge': 'ورشة العملاء',
-    'desktop_apps.chronoVault': 'خزنة كرونو',
+    'desktop_apps.travelServices': 'خدمات السفر',
+    'desktop_apps.workflow': 'استوديو سير العمل',
+    'desktop_apps.agentForge': 'ورشة الوكلاء',
+    'desktop_apps.chronoVault': 'المحرك الكمومي',
     'desktop_apps.workspace': 'مساحة العمل',
-    'desktop_apps.smartwatch': 'ساعة ذكية',
-    'desktop_apps.luna': 'العميلة لونا',
+    'desktop_apps.smartwatch': 'الساعة الذكية',
+    'desktop_apps.luna': 'الوكيلة لونا',
     'desktop_apps.store': 'متجر Gemini',
     
     'app_launcher.creatorStudio': 'استوديو المبدعين',
     'app_launcher.cognitoBrowser': 'متصفح كوجنيتو',
-    'app_launcher.chat': 'دردشة',
+    'app_launcher.chat': 'دردشة AI',
     'app_launcher.liveConversation': 'محادثة مباشرة',
     'app_launcher.imageAnalyzer': 'محلل الصور',
-    'app_launcher.voice': 'مساعد صوتي',
+    'app_launcher.voice': 'مساعد صوتي بالذكاء الاصطناعي',
     'app_launcher.travelAgent': 'وكيل سفر',
-    'app_launcher.travelServices': 'خدمات السفر', // New
+    'app_launcher.travelServices': 'خدمات السفر',
     'app_launcher.workspace': 'مساحة العمل',
-    'app_launcher.smartwatch': 'ساعة ذكية',
+    'app_launcher.smartwatch': 'الساعة الذكية',
     'app_launcher.marketing': 'التسويق',
     'app_launcher.workflow': 'استوديو سير العمل',
-    'app_launcher.agentForge': 'ورشة العملاء',
+    'app_launcher.agentForge': 'ورشة الوكلاء',
     'app_launcher.atlasFinance': 'أطلس المالية',
     'app_launcher.cognitiveCanvas': 'اللوحة الإدراكية',
-    'app_launcher.avatarStudio': 'استوديو الأفاتار',
-    'app_launcher.skillForge': 'مهارات النظام',
-    'app_launcher.chronoVault': 'خزنة كرونو',
+    'app_launcher.veridianId': 'هوية Veridian',
+    'app_launcher.nexusProfile': 'ملف نيكسوس',
+    'app_launcher.translateHub': 'مركز الترجمة',
+    'app_launcher.nexusGo': 'NexusGo',
+    'app_launcher.nexusFeed': 'موجز نيكسوس',
+    'app_launcher.avatarStudio': 'استوديو الصور الرمزية',
+    'app_launcher.skillForge': 'مَشغَل المهارات',
+    'app_launcher.chronoVault': 'المحرك الكمومي',
     'app_launcher.eventLog': 'سجل الأحداث',
     'app_launcher.notificationCenter': 'مركز الإشعارات',
-    'app_launcher.jules': 'العميل جول',
+    'app_launcher.jules': 'الوكيل جول',
     'app_launcher.files': 'الملفات',
     'app_launcher.settings': 'الإعدادات',
     'app_launcher.terminal': 'الطرفية',
@@ -486,26 +505,26 @@ export const translations = {
     'app_launcher.devToolkit': 'مجموعة أدوات المطور',
     'app_launcher.growthHub': 'مركز النمو',
     'app_launcher.resourceHub': 'مركز الموارد',
-    'app_launcher.geminiAiNews': 'أخبار AI',
+    'app_launcher.geminiAiNews': 'أخبار Gemini AI',
     'app_launcher.controlPanel': 'لوحة التحكم',
 
-    'notifications.agent_installed': 'تم تثبيت العميل "{agentName}" بنجاح!',
+    'notifications.agent_installed': 'تم تثبيت الوكيل "{agentName}" بنجاح!',
     'notifications.upgraded_to_pro': 'تم الترقية إلى الخطة الاحترافية بنجاح!',
     'notifications.collab_join': 'انضم {userName} إلى مساحة العمل.',
     'notifications.collab_edit': '{userName} يقوم بتحرير الملاحظات.',
 
     'overview.plan': 'خطة {tier}',
-    'overview.credits': 'نقاط AI',
+    'overview.credits': 'أرصدة AI',
 
-    'store.upgrade_prompt_title': 'عميل احترافي',
-    'store.upgrade_prompt_text': 'هذا عميل مميز. يرجى الترقية إلى الخطة الاحترافية للتثبيت.',
+    'store.upgrade_prompt_title': 'وكيل احترافي',
+    'store.upgrade_prompt_text': 'هذا وكيل مميز. يرجى الترقية إلى الخطة الاحترافية لتثبيته.',
     'store.upgrade_button': 'ترقية الخطة',
 
-    'image.credit_cost': 'التكلفة: {cost} نقاط',
-    'audio.credit_cost': 'التكلفة: {cost} نقاط / 1 ألف حرف',
-    'video.credit_cost': 'التكلفة: {cost} نقاط AI',
-    'video.insufficient_credits_text': 'تحتاج إلى {cost} نقطة AI على الأقل لإنشاء فيديو. يرجى ترقية خطتك للحصول على المزيد من النقاط.',
-    '*.insufficient_credits_text': 'تحتاج إلى {cost} نقطة AI على الأقل لهذا الإجراء. يرجى ترقية خطتك للحصول على المزيد من النقاط.',
+    'image.credit_cost': 'التكلفة: {cost} أرصدة',
+    'audio.credit_cost': 'التكلفة: {cost} أرصدة / 1 ألف حرف',
+    'video.credit_cost': 'التكلفة: {cost} أرصدة AI',
+    'video.insufficient_credits_text': 'تحتاج إلى {cost} رصيد AI على الأقل لإنشاء فيديو. يرجى ترقية خطتك للحصول على المزيد من الأرصدة.',
+    '*.insufficient_credits_text': 'تحتاج إلى {cost} رصيد AI على الأقل لهذا الإجراء. يرجى ترقية خطتك للحصول على المزيد من الأرصدة.',
     
     'voice_control.listening': 'جاري الاستماع...',
     'voice_control.processing': 'جاري المعالجة...',
@@ -514,45 +533,45 @@ export const translations = {
     
     'workspace_widget.title': 'مركز مساحة العمل',
     'workspace_widget.calendar': 'التقويم',
-    'workspace_widget.drive': 'القرص',
+    'workspace_widget.drive': 'غوغل درايف',
     'workspace_widget.gmail': 'جيميل',
     'workspace_widget.not_connected': 'قم بربط حساب Google الخاص بك في الإعدادات لرؤية بيانات مساحة العمل الخاصة بك.',
 
     'share_preview.download': 'تحميل الصورة',
-    'share_preview.post_to_feed': 'النشر على موجز نيكسوس', // Changed
+    'share_preview.post_to_feed': 'النشر على موجز نيكسوس',
     'share_preview.ai_post': 'منشور اجتماعي مدعوم بالذكاء الاصطناعي',
     'share_preview.generate_post': 'إنشاء منشور',
 
-    'dev_toolkit.title': 'ملعب تعليمات النظام',
-    'dev_toolkit.desc': 'اختبر وحسّن السلوك الأساسي لعملاء AI الخاصين بك.',
-    'dev_toolkit.system_prompt': 'تعليمات النظام',
-    'dev_toolkit.user_prompt': 'تعليمات المستخدم',
+    'dev_toolkit.title': 'ملعب أوامر النظام',
+    'dev_toolkit.desc': 'اختبر وحسّن السلوك الأساسي لوكلاء AI الخاصين بك.',
+    'dev_toolkit.system_prompt': 'أوامر النظام',
+    'dev_toolkit.user_prompt': 'أوامر المستخدم',
     'dev_toolkit.run_test': 'تشغيل الاختبار',
     'dev_toolkit.response': 'استجابة AI',
 
     'growth_hub.title': 'برنامج مكافآت المبدعين',
     'growth_hub.creator_score': 'نقاط المبدع',
     'growth_hub.bounties': 'مكافآت المبدعين',
-    'growth_hub.bounties_desc': 'أكمل المهام لكسب النقاط وزيادة نقاطك.',
+    'growth_hub.bounties_desc': 'أكمل المهام لكسب الأرصدة وزيادة نقاطك.',
     'growth_hub.claim_reward': 'المطالبة بالمكافأة',
     'growth_hub.completed': 'مكتمل',
 
-    'nexus_feed.title': 'موجز نيكسوس', // Renamed from viral_feed.title
-    'nexus_feed.no_posts': 'الموجز هادئ... أنشئ منشورًا للبدء!', // New
-    'nexus_feed.create_post': 'إنشاء منشور', // New
-    'nexus_feed.comments_button': 'التعليقات ({count})', // New
-    'nexus_feed.like_button': 'إعجاب', // New
-    'nexus_feed.boost_button': 'تعزيز المنشور ({cost} نقاط)', // New
-    'nexus_feed.add_comment_placeholder': 'أضف تعليقًا...', // New
-    'nexus_feed.send_comment': 'إرسال', // New
-    'nexus_feed.no_comments': 'لا توجد تعليقات بعد. كن الأول!', // New
+    'nexus_feed.title': 'موجز نيكسوس',
+    'nexus_feed.no_posts': 'الموجز هادئ... أنشئ منشورًا للبدء!',
+    'nexus_feed.create_post': 'إنشاء منشور',
+    'nexus_feed.comments_button': 'التعليقات ({count})',
+    'nexus_feed.like_button': 'إعجاب',
+    'nexus_feed.boost_button': 'تعزيز المنشور ({cost} رصيد)',
+    'nexus_feed.add_comment_placeholder': 'أضف تعليقًا...',
+    'nexus_feed.send_comment': 'إرسال',
+    'nexus_feed.no_comments': 'لا توجد تعليقات بعد. كن الأول!',
 
-    'nexus_profile.title': 'ملف نيكسوس', // New
-    'nexus_profile.total_posts': 'إجمالي المنشورات', // New
-    'nexus_profile.total_likes': 'إجمالي الإعجابات', // New
-    'nexus_profile.avg_engagement': 'متوسط التفاعل', // New
-    'nexus_profile.edit_profile': 'تحرير الملف الشخصي', // New
-    'nexus_profile.user_posts': 'منشوراتي', // New
+    'nexus_profile.title': 'ملف نيكسوس',
+    'nexus_profile.total_posts': 'إجمالي المنشورات',
+    'nexus_profile.total_likes': 'إجمالي الإعجابات',
+    'nexus_profile.avg_engagement': 'متوسط التفاعل',
+    'nexus_profile.edit_profile': 'تحرير الملف الشخصي',
+    'nexus_profile.user_posts': 'منشوراتي',
     
     'resource_hub.title': 'مركز موارد المصدر المفتوح',
     'resource_hub.desc': 'قائمة منسقة من الأدوات والمكتبات للمطورين والمبدعين.',
@@ -568,11 +587,11 @@ export const translations = {
 
     'veridian_id.os_id': 'معرف نظام التشغيل',
     'veridian_id.join_date': 'تاريخ الانضمام',
-    'veridian_id.trust_score': 'نقاط الثقة',
+    'veridian_id.trust_score': 'درجة الثقة',
     'veridian_id.verified_by': 'تم التحقق بواسطة Amrikyy AI OS',
     'veridian_id.scan_to_verify': 'امسح للتحقق من الهوية',
 
-    'translate_hub.title': 'مركز الترجمة الذكي',
+    'translate_hub.title': 'مركز الترجمة بالذكاء الاصطناعي',
     'translate_hub.text_tab': 'النص',
     'translate_hub.conversation_tab': 'المحادثة',
     'translate_hub.source_language': 'لغة المصدر',
@@ -601,29 +620,43 @@ export const translations = {
     'nexus_go.current_location': 'باستخدام الموقع الحالي',
     'nexus_go.error_location': 'فشل الحصول على الموقع. يرجى تمكين خدمات الموقع.',
 
-    'travel_services.title': 'خدمات السفر بالذكاء الاصطناعي', // New
-    'travel_services.cleaning_tab': 'التنظيف', // New
-    'travel_services.food_delivery_tab': 'توصيل الطعام', // New
-    'travel_services.nightlife_tab': 'الحياة الليلية والفعاليات', // New
-    'travel_services.cleaning_input_placeholder': 'ما نوع خدمة التنظيف التي تحتاجها؟', // New
-    'travel_services.nightlife_input_placeholder': 'ما نوع الفعاليات التي تبحث عنها؟', // New
-    'travel_services.food_delivery_input_placeholder': 'ما الطعام الذي تشتهيه؟', // New
-    'travel_services.find_services': 'البحث عن خدمات', // New
-    'travel_services.find_events': 'البحث عن فعاليات', // New
-    'travel_services.find_food': 'البحث عن طعام', // New
-    'travel_services.no_cleaning_results': 'لم يتم العثور على خدمات تنظيف لطلبك.', // New
-    'travel_services.no_nightlife_results': 'لم يتم العثور على فعاليات لطلبك.', // New
-    'travel_services.no_food_results': 'لم يتم العثور على خيارات توصيل طعام لطلبك.', // New
-    'travel_services.loading_cleaning': 'جاري البحث عن خدمات التنظيف...', // New
-    'travel_services.loading_nightlife': 'جاري البحث عن الحياة الليلية والفعاليات...', // New
-    'travel_services.loading_food': 'جاري البحث عن خيارات توصيل الطعام...', // New
-    'travel_services.current_location': 'باستخدام الموقع الحالي', // New
-    'travel_services.error_location': 'فشل الحصول على الموقع. يرجى تمكين خدمات الموقع.', // New
+    'travel_services.title': 'خدمات السفر بالذكاء الاصطناعي',
+    'travel_services.cleaning_tab': 'التنظيف',
+    'travel_services.food_delivery_tab': 'توصيل الطعام',
+    'travel_services.nightlife_tab': 'الحياة الليلية والفعاليات',
+    'travel_services.cleaning_input_placeholder': 'ما نوع خدمة التنظيف التي تحتاجها؟',
+    'travel_services.nightlife_input_placeholder': 'ما نوع الفعاليات التي تبحث عنها؟',
+    'travel_services.food_delivery_input_placeholder': 'ما الطعام الذي تشتهيه؟',
+    'travel_services.find_services': 'البحث عن خدمات',
+    'travel_services.find_events': 'البحث عن فعاليات',
+    'travel_services.find_food': 'البحث عن طعام',
+    'travel_services.no_cleaning_results': 'لم يتم العثور على خدمات تنظيف لطلبك.',
+    'travel_services.no_nightlife_results': 'لم يتم العثور على فعاليات لطلبك.',
+    'travel_services.no_food_results': 'لم يتم العثور على خيارات توصيل طعام لطلبك.',
+    'travel_services.loading_cleaning': 'جاري البحث عن خدمات التنظيف...',
+    'travel_services.loading_nightlife': 'جاري البحث عن الحياة الليلية والفعاليات...',
+    'travel_services.loading_food': 'جاري البحث عن خيارات توصيل الطعام...',
+    'travel_services.current_location': 'باستخدام الموقع الحالي',
+    'travel_services.error_location': 'فشل الحصول على الموقع. يرجى تمكين خدمات الموقع.',
 
-    'loading_screen.welcome_message': 'مرحبًا بك في نظام التشغيل Amrikyy AI. تنتظرك تجربتك الأصلية في الذكاء الاصطناعي...', // New
-    'loading_screen.init_ai_core': 'تهيئة قلب الذكاء الاصطناعي...',
+    'travel_agent.flights_tab': 'الرحلات الجوية', // New
+    'travel_agent.flight_input_placeholder': 'مثال: لندن، المملكة المتحدة', // New
+    'travel_agent.find_flights': 'البحث عن رحلات', // New
+    'travel_agent.no_flights_results': 'لم يتم العثور على رحلات لعملية البحث الخاصة بك.', // New
+    'travel_agent.loading_flights': 'جاري البحث عن رحلات...', // New
+    'travel_agent.round_trip': 'ذهاب وعودة', // New
+    'travel_agent.one_way': 'اتجاه واحد', // New
+    'travel_agent.passengers': 'المسافرون', // New
+    'travel_agent.cabin_class': 'درجة المقصورة', // New
+    'travel_agent.economy': 'اقتصادية', // New
+    'travel_agent.premium_economy': 'اقتصادية ممتازة', // New
+    'travel_agent.business': 'درجة رجال الأعمال', // New
+    'travel_agent.first_class': 'الدرجة الأولى', // New
+
+    'loading_screen.welcome_message': 'مرحبًا بك في نظام التشغيل Amrikyy AI. تنتظرك تجربتك الأصلية في الذكاء الاصطناعي...',
+    'loading_screen.init_ai_core': 'تهيئة نواة الذكاء الاصطناعي...',
     'loading_screen.loading_ui_components': 'تحميل مكونات واجهة المستخدم...',
-    'loading_screen.booting_agents': 'تشغيل العملاء...',
+    'loading_screen.booting_agents': 'تشغيل الوكلاء...',
     'loading_screen.fetching_user_data': 'جلب بيانات المستخدم...',
     'loading_screen.establishing_network': 'إنشاء شبكة آمنة...',
     'loading_screen.syncing_preferences': 'مزامنة التفضيلات...',
@@ -632,10 +665,29 @@ export const translations = {
   },
 };
 
+/**
+ * Defines the supported languages for the application.
+ */
 export type Language = keyof typeof translations;
+/**
+ * Defines a union type for all possible translation keys in English and Arabic.
+ * This ensures type safety when accessing translation strings.
+ */
 export type TranslationKey = keyof typeof translations['en'] | keyof typeof translations['ar'];
+/**
+ * Defines the structure for placeholder objects used in translations.
+ * Keys are placeholder names (e.g., 'userName'), and values can be strings or numbers.
+ */
 export type TranslationPlaceholder = Record<string, string | number>;
 
+/**
+ * Returns a translator function for a given language.
+ * The translator function takes a `TranslationKey` and optional `TranslationPlaceholder`
+ * and returns the translated string. It falls back to English if the key is not found
+ * in the current language, then to the key itself.
+ * @param {Language} lang - The target language for translation.
+ * @returns {(key: TranslationKey, placeholders?: TranslationPlaceholder) => string} The translator function.
+ */
 export const getTranslator = (lang: Language) => {
   const currentTranslations = translations[lang];
   return (key: TranslationKey, placeholders?: TranslationPlaceholder): string => {

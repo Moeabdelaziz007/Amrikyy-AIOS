@@ -3,26 +3,21 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { FinanceIcon, SparklesIcon, SendIcon } from '../Icons';
 import { marketIndices, defaultWatchlist, MarketIndex, WatchlistItem } from '../../data/finance';
 import { getFinancialNews, getFinancialAnalysis } from '../../services/geminiAdvancedService';
-import { generateResponse } from '../../services/geminiService';
-import { Message } from '../../types';
+// FIX: Imported FinancialNews and FinancialAnalysis
+import { Message, FinancialNews, FinancialAnalysis } from '../../types';
 import { Content } from '@google/genai';
+import { generateResponse } from '../../services/geminiService';
 
+/**
+ * Defines the available tabs within the Atlas Finance application.
+ */
 type Tab = 'dashboard' | 'analysis' | 'chat';
 
-interface FinancialNews {
-    title: string;
-    source: string;
-    url: string;
-}
-
-interface FinancialAnalysis {
-    summary: string;
-    bullCase: string;
-    bearCase: string;
-    keyMetrics: { name: string; value: string }[];
-    recentNews: string;
-}
-
+/**
+ * The AtlasApp component provides a comprehensive financial dashboard,
+ * market analysis tools, and an AI chat assistant for financial queries.
+ * @returns {JSX.Element} The AtlasApp component.
+ */
 const AtlasApp: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('dashboard');
 
@@ -48,6 +43,15 @@ const AtlasApp: React.FC = () => {
     );
 }
 
+/**
+ * Reusable button component for switching between tabs.
+ * @param {object} props - The component props.
+ * @param {Tab} props.id - The unique ID of the tab.
+ * @param {Tab} props.activeTab - The currently active tab.
+ * @param {(tab: Tab) => void} props.setActiveTab - Callback to set the active tab.
+ * @param {string} props.label - The display label for the tab button.
+ * @returns {JSX.Element} The tab button component.
+ */
 const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => void, label: string}> = ({ id, activeTab, setActiveTab, label }) => (
     <button
         onClick={() => setActiveTab(id)}
@@ -57,6 +61,12 @@ const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => 
     </button>
 );
 
+/**
+ * The DashboardView component displays an overview of market indices,
+ * a personal watchlist, and recent financial news.
+ * It simulates real-time data updates.
+ * @returns {JSX.Element} The DashboardView component.
+ */
 const DashboardView: React.FC = () => {
     const [indices, setIndices] = useState<MarketIndex[]>(marketIndices);
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>(defaultWatchlist);
@@ -64,13 +74,14 @@ const DashboardView: React.FC = () => {
     const [isLoadingNews, setIsLoadingNews] = useState(true);
 
     useEffect(() => {
+        // Fetch financial news on component mount
         const fetchNews = async () => {
             try {
                 const fetchedNews = await getFinancialNews();
                 setNews(fetchedNews);
             } catch (error) {
                 console.error(error);
-                setNews([]);
+                setNews([]); // Clear news on error
             } finally {
                 setIsLoadingNews(false);
             }
@@ -79,10 +90,11 @@ const DashboardView: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        // Simulate real-time updates for market indices and watchlist items
         const interval = setInterval(() => {
             setIndices(prev => prev.map(index => ({...index, value: index.value * (1 + (Math.random() - 0.5) * 0.01), change: (Math.random() - 0.5) * 2 })));
             setWatchlist(prev => prev.map(item => ({...item, price: item.price * (1 + (Math.random() - 0.5) * 0.02), change: (Math.random() - 0.5) * 5 })));
-        }, 5000);
+        }, 5000); // Update every 5 seconds
         return () => clearInterval(interval);
     }, []);
     
@@ -131,12 +143,20 @@ const DashboardView: React.FC = () => {
     );
 };
 
+/**
+ * The AnalysisView component allows users to search for financial analysis
+ * of a specific stock or crypto ticker using an AI service.
+ * @returns {JSX.Element} The AnalysisView component.
+ */
 const AnalysisView: React.FC = () => {
     const [ticker, setTicker] = useState('');
     const [analysis, setAnalysis] = useState<FinancialAnalysis | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Handles initiating the financial analysis request.
+     */
     const handleAnalysis = async () => {
         if (!ticker || isLoading) return;
         setIsLoading(true);
@@ -199,6 +219,11 @@ const AnalysisView: React.FC = () => {
     );
 };
 
+/**
+ * The AIChatView component provides a chat interface for interacting with the Atlas AI.
+ * Users can ask financial questions and receive AI-generated responses, with a disclaimer.
+ * @returns {JSX.Element} The AIChatView component.
+ */
 const AIChatView: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
         { id: '1', sender: 'ai', text: `I am Atlas, your AI financial analyst. Ask me anything about markets, investment strategies, or specific assets.` }
@@ -206,6 +231,9 @@ const AIChatView: React.FC = () => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    /**
+     * Handles sending a user message to the Atlas AI and displaying the response.
+     */
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
         const userMessage: Message = { id: `user-${Date.now()}`, sender: 'user', text: input };

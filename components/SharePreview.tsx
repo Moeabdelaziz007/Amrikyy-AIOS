@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SharedContent, SocialPost } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-// FIX: Replaced non-existent `generateSocialMediaPost` with a mock function.
+// FIX: Replaced non-existent `generateSocialMediaPost` with an import from the correct service.
 import { generateSocialMediaPost } from '../services/geminiAdvancedService';
 import { SparklesIcon } from './Icons';
 

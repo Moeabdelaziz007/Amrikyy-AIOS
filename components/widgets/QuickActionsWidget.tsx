@@ -2,17 +2,33 @@ import React from 'react';
 import { AppID } from '../../types';
 import { CreatorStudioIcon, TripIcon, ImageIcon, WorkflowIcon } from '../Icons';
 
+/**
+ * Props for the QuickActionsWidget component.
+ */
 interface QuickActionsWidgetProps {
+  /**
+   * Callback function to open an application by its ID when an action button is clicked.
+   * @param {AppID} appId - The ID of the application to open.
+   */
   onOpenApp: (appId: AppID) => void;
 }
 
+/**
+ * The QuickActionsWidget displays a grid of commonly used application shortcuts.
+ * Users can click these buttons to quickly launch a specific application or initiate a task.
+ * @param {QuickActionsWidgetProps} props - The component props.
+ * @returns {JSX.Element} The QuickActionsWidget component.
+ */
 const QuickActionsWidget: React.FC<QuickActionsWidgetProps> = ({ onOpenApp }) => {
+  /**
+   * Defines the list of quick actions, including their ID, label, icon, and accent color.
+   */
   const actions = [
     { id: 'creatorStudio', label: 'New Project', icon: CreatorStudioIcon, color: 'text-amber-400' },
     { id: 'travelAgent', label: 'Plan a Trip', icon: TripIcon, color: 'text-cyan-400' },
     { id: 'image', label: 'Generate Image', icon: ImageIcon, color: 'text-pink-400' },
     { id: 'workflow', label: 'Start Workflow', icon: WorkflowIcon, color: 'text-purple-400' },
-  ] as const;
+  ] as const; // `as const` ensures `id` is treated as specific AppID literals
 
   return (
     <div>

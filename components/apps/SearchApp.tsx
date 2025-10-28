@@ -3,6 +3,11 @@ import { Message } from '../../types';
 import { SearchIcon, SparklesIcon } from '../Icons';
 import { groundedSearch } from '../../services/geminiAdvancedService';
 
+/**
+ * The SearchApp component provides an AI-powered search interface.
+ * It uses Google Search for grounding and can optionally use a "Thinking Mode" for complex queries.
+ * @returns {JSX.Element} The SearchApp component.
+ */
 const SearchApp: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -10,12 +15,19 @@ const SearchApp: React.FC = () => {
     const [thinkingMode, setThinkingMode] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
   
+    /**
+     * Scrolls the chat-like message area to the bottom.
+     */
     const scrollToBottom = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
   
     useEffect(scrollToBottom, [messages]);
   
+    /**
+     * Handles sending a search query to the AI and displaying the results,
+     * including potential sources from Google Search.
+     */
     const handleSend = async () => {
         if (input.trim() === '' || isLoading) return;
     

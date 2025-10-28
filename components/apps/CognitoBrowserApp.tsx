@@ -72,7 +72,7 @@ const CognitoBrowserApp: React.FC<CognitoBrowserAppProps> = ({ onOpenWindow }) =
                 <header className="flex-shrink-0 p-2 border-b border-border-color flex items-center gap-2">
                      <form onSubmit={handleInputSubmit} className="flex-grow">
                         <div className="relative">
-                            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                             <input
                                 type="text"
                                 value={input}

@@ -1,23 +1,11 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { WindowStyle } from '../types';
 
-interface WindowProps {
-  id: number;
-  children: React.ReactNode;
-  title: string;
-  initialX: number;
-  initialY: number;
-  initialWidth: number;
-  initialHeight: number;
-  zIndex: number;
-  isMinimized: boolean;
-  isActive: boolean;
-  windowStyle: WindowStyle;
-  onClose: () => void;
-  onMinimize: () => void;
-  onFocus: () => void;
-}
-
+/**
+ * A custom React hook to detect if the screen matches a given media query.
+ * @param {string} query - The media query string (e.g., '(max-width: 768px)').
+ * @returns {boolean} True if the media query matches, false otherwise.
+ */
 const useMediaQuery = (query: string) => {
     const [matches, setMatches] = useState(false);
     useEffect(() => {
@@ -32,8 +20,26 @@ const useMediaQuery = (query: string) => {
     return matches;
 };
 
+/**
+ * Props for the WindowControls component.
+ */
+interface WindowControlsProps {
+  /** Callback function to close the window. */
+  onClose: () => void;
+  /** Callback function to minimize the window. */
+  onMinimize: () => void;
+  /** The current visual style of the window. */
+  style: WindowStyle;
+  /** The title of the window, used for ARIA labels. */
+  title: string;
+}
 
-const WindowControls: React.FC<{ onClose: () => void; onMinimize: () => void; style: WindowStyle; title: string; }> = ({ onClose, onMinimize, style, title }) => {
+/**
+ * Renders the minimize, maximize, and close buttons for a window.
+ * @param {WindowControlsProps} props - The component props.
+ * @returns {JSX.Element} The window control buttons.
+ */
+const WindowControls: React.FC<WindowControlsProps> = ({ onClose, onMinimize, style, title }) => {
     return (
         <div className="flex items-center space-x-2">
             <button onClick={onClose} aria-label={`Close ${title} window`} className="window-control size-3 rounded-full bg-red-400/80 hover:bg-red-400" />
@@ -43,6 +49,45 @@ const WindowControls: React.FC<{ onClose: () => void; onMinimize: () => void; st
     );
 };
 
+/**
+ * Props for the WindowComponent.
+ */
+interface WindowProps {
+  /** The unique identifier for the window. */
+  id: number;
+  /** The content to be rendered inside the window. */
+  children: React.ReactNode;
+  /** The title displayed in the window's title bar. */
+  title: string;
+  /** The initial X-coordinate of the window. */
+  initialX: number;
+  /** The initial Y-coordinate of the window. */
+  initialY: number;
+  /** The initial width of the window. */
+  initialWidth: number;
+  /** The initial height of the window. */
+  initialHeight: number;
+  /** The z-index of the window, determining its stacking order. */
+  zIndex: number;
+  /** Indicates if the window is currently minimized. */
+  isMinimized: boolean;
+  /** Indicates if the window is currently active (focused). */
+  isActive: boolean;
+  /** The visual style of the window. */
+  windowStyle: WindowStyle;
+  /** Callback function to handle closing the window. */
+  onClose: () => void;
+  /** Callback function to handle minimizing the window. */
+  onMinimize: () => void;
+  /** Callback function to handle focusing the window. */
+  onFocus: () => void;
+}
+
+/**
+ * A draggable, resizable, and closable window component for the OS.
+ * @param {WindowProps} props - The component props.
+ * @returns {JSX.Element | null} The rendered window or null if minimized.
+ */
 const WindowComponent: React.FC<WindowProps> = ({ children, title, id, initialX, initialY, initialWidth, initialHeight, zIndex, isMinimized, isActive, windowStyle, onClose, onMinimize, onFocus }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [position, setPosition] = useState({ x: initialX, y: initialY });
@@ -57,6 +102,10 @@ const WindowComponent: React.FC<WindowProps> = ({ children, title, id, initialX,
     }
   }, [isActive]);
   
+  /**
+   * Handles the mouse down event for window dragging.
+   * @param {React.MouseEvent<HTMLDivElement>} e - The mouse event.
+   */
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     // Only allow dragging on desktop, not mobile
     if ((e.target as HTMLElement).closest('.window-control') || isMobile) return;
@@ -72,6 +121,10 @@ const WindowComponent: React.FC<WindowProps> = ({ children, title, id, initialX,
     e.preventDefault();
   }, [onFocus, isMobile]);
 
+  /**
+   * Handles the mouse move event during dragging.
+   * @param {MouseEvent} e - The mouse event.
+   */
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging && !isMobile) {
       setPosition({
@@ -81,6 +134,9 @@ const WindowComponent: React.FC<WindowProps> = ({ children, title, id, initialX,
     }
   }, [isDragging, isMobile]);
 
+  /**
+   * Handles the mouse up event, ending dragging.
+   */
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
@@ -100,6 +156,9 @@ const WindowComponent: React.FC<WindowProps> = ({ children, title, id, initialX,
     return null;
   }
 
+  /**
+   * Configuration for different window styles, defining their CSS classes.
+   */
   const styleConfig = {
       cyberpunk: {
           container: `glass-effect rounded-xl transition-all duration-300 ${isActive ? 'shadow-2xl ring-2 ring-inset ring-[var(--accent-color)]' : ''}`,

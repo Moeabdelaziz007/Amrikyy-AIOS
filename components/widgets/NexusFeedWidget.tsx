@@ -3,10 +3,20 @@ import { NexusPost } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { NexusChatIcon } from '../Icons'; // Use NexusChatIcon
 
+/**
+ * Props for the NexusFeedWidget component.
+ */
 interface NexusFeedWidgetProps {
+    /** An array of Nexus social posts to display. */
     posts: NexusPost[];
 }
 
+/**
+ * The NexusFeedWidget displays a scrollable feed of social posts from the Nexus platform.
+ * It provides a quick glance at community activity.
+ * @param {NexusFeedWidgetProps} props - The component props.
+ * @returns {JSX.Element} The NexusFeedWidget component.
+ */
 const NexusFeedWidget: React.FC<NexusFeedWidgetProps> = ({ posts }) => {
     const { t } = useLanguage();
 

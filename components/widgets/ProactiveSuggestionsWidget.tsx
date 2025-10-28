@@ -5,15 +5,33 @@ import { AppID } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { LightbulbIcon } from '../Icons';
 
+/**
+ * Props for the ProactiveSuggestionsWidget component.
+ */
 interface ProactiveSuggestionsWidgetProps {
+    /**
+     * Callback function to open an application by its ID when a suggestion is clicked.
+     * @param {AppID} appId - The ID of the application to open.
+     */
     onOpenApp: (appId: AppID) => void;
 }
 
+/**
+ * Defines the structure for a single suggestion.
+ */
 interface Suggestion {
+    /** The text content of the suggestion. */
     text: string;
+    /** Optional AppID to open if the suggestion is actionable. */
     actionAppId?: AppID;
 }
 
+/**
+ * The ProactiveSuggestionsWidget displays AI-generated suggestions based on recent user behavior.
+ * It uses the `generateProactiveSuggestion` service to get context-aware recommendations.
+ * @param {ProactiveSuggestionsWidgetProps} props - The component props.
+ * @returns {JSX.Element} The ProactiveSuggestionsWidget component.
+ */
 const ProactiveSuggestionsWidget: React.FC<ProactiveSuggestionsWidgetProps> = ({ onOpenApp }) => {
     const { t } = useLanguage();
     const { actions } = useUserBehavior();
@@ -22,11 +40,15 @@ const ProactiveSuggestionsWidget: React.FC<ProactiveSuggestionsWidgetProps> = ({
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        /**
+         * Fetches proactive suggestions from the AI service.
+         */
         const getSuggestions = async () => {
             if (actions.length === 0) return;
             setIsLoading(true);
             try {
-                const result = await generateProactiveSuggestion(actions.slice(0, 3)); // Use last 3 actions for context
+                // Use last 3 actions for context to generate suggestions
+                const result = await generateProactiveSuggestion(actions.slice(0, 3));
                 setTitle(result.title);
                 setSuggestions(result.suggestions);
             } catch (error) {
@@ -36,10 +58,11 @@ const ProactiveSuggestionsWidget: React.FC<ProactiveSuggestionsWidgetProps> = ({
             }
         };
 
-        const debounce = setTimeout(getSuggestions, 1000); // Debounce to avoid rapid firing
+        // Debounce the suggestion fetching to avoid rapid API calls on frequent actions
+        const debounce = setTimeout(getSuggestions, 1000);
         return () => clearTimeout(debounce);
 
-    }, [actions]);
+    }, [actions, t]);
 
     return (
         <div>

@@ -2,15 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SparklesIcon } from './Icons';
 import { CurrentWeather, WeatherData, ForecastDay } from '../types';
-// FIX: Replaced non-existent `getAiWeatherReport` with a mock function.
+// FIX: Replaced non-existent `getAiWeatherReport` with an import from the correct service.
 import { getAiWeatherReport } from '../services/geminiAdvancedService';
 
+/**
+ * Props for the WeatherDetailModal component.
+ */
 interface WeatherDetailModalProps {
+    /** Determines if the modal is currently open and visible. */
     isOpen: boolean;
+    /** Callback function to close the modal. */
     onClose: () => void;
+    /** The current weather data to display in the modal. */
     weatherData: CurrentWeather;
 }
 
+/**
+ * Mock forecast data to supplement the current weather data in the modal.
+ */
 const mockForecast: ForecastDay[] = [
     { day: 'Tue', high: 26, low: 19, icon: 'partly_cloudy_day', condition: 'Partly Cloudy' },
     { day: 'Wed', high: 24, low: 17, icon: 'rainy', condition: 'Rainy' },
@@ -19,13 +28,25 @@ const mockForecast: ForecastDay[] = [
     { day: 'Sat', high: 26, low: 19, icon: 'cloudy', condition: 'Cloudy' },
 ];
 
+/**
+ * The WeatherDetailModal component displays detailed current weather information
+ * and a 5-day forecast. It also fetches and presents an AI-generated summary of the weather.
+ * @param {WeatherDetailModalProps} props - The component props.
+ * @returns {JSX.Element | null} The rendered weather detail modal or `null` if not open.
+ */
 const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({ isOpen, onClose, weatherData }) => {
     const { t } = useLanguage();
     const [aiSummary, setAiSummary] = useState('');
     const [isLoadingSummary, setIsLoadingSummary] = useState(true);
 
+    /**
+     * Effect hook to fetch an AI-generated weather summary when the modal opens or weather data changes.
+     */
     useEffect(() => {
         if (!isOpen) return;
+        /**
+         * Fetches the AI-generated weather report.
+         */
         const fetchSummary = async () => {
             setIsLoadingSummary(true);
             try {
@@ -57,6 +78,7 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({ isOpen, onClose
             role="dialog"
             aria-modal="true"
             aria-labelledby="weather-modal-title"
+            aria-describedby="weather-ai-summary"
         >
             <div
                 className="w-full max-w-2xl bg-bg-secondary rounded-2xl border border-border-color shadow-2xl flex flex-col animate-slide-up text-white"
@@ -65,46 +87,49 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({ isOpen, onClose
                 <header className="p-4 border-b border-border-color flex items-center justify-between">
                     <h2 id="weather-modal-title" className="font-display text-2xl font-bold">Weather for {weatherData.location}</h2>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-white/10" aria-label="Close weather details">
-                        <span className="material-symbols-outlined text-xl">close</span>
+                        <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
                     </button>
                 </header>
                 <main className="p-6 space-y-6 overflow-y-auto">
                     {/* Current Weather Section */}
-                    <div className="bg-black/20 p-6 rounded-lg border border-border-color flex items-center gap-6">
-                        <span className="material-symbols-outlined text-8xl text-yellow-300">{weatherData.icon}</span>
+                    <div className="bg-black/20 p-6 rounded-lg border border-border-color flex items-center gap-6" aria-label="Current Weather">
+                        <span className="material-symbols-outlined text-8xl text-yellow-300" aria-hidden="true">{weatherData.icon}</span>
                         <div>
                             <p className="text-text-secondary">{weatherData.location}</p>
-                            <p className="font-display text-6xl font-bold my-1">{weatherData.temp}°</p>
+                            <p className="font-display text-6xl font-bold my-1" aria-label={`Temperature: ${weatherData.temp} degrees Celsius`}>{weatherData.temp}°</p>
                             <p className="text-xl font-semibold">{weatherData.condition}</p>
                             <div className="flex items-center gap-4 text-sm mt-2">
-                                <span>H: {weatherData.high}°</span>
-                                <span>L: {weatherData.low}°</span>
+                                <span aria-label={`High temperature: ${weatherData.high} degrees Celsius`}>H: {weatherData.high}°</span>
+                                <span aria-label={`Low temperature: ${weatherData.low} degrees Celsius`}>L: {weatherData.low}°</span>
                             </div>
                         </div>
                     </div>
 
                     {/* AI Summary Section */}
                     <div className="bg-black/20 p-4 rounded-lg border border-border-color">
-                        <h3 className="font-bold text-sm mb-2 flex items-center gap-2"><SparklesIcon className="text-accent"/> AI Summary</h3>
+                        <h3 className="font-bold text-sm mb-2 flex items-center gap-2" aria-label="AI Summary"><SparklesIcon className="text-accent" aria-hidden="true"/> AI Summary</h3>
                         {isLoadingSummary ? (
-                            <div className="text-xs text-text-muted">Generating summary...</div>
+                            <div className="text-xs text-text-muted" role="progressbar" aria-valuenow={0} aria-valuetext="Generating summary...">Generating summary...</div>
                         ) : (
-                            <p className="text-xs text-text-secondary">{aiSummary}</p>
+                            <p id="weather-ai-summary" className="text-xs text-text-secondary">{aiSummary}</p>
                         )}
                     </div>
 
                     {/* Forecast Section */}
                     <div className="bg-black/20 p-4 rounded-lg border border-border-color">
                         <h3 className="font-bold text-sm mb-4">5-Day Forecast</h3>
-                        <div className="flex justify-between">
-                            {mockForecast.map(day => (
-                                <div key={day.day} className="flex flex-col items-center gap-2 text-center">
-                                    <p className="font-semibold text-sm">{day.day}</p>
-                                    <span className="material-symbols-outlined text-3xl text-yellow-300">{day.icon}</span>
-                                    <p className="text-sm font-semibold">{day.high}°</p>
-                                    <p className="text-xs text-text-muted">{day.low}°</p>
-                                </div>
-                            ))}
+                        <div className="flex justify-between" role="table" aria-label="5-Day Weather Forecast">
+                            <div role="rowgroup">
+                                <div role="row" className="sr-only"><span role="columnheader">Day</span><span role="columnheader">High</span><span role="columnheader">Low</span><span role="columnheader">Condition</span></div>
+                                {mockForecast.map(day => (
+                                    <div key={day.day} role="row" className="flex flex-col items-center gap-2 text-center">
+                                        <p role="cell" className="font-semibold text-sm">{day.day}</p>
+                                        <span role="img" aria-label={day.condition} className="material-symbols-outlined text-3xl text-yellow-300">{day.icon}</span>
+                                        <p role="cell" className="text-sm font-semibold">{day.high}°</p>
+                                        <p role="cell" className="text-xs text-text-muted">{day.low}°</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </main>

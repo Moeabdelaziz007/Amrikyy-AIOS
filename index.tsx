@@ -7,6 +7,10 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { UserBehaviorProvider } from './contexts/UserBehaviorContext';
 import { GoogleAuthProvider } from './contexts/GoogleAuthContext';
 
+/**
+ * The main entry point of the React application.
+ * It initializes the root React DOM and renders the App component wrapped in various context providers.
+ */
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");

@@ -2,10 +2,24 @@ import React from 'react';
 import { WorkflowIcon } from './Icons';
 import { AppID } from '../types';
 
+/**
+ * Props for the WorkflowDashboardWidget component.
+ */
 interface WorkflowDashboardWidgetProps {
+    /**
+     * Callback function to open an application by its ID.
+     * @param {AppID} appId - The ID of the application to open.
+     */
     onOpenApp: (appId: AppID) => void;
 }
 
+/**
+ * The WorkflowDashboardWidget displays a summary of active workflows
+ * and provides a quick action button to create a new workflow.
+ * It simulates an ongoing workflow for demonstration purposes.
+ * @param {WorkflowDashboardWidgetProps} props - The component props.
+ * @returns {JSX.Element} The WorkflowDashboardWidget component.
+ */
 const WorkflowDashboardWidget: React.FC<WorkflowDashboardWidgetProps> = ({ onOpenApp }) => {
     return (
         <div>

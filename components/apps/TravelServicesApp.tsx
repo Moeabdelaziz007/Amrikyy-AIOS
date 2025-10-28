@@ -4,14 +4,32 @@ import { TravelServicesIcon, SparklesIcon, SendIcon } from '../Icons';
 import { findCleaningServices, findNightlifeEvents, findDeliveryOptions as fetchDeliveryOptions } from '../../services/geminiAdvancedService';
 import { CleaningService, NightlifeEvent, FastFoodRestaurant, UserAccount } from '../../types';
 
+/**
+ * Defines the available tabs within the Travel Services application.
+ */
 type Tab = 'cleaning' | 'food_delivery' | 'nightlife';
 
+/**
+ * Props for the TravelServicesApp component.
+ */
 interface TravelServicesAppProps {
+    /**
+     * Callback function to open an application by its ID.
+     * @param {string} appId - The ID of the application to open.
+     */
     onOpenApp: (appId: string) => void;
+    /** The current user account details. */
     userAccount: UserAccount;
 }
 
-const TravelServicesApp: React.FC<TravelServicesAppProps> = ({ onOpenApp, userAccount }) => {
+/**
+ * The TravelServicesApp component provides AI-powered services to enhance travel experiences,
+ * including finding cleaning services, food delivery, and nightlife events.
+ * It uses geolocation and integrates with various AI services for recommendations.
+ * @param {TravelServicesAppProps} props - The component props.
+ * @returns {JSX.Element} The TravelServicesApp component.
+ */
+export const TravelServicesApp: React.FC<TravelServicesAppProps> = ({ onOpenApp, userAccount }) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<Tab>('cleaning');
 
@@ -37,6 +55,15 @@ const TravelServicesApp: React.FC<TravelServicesAppProps> = ({ onOpenApp, userAc
     );
 };
 
+/**
+ * Reusable button component for switching between tabs.
+ * @param {object} props - The component props.
+ * @param {Tab} props.id - The unique ID of the tab.
+ * @param {Tab} props.activeTab - The currently active tab.
+ * @param {(tab: Tab) => void} props.setActiveTab - Callback to set the active tab.
+ * @param {string} props.label - The display label for the tab button.
+ * @returns {JSX.Element} The tab button component.
+ */
 const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => void, label: string}> = ({ id, activeTab, setActiveTab, label }) => (
     <button
         onClick={() => setActiveTab(id)}
@@ -46,11 +73,18 @@ const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => 
     </button>
 );
 
+/**
+ * Defines the state structure for geolocation coordinates.
+ */
 interface GeolocationState {
     latitude: number;
     longitude: number;
 }
 
+/**
+ * Custom hook to fetch and manage the user's current geolocation.
+ * @returns {object} An object containing the current `location` (GeolocationState | null) and any `error` (string | null).
+ */
 const useGeolocation = () => {
     const { t } = useLanguage();
     const [location, setLocation] = useState<GeolocationState | null>(null);
@@ -76,18 +110,27 @@ const useGeolocation = () => {
     return { location, error };
 };
 
+/**
+ * The CleaningView component provides an interface for finding cleaning services.
+ * It uses geolocation and an AI service to recommend suitable services.
+ * @returns {JSX.Element} The CleaningView component.
+ */
 const CleaningView: React.FC = () => {
     const { t } = useLanguage();
     const [query, setQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { location, error: locationError } = useGeolocation();
     const [results, setResults] = useState<{aiSummary: string, services: CleaningService[] } | null>(null);
+    const [error, setError] = useState<string | null>(null); // Local error state for API calls
 
+    /**
+     * Handles initiating the search for cleaning services.
+     */
     const handleFindServices = async () => {
         if (!query || isLoading || !location) return;
         setIsLoading(true);
         setResults(null);
-        setError(null);
+        setError(null); // Clear previous API-specific errors
 
         try {
             const data = await findCleaningServices(query, location);
@@ -100,8 +143,6 @@ const CleaningView: React.FC = () => {
         }
     };
 
-    const [error, setError] = useState<string | null>(null); // Local error state for API calls
-
     return (
         <div className="p-4 sm:p-6 flex flex-col gap-6 h-full">
             <div className="flex-grow w-full max-w-2xl mx-auto space-y-4">
@@ -109,16 +150,16 @@ const CleaningView: React.FC = () => {
                     <TravelServicesIcon className="w-16 h-16 mx-auto mb-2 text-teal-400" />
                     <h2 className="text-xl font-bold font-display">{t('travel_services.cleaning_tab')}</h2>
                     <p className="text-text-muted">{t('travel_services.current_location')}</p>
-                    {(locationError || error) && <p className="text-sm text-red-400 mt-2">{locationError || error}</p>}
+                    {(locationError || error) && <p className="text-sm text-red-400 mt-2" role="alert">{locationError || error}</p>}
                 </div>
                 
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 text-teal-400">
-                        <SparklesIcon className="w-8 h-8 animate-pulse" />
+                        <SparklesIcon className="w-8 h-8 animate-pulse" role="status"><span className="sr-only">Loading...</span></SparklesIcon>
                         <p>{t('travel_services.loading_cleaning')}</p>
                     </div>
                 ) : results ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4" aria-live="polite">
                         <div className="bg-black/20 p-4 rounded-lg border border-border-color">
                             <h3 className="font-bold text-sm mb-2 flex items-center gap-2"><SparklesIcon className="w-4 h-4 text-accent"/> {t('nexus_go.delivery_ai_summary')}</h3>
                             <p className="text-xs text-text-secondary">{results.aiSummary}</p>
@@ -132,7 +173,7 @@ const CleaningView: React.FC = () => {
                                     </div>
                                     <p className="text-xs text-text-muted">{service.type} &bull; {service.priceRange}</p>
                                     <div className="flex items-center gap-1 text-xs text-yellow-400 mt-1">
-                                        <span className="material-symbols-outlined text-sm">star</span>
+                                        <span className="material-symbols-outlined text-sm" aria-hidden="true">star</span>
                                         <span>{service.rating}</span>
                                         <span className="text-text-muted ml-2">Availability: {service.availability}</span>
                                     </div>
@@ -144,7 +185,7 @@ const CleaningView: React.FC = () => {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-text-muted">
-                        <TravelServicesIcon className="w-20 h-20 mb-4 opacity-30" />
+                        <TravelServicesIcon className="w-20 h-20 mb-4 opacity-30" aria-hidden="true" />
                         <p className="text-xl font-bold">{t('travel_services.no_cleaning_results')}</p>
                     </div>
                 )}
@@ -160,11 +201,13 @@ const CleaningView: React.FC = () => {
                         placeholder={t('travel_services.cleaning_input_placeholder')}
                         disabled={isLoading || !location}
                         className="flex-grow h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-text-primary focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                        aria-label={t('travel_services.cleaning_input_placeholder')}
                     />
                     <button 
                         onClick={handleFindServices}
                         disabled={isLoading || !query || !location}
                         className="h-12 px-6 font-bold rounded-lg bg-gradient-to-r from-teal-500 to-green-500 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={t('travel_services.find_services')}
                     >
                         {t('travel_services.find_services')}
                     </button>
@@ -174,13 +217,22 @@ const CleaningView: React.FC = () => {
     );
 };
 
+/**
+ * The FoodDeliveryView component provides an interface for finding food delivery options.
+ * It uses geolocation and an AI service to recommend fast food restaurants.
+ * @returns {JSX.Element} The FoodDeliveryView component.
+ */
 const FoodDeliveryView: React.FC = () => {
     const { t } = useLanguage();
     const [query, setQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { location, error: locationError } = useGeolocation();
     const [results, setResults] = useState<{aiSummary: string, options: FastFoodRestaurant[] } | null>(null);
+    const [error, setError] = useState<string | null>(null); // Local error state for API calls
 
+    /**
+     * Handles initiating the search for food delivery options.
+     */
     const handleFindFoodOptions = async () => {
         if (!query || isLoading || !location) return;
         setIsLoading(true);
@@ -198,8 +250,6 @@ const FoodDeliveryView: React.FC = () => {
         }
     };
 
-    const [error, setError] = useState<string | null>(null); // Local error state for API calls
-
     return (
         <div className="p-4 sm:p-6 flex flex-col gap-6 h-full">
             <div className="flex-grow w-full max-w-2xl mx-auto space-y-4">
@@ -207,16 +257,16 @@ const FoodDeliveryView: React.FC = () => {
                     <TravelServicesIcon className="w-16 h-16 mx-auto mb-2 text-orange-400" />
                     <h2 className="text-xl font-bold font-display">{t('travel_services.food_delivery_tab')}</h2>
                     <p className="text-text-muted">{t('travel_services.current_location')}</p>
-                    {(locationError || error) && <p className="text-sm text-red-400 mt-2">{locationError || error}</p>}
+                    {(locationError || error) && <p className="text-sm text-red-400 mt-2" role="alert">{locationError || error}</p>}
                 </div>
                 
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 text-orange-400">
-                        <SparklesIcon className="w-8 h-8 animate-pulse" />
+                        <SparklesIcon className="w-8 h-8 animate-pulse" role="status"><span className="sr-only">Loading...</span></SparklesIcon>
                         <p>{t('travel_services.loading_food')}</p>
                     </div>
                 ) : results ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4" aria-live="polite">
                         <div className="bg-black/20 p-4 rounded-lg border border-border-color">
                             <h3 className="font-bold text-sm mb-2 flex items-center gap-2"><SparklesIcon className="w-4 h-4 text-accent"/> {t('nexus_go.delivery_ai_summary')}</h3>
                             <p className="text-xs text-text-secondary">{results.aiSummary}</p>
@@ -231,7 +281,7 @@ const FoodDeliveryView: React.FC = () => {
                                     </div>
                                     <p className="text-xs text-text-muted">{option.cuisine} &bull; {option.priceLevel}</p>
                                     <div className="flex items-center gap-1 text-xs text-yellow-400 mt-1">
-                                        <span className="material-symbols-outlined text-sm">star</span>
+                                        <span className="material-symbols-outlined text-sm" aria-hidden="true">star</span>
                                         <span>{option.rating}</span>
                                         <span className="text-text-muted ml-2">Delivery: {option.deliveryTime}</span>
                                     </div>
@@ -243,7 +293,7 @@ const FoodDeliveryView: React.FC = () => {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-text-muted">
-                        <TravelServicesIcon className="w-20 h-20 mb-4 opacity-30" />
+                        <TravelServicesIcon className="w-20 h-20 mb-4 opacity-30" aria-hidden="true" />
                         <p className="text-xl font-bold">{t('travel_services.no_food_results')}</p>
                     </div>
                 )}
@@ -259,11 +309,13 @@ const FoodDeliveryView: React.FC = () => {
                         placeholder={t('travel_services.food_delivery_input_placeholder')}
                         disabled={isLoading || !location}
                         className="flex-grow h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-text-primary focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        aria-label={t('travel_services.food_delivery_input_placeholder')}
                     />
                     <button 
                         onClick={handleFindFoodOptions}
                         disabled={isLoading || !query || !location}
                         className="h-12 px-6 font-bold rounded-lg bg-gradient-to-r from-orange-500 to-red-500 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={t('travel_services.find_food')}
                     >
                         {t('travel_services.find_food')}
                     </button>
@@ -273,13 +325,22 @@ const FoodDeliveryView: React.FC = () => {
     );
 };
 
+/**
+ * The NightlifeView component provides an interface for finding nightlife events and venues.
+ * It uses geolocation and an AI service to recommend suitable events.
+ * @returns {JSX.Element} The NightlifeView component.
+ */
 const NightlifeView: React.FC = () => {
     const { t } = useLanguage();
     const [query, setQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { location, error: locationError } = useGeolocation();
     const [results, setResults] = useState<{aiSummary: string, events: NightlifeEvent[] } | null>(null);
+    const [error, setError] = useState<string | null>(null); // Local error state for API calls
 
+    /**
+     * Handles initiating the search for nightlife events.
+     */
     const handleFindEvents = async () => {
         if (!query || isLoading || !location) return;
         setIsLoading(true);
@@ -297,8 +358,6 @@ const NightlifeView: React.FC = () => {
         }
     };
 
-    const [error, setError] = useState<string | null>(null); // Local error state for API calls
-
     return (
         <div className="p-4 sm:p-6 flex flex-col gap-6 h-full">
             <div className="flex-grow w-full max-w-2xl mx-auto space-y-4">
@@ -306,16 +365,16 @@ const NightlifeView: React.FC = () => {
                     <TravelServicesIcon className="w-16 h-16 mx-auto mb-2 text-purple-400" />
                     <h2 className="text-xl font-bold font-display">{t('travel_services.nightlife_tab')}</h2>
                     <p className="text-text-muted">{t('travel_services.current_location')}</p>
-                    {(locationError || error) && <p className="text-sm text-red-400 mt-2">{locationError || error}</p>}
+                    {(locationError || error) && <p className="text-sm text-red-400 mt-2" role="alert">{locationError || error}</p>}
                 </div>
                 
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 text-purple-400">
-                        <SparklesIcon className="w-8 h-8 animate-pulse" />
+                        <SparklesIcon className="w-8 h-8 animate-pulse" role="status"><span className="sr-only">Loading...</span></SparklesIcon>
                         <p>{t('travel_services.loading_nightlife')}</p>
                     </div>
                 ) : results ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4" aria-live="polite">
                         <div className="bg-black/20 p-4 rounded-lg border border-border-color">
                             <h3 className="font-bold text-sm mb-2 flex items-center gap-2"><SparklesIcon className="w-4 h-4 text-accent"/> {t('nexus_go.delivery_ai_summary')}</h3>
                             <p className="text-xs text-text-secondary">{results.aiSummary}</p>
@@ -338,7 +397,7 @@ const NightlifeView: React.FC = () => {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-text-muted">
-                        <TravelServicesIcon className="w-20 h-20 mb-4 opacity-30" />
+                        <TravelServicesIcon className="w-20 h-20 mb-4 opacity-30" aria-hidden="true" />
                         <p className="text-xl font-bold">{t('travel_services.no_nightlife_results')}</p>
                     </div>
                 )}
@@ -354,11 +413,13 @@ const NightlifeView: React.FC = () => {
                         placeholder={t('travel_services.nightlife_input_placeholder')}
                         disabled={isLoading || !location}
                         className="flex-grow h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-text-primary focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                        aria-label={t('travel_services.nightlife_input_placeholder')}
                     />
                     <button 
                         onClick={handleFindEvents}
                         disabled={isLoading || !query || !location}
                         className="h-12 px-6 font-bold rounded-lg bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={t('travel_services.find_events')}
                     >
                         {t('travel_services.find_events')}
                     </button>

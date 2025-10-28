@@ -3,16 +3,35 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { CalendarIcon, DriveIcon, GmailIcon } from '../Icons';
 import { CalendarEvent, DriveFile, GmailMessage } from '../../types';
 
+/**
+ * Props for the WorkspaceHubWidget component.
+ */
 interface WorkspaceHubWidgetProps {
+    /** Indicates if the Google account is connected. */
     isConnected: boolean;
+    /** An array of calendar events to display. */
     events: CalendarEvent[];
+    /** An array of drive files to display. */
     files: DriveFile[];
+    /** An array of Gmail messages to display. */
     messages: GmailMessage[];
 }
 
+/**
+ * The WorkspaceHubWidget provides a quick overview of a user's integrated Google Workspace data.
+ * It displays upcoming calendar events, recent Drive files, and important Gmail messages.
+ * If not connected, it prompts the user to connect their Google account.
+ * @param {WorkspaceHubWidgetProps} props - The component props.
+ * @returns {JSX.Element} The WorkspaceHubWidget component.
+ */
 const WorkspaceHubWidget: React.FC<WorkspaceHubWidgetProps> = ({ isConnected, events, files, messages }) => {
     const { t } = useLanguage();
     
+    /**
+     * Formats an ISO string into a localized time string (e.g., "10:30 AM").
+     * @param {string} isoString - The ISO date string to format.
+     * @returns {string} The formatted time string.
+     */
     const formatTime = (isoString: string) => {
         return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };

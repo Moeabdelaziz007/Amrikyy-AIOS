@@ -1,6 +1,11 @@
 import React from 'react';
 import { FileIcon } from '../Icons';
 
+/**
+ * The FilesApp component represents a file explorer application.
+ * It currently displays a placeholder message indicating future development.
+ * @returns {JSX.Element} The FilesApp component.
+ */
 const FilesApp: React.FC = () => {
   return (
     <div className="h-full w-full flex flex-col items-center justify-center bg-bg-tertiary rounded-b-md text-white p-6">

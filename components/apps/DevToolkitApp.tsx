@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DevToolkitIcon, SparklesIcon, SendIcon } from '../Icons';
 import { useLanguage } from '../../contexts/LanguageContext';
-// FIX: Replaced non-existent `testSystemPrompt` with a mock function.
+// FIX: Replaced non-existent `testSystemPrompt` with an import from the correct service.
 import { testSystemPrompt } from '../../services/geminiAdvancedService';
 
 const DevToolkitApp: React.FC = () => {

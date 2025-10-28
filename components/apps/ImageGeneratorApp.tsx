@@ -4,12 +4,26 @@ import { generateImage, editImage } from '../../services/geminiAdvancedService';
 import { fileToBase64 } from '../../utils/fileUtils';
 import { AppID } from '../../types';
 
+/**
+ * Defines the mode of operation for the image generator.
+ */
 type Mode = 'generate' | 'edit';
 
+/**
+ * Props for the ImageGeneratorApp component.
+ */
 interface ImageGeneratorAppProps {
+    /** Callback function to open another application by its ID. */
     onOpenApp: (appId: AppID, props?: any) => void;
 }
 
+/**
+ * The ImageGeneratorApp component allows users to generate new images from text prompts
+ * or edit existing images using AI. It also provides options to send generated images
+ * to other applications.
+ * @param {ImageGeneratorAppProps} props - The component props.
+ * @returns {JSX.Element} The ImageGeneratorApp component.
+ */
 const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +32,9 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
     const [mode, setMode] = useState<Mode>('generate');
     const [sourceImage, setSourceImage] = useState<{file: File, base64: string} | null>(null);
 
+    /**
+     * Handles the image generation process based on the current prompt.
+     */
     const handleGenerate = async () => {
         if (!prompt || isLoading) return;
         setIsLoading(true);
@@ -34,6 +51,9 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
         }
     };
 
+    /**
+     * Handles the image editing process, applying the prompt to the source image.
+     */
     const handleEdit = async () => {
         if (!prompt || !sourceImage || isLoading) return;
         setIsLoading(true);
@@ -50,6 +70,11 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
         }
     };
 
+    /**
+     * Handles the file input change for uploading a source image for editing.
+     * Converts the selected file to base64.
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The file input change event.
+     */
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
@@ -62,6 +87,9 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
         }
     };
 
+    /**
+     * Submits the current action (generate or edit) based on the selected mode.
+     */
     const handleSubmit = () => {
         if (mode === 'generate') {
             handleGenerate();
@@ -70,6 +98,10 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
         }
     };
 
+    /**
+     * Sends the generated image to another specified application.
+     * @param {AppID} appId - The ID of the target application.
+     */
     const handleSendTo = (appId: AppID) => {
         if (!generatedImage) return;
         
@@ -79,7 +111,7 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
                 mimeType: 'image/png' // Assuming PNG from our generator
             }
         };
-        onOpenApp(appId, props);
+        onOpenApp(AppID.video, props);
     };
 
     return (
@@ -115,8 +147,8 @@ const ImageGeneratorApp: React.FC<ImageGeneratorAppProps> = ({ onOpenApp }) => {
                         <>
                             <img src={generatedImage} alt="AI generated" className="max-w-full max-h-full object-contain rounded-lg"/>
                             <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => handleSendTo('video')} className="bg-black/50 backdrop-blur-sm p-2 rounded-lg text-xs font-semibold hover:bg-rose-500 transition-colors">Send to Video Studio</button>
-                                <button onClick={() => handleSendTo('imageAnalyzer')} className="bg-black/50 backdrop-blur-sm p-2 rounded-lg text-xs font-semibold hover:bg-indigo-500 transition-colors">Analyze Image</button>
+                                <button onClick={() => handleSendTo(AppID.video)} className="bg-black/50 backdrop-blur-sm p-2 rounded-lg text-xs font-semibold hover:bg-rose-500 transition-colors">Send to Video Studio</button>
+                                <button onClick={() => handleSendTo(AppID.imageAnalyzer)} className="bg-black/50 backdrop-blur-sm p-2 rounded-lg text-xs font-semibold hover:bg-indigo-500 transition-colors">Analyze Image</button>
                             </div>
                         </>
                     ) : error ? (

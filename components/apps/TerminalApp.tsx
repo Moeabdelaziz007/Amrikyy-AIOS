@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
+/**
+ * The TerminalApp component simulates a command-line interface.
+ * It displays a sequence of initial commands and provides a mock command prompt.
+ * @returns {JSX.Element} The TerminalApp component.
+ */
 const TerminalApp: React.FC = () => {
   const [lines, setLines] = useState<string[]>([]);
   const initialCommands = [

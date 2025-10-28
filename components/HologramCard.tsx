@@ -1,12 +1,28 @@
 import React from 'react';
 import { Agent } from '../types';
 
+/**
+ * Props for the HologramCard component.
+ */
 interface HologramCardProps {
+    /** The AI agent data to display in the card. */
     agent: Agent;
 }
 
+/**
+ * The HologramCard component displays an animated, futuristic card for an AI agent,
+ * featuring a name, icon, current task, and a progress bar, with glitch effects.
+ * @param {HologramCardProps} props - The component props.
+ * @returns {JSX.Element} The HologramCard component.
+ */
 const HologramCard: React.FC<HologramCardProps> = ({ agent }) => {
     
+    /**
+     * A utility component to render text with a glitch effect.
+     * @param {object} props - The component props.
+     * @param {string} props.text - The text to apply glitch effect to.
+     * @returns {JSX.Element} The glitching text.
+     */
     const GlitchText: React.FC<{ text: string }> = ({ text }) => (
         <div className="relative" data-text={text}>
             {text}

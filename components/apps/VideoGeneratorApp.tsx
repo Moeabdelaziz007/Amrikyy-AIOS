@@ -5,17 +5,35 @@ import { fileToBase64 } from '../../utils/fileUtils';
 import { UserAccount, AppID } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+/**
+ * Defines the status of video generation.
+ */
 type Status = 'idle' | 'processing' | 'completed' | 'error';
 
+/**
+ * Props for the VideoGeneratorApp component.
+ */
 interface VideoGeneratorAppProps {
+    /** The current user's account information. */
     userAccount: UserAccount;
+    /** Setter for the user's account information. */
     setUserAccount: React.Dispatch<React.SetStateAction<UserAccount>>;
+    /** Callback function to open another application by its ID. */
     onOpenApp: (appId: AppID) => void;
+    /** Optional initial image data (base64 and mimeType) to start video generation with. */
     initialImage?: { base64: string, mimeType: string };
 }
 
-const VIDEO_GENERATION_COST = 250; // AI Credits
+/** The cost in AI Credits for generating a video. */
+const VIDEO_GENERATION_COST = 250;
 
+/**
+ * The VideoGeneratorApp component allows users to generate videos from text prompts
+ * and an optional starting image using the Veo model. It handles API key selection,
+ * credit deduction, and displays generation progress.
+ * @param {VideoGeneratorAppProps} props - The component props.
+ * @returns {JSX.Element} The VideoGeneratorApp component.
+ */
 const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setUserAccount, onOpenApp, initialImage }) => {
     const { t } = useLanguage();
     const [prompt, setPrompt] = useState('');
@@ -27,6 +45,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
     const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
     const [isKeySelected, setIsKeySelected] = useState(false);
 
+    // Checks if an API key has been selected on component mount.
     useEffect(() => {
         const checkKey = async () => {
             const hasKey = await window.aistudio.hasSelectedApiKey();
@@ -35,12 +54,18 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
         checkKey();
     }, []);
 
+    // Sets the initial image if provided via props.
     useEffect(() => {
         if (initialImage) {
             setSourceImage({ base64: initialImage.base64, mimeType: initialImage.mimeType });
         }
     }, [initialImage]);
 
+    /**
+     * Handles file input change for selecting a source image.
+     * Converts the selected image file to base64.
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The file input change event.
+     */
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
@@ -49,17 +74,25 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
         }
     };
 
+    /**
+     * Opens the API key selection dialog and updates the `isKeySelected` state.
+     */
     const handleSelectKey = async () => {
         await window.aistudio.openSelectKey();
         setIsKeySelected(true); // Assume success to improve UX
     };
 
+    /**
+     * Initiates the video generation process.
+     * Checks for sufficient credits and API key selection.
+     * Manages generation status, progress, and credit transactions.
+     */
     const handleGenerate = async () => {
         if (!prompt || !sourceImage || status === 'processing') return;
 
         if (userAccount.aiCredits < VIDEO_GENERATION_COST) {
             alert(t('video.insufficient_credits_text', { cost: VIDEO_GENERATION_COST }));
-            onOpenApp('pricing');
+            onOpenApp(AppID.pricing);
             return;
         }
 
@@ -96,6 +129,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
         }
     };
 
+    // Displays a prompt to select an API key if none is selected.
     if (!isKeySelected) {
         return (
             <div className="h-full w-full flex flex-col items-center justify-center bg-bg-tertiary rounded-b-md text-white p-6 gap-4 text-center">

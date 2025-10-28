@@ -33,6 +33,7 @@ export const connectToLiveStream = (
     if (!process.env.API_KEY) {
         throw new Error("API key not found for live service.");
     }
+    // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const sessionPromise = ai.live.connect({

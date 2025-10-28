@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CryptoData } from '../types';
 
-// Initial mock data
+// Initial mock data for cryptocurrency tracking.
 const initialCryptoData: CryptoData[] = [
     {
         id: 'btc',
@@ -23,12 +23,27 @@ const initialCryptoData: CryptoData[] = [
     },
 ];
 
-const Sparkline: React.FC<{ data: number[], color: string }> = ({ data, color }) => {
+/**
+ * Props for the Sparkline component.
+ */
+interface SparklineProps {
+    /** The data points to render in the sparkline. */
+    data: number[];
+    /** The color of the sparkline. */
+    color: string;
+}
+
+/**
+ * A small, high-density line graph that shows trends or variations.
+ * @param {SparklineProps} props - The component props.
+ * @returns {JSX.Element} The Sparkline component.
+ */
+const Sparkline: React.FC<SparklineProps> = ({ data, color }) => {
     const width = 100;
     const height = 25;
     const max = Math.max(...data);
     const min = Math.min(...data);
-    const range = max - min || 1;
+    const range = max - min || 1; // Prevent division by zero if all values are the same
 
     const points = data.map((d, i) => {
         const x = (i / (data.length - 1)) * width;
@@ -50,6 +65,11 @@ const Sparkline: React.FC<{ data: number[], color: string }> = ({ data, color })
     );
 };
 
+/**
+ * The CryptoDashboardWidget displays real-time cryptocurrency data with sparkline charts.
+ * It simulates price changes and updates periodically.
+ * @returns {JSX.Element} The CryptoDashboardWidget component.
+ */
 const CryptoDashboardWidget: React.FC = () => {
     const [cryptoData, setCryptoData] = useState<CryptoData[]>(initialCryptoData);
 

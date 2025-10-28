@@ -1,29 +1,45 @@
 import React from 'react';
 import { SparklesIcon, MicrophoneIcon } from './Icons';
 
+/**
+ * Defines the possible states of the voice hologram animation.
+ */
 type VoiceState = 'idle' | 'listening' | 'speaking';
 
+/**
+ * Props for the VoiceHologram component.
+ */
 interface VoiceHologramProps {
+    /** The current state of the voice assistant, controlling its visual animation and text. */
     state: VoiceState;
 }
 
+/**
+ * The VoiceHologram component displays a dynamic, animated hologram representation
+ * of the AI voice assistant, reflecting its current state (idle, listening, speaking).
+ * @param {VoiceHologramProps} props - The component props.
+ * @returns {JSX.Element} The VoiceHologram component.
+ */
 const VoiceHologram: React.FC<VoiceHologramProps> = ({ state }) => {
     
+    /**
+     * Configuration for each voice state, including icon, text, border color, and animation.
+     */
     const stateConfig = {
         idle: {
-            icon: <SparklesIcon className="w-12 h-12 text-primary-cyan" />,
+            icon: <SparklesIcon className="w-12 h-12 text-primary-cyan" aria-hidden="true" />,
             text: "AI is ready. Click the button to speak.",
             borderColor: 'border-primary-cyan/30',
             animation: 'animate-voice-pulse',
         },
         listening: {
-            icon: <MicrophoneIcon className="w-12 h-12 text-primary-pink" />,
+            icon: <MicrophoneIcon className="w-12 h-12 text-primary-pink" aria-hidden="true" />,
             text: "Listening...",
             borderColor: 'border-primary-pink/50',
             animation: 'animate-pulse',
         },
         speaking: {
-            icon: <SparklesIcon className="w-12 h-12 text-primary-purple" />,
+            icon: <SparklesIcon className="w-12 h-12 text-primary-purple" aria-hidden="true" />,
             text: "Speaking...",
             borderColor: 'border-primary-purple/40',
             animation: 'animate-voice-pulse',
@@ -33,7 +49,7 @@ const VoiceHologram: React.FC<VoiceHologramProps> = ({ state }) => {
     const current = stateConfig[state];
 
     return (
-        <div className="relative w-64 h-64 flex items-center justify-center">
+        <div className="relative w-64 h-64 flex items-center justify-center" role="status" aria-live="polite" aria-label={`Voice assistant is ${state}`}>
             {/* Outer rings */}
             <div className={`absolute inset-0 rounded-full border-2 ${current.borderColor} ${state === 'listening' ? 'animate-ping' : ''}`} />
             <div className={`absolute inset-4 rounded-full border ${current.borderColor} ${current.animation}`} style={{ animationDelay: '0.5s' }} />

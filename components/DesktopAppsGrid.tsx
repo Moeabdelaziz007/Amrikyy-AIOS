@@ -1,17 +1,34 @@
 import React from 'react';
 import { AppID } from '../types';
 
+/**
+ * Defines the structure for an application definition used in the DesktopAppsGrid.
+ */
 interface AppDef {
+    /** The unique identifier for the application. */
     id: AppID;
+    /** The display name of the application. */
     name: string;
+    /** The React component for the application's icon. */
     icon: React.FC<{ className: string }>;
 }
 
+/**
+ * Props for the DesktopAppsGrid component.
+ */
 interface DesktopAppsGridProps {
+    /** Callback function to open an application by its ID. */
     onOpen: (appId: AppID) => void;
+    /** An array of application definitions to display in the grid. */
     apps: AppDef[];
 }
 
+/**
+ * The DesktopAppsGrid component displays a grid of application icons on the desktop.
+ * Each icon can be clicked to open the corresponding application.
+ * @param {DesktopAppsGridProps} props - The component props.
+ * @returns {JSX.Element} The rendered desktop applications grid.
+ */
 const DesktopAppsGrid: React.FC<DesktopAppsGridProps> = ({ onOpen, apps }) => {
     return (
         <div className="w-full max-w-4xl p-4">

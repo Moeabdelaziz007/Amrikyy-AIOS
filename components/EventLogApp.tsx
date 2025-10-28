@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { agents } from '../data/agents';
 import { AgentID, LogEntry } from '../types';
 
+/**
+ * Mock data for system event logs, simulating agent-to-agent communications and actions.
+ * Includes different types of log entries: standard, insight, and proactive-offer.
+ */
 const mockLogs: Omit<LogEntry, 'id' | 'timestamp'>[] = [
     { from: 'orion', message: 'Workflow "Paris Trip" initiated by user.', type: 'standard' },
     { from: 'echo', to: 'luna', message: 'Insight: User frequently researches European history. Luna, consider adding cultural landmark visits to travel plans for Rome.', type: 'insight' }, // Proactive insight
@@ -17,15 +21,24 @@ const mockLogs: Omit<LogEntry, 'id' | 'timestamp'>[] = [
     { from: 'maya', message: 'Workflow "Paris Trip" completed successfully.', type: 'standard' },
 ];
 
+/**
+ * A mapping of agent IDs to their full agent objects for easy lookup.
+ */
 const agentMap = agents.reduce((acc, agent) => {
     acc[agent.id] = agent;
     return acc;
 }, {} as Record<AgentID, (typeof agents)[0]>);
 
+/**
+ * The EventLogApp component displays a real-time stream of agent-to-agent communications and system events.
+ * It simulates a "Communication Bus" where AI agents interact and log their activities.
+ * @returns {JSX.Element} The EventLogApp component.
+ */
 const EventLogApp: React.FC = () => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const logEndRef = useRef<HTMLDivElement>(null);
 
+    // Effect to simulate streaming of log entries over time.
     useEffect(() => {
         const interval = setInterval(() => {
             setLogs(prevLogs => {
@@ -40,11 +53,12 @@ const EventLogApp: React.FC = () => {
                     timestamp: new Date().toLocaleTimeString(),
                 }];
             });
-        }, 1500);
+        }, 1500); // Add a new log entry every 1.5 seconds
 
         return () => clearInterval(interval);
     }, []);
 
+    // Effect to scroll to the bottom of the log whenever new entries are added.
     useEffect(() => {
         logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [logs]);

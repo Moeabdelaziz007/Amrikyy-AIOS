@@ -1,15 +1,31 @@
 import React from 'react';
 
+/**
+ * Props for the ConfirmationDialog component.
+ */
 interface ConfirmationDialogProps {
+  /** Determines if the dialog is currently open and visible. */
   isOpen: boolean;
+  /** Callback function to close the dialog without confirming the action. */
   onClose: () => void;
+  /** Callback function to execute when the confirmation action is performed. */
   onConfirm: () => void;
+  /** The title of the confirmation dialog. */
   title: string;
+  /** The main message or question displayed in the dialog. */
   message: string;
+  /** Optional text for the confirm button. Defaults to 'Confirm'. */
   confirmText?: string;
+  /** Optional text for the cancel button. Defaults to 'Cancel'. */
   cancelText?: string;
 }
 
+/**
+ * A reusable modal component for displaying a confirmation dialog.
+ * It provides a title, a message, and two action buttons (confirm and cancel).
+ * @param {ConfirmationDialogProps} props - The component props.
+ * @returns {JSX.Element | null} The rendered confirmation dialog or `null` if not open.
+ */
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   isOpen,
   onClose,
@@ -30,6 +46,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialog-title"
+      aria-describedby="dialog-message"
     >
       <div
         className="w-full max-w-md bg-bg-secondary rounded-2xl border border-border-color shadow-2xl flex flex-col animate-slide-up"
@@ -37,7 +54,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       >
         <div className="p-6">
           <h2 id="dialog-title" className="text-xl font-bold font-display">{title}</h2>
-          <p className="text-sm text-text-secondary mt-2">{message}</p>
+          <p id="dialog-message" className="text-sm text-text-secondary mt-2">{message}</p>
         </div>
         <div className="p-4 bg-black/20 rounded-b-2xl flex justify-end items-center gap-4 border-t border-border-color">
           <button onClick={onClose} className="px-4 py-2 text-sm font-semibold rounded-lg hover:bg-white/10 transition-colors">

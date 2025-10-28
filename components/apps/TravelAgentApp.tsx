@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { TravelPlan } from '../../types';
-import { SparklesIcon, SearchIcon, MapIcon, TripIcon } from '../Icons';
+import { TravelPlan, FlightOption } from '../../types';
+import { SparklesIcon, SearchIcon, MapIcon, TripIcon, FlightsIcon } from '../Icons';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { searchFlights } from '../../services/geminiAdvancedService';
 
-type Tab = 'plan' | 'explore' | 'deals' | 'my-plans';
+type Tab = 'plan' | 'explore' | 'deals' | 'flights' | 'my-plans';
 
 interface TravelAgentAppProps {
     startTravelWorkflow: (details: { destination: string, startDate: string, endDate: string, budget: string }) => void;
 }
 
 const TravelAgentApp: React.FC<TravelAgentAppProps> = ({ startTravelWorkflow }) => {
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<Tab>('plan');
 
     return (
@@ -20,6 +23,7 @@ const TravelAgentApp: React.FC<TravelAgentAppProps> = ({ startTravelWorkflow }) 
                 </div>
                 <nav className="flex gap-2 bg-black/20 p-1 rounded-lg">
                     <TabButton id="plan" activeTab={activeTab} setActiveTab={setActiveTab} label="Plan Trip" />
+                    <TabButton id="flights" activeTab={activeTab} setActiveTab={setActiveTab} label={t('travel_agent.flights_tab')} />
                     <TabButton id="explore" activeTab={activeTab} setActiveTab={setActiveTab} label="Explore Places" />
                     <TabButton id="deals" activeTab={activeTab} setActiveTab={setActiveTab} label="Find Deals" />
                     <TabButton id="my-plans" activeTab={activeTab} setActiveTab={setActiveTab} label="My Plans" />
@@ -27,6 +31,7 @@ const TravelAgentApp: React.FC<TravelAgentAppProps> = ({ startTravelWorkflow }) 
             </header>
             <main className="flex-grow overflow-y-auto">
                 {activeTab === 'plan' && <PlanTripView startTravelWorkflow={startTravelWorkflow} />}
+                {activeTab === 'flights' && <FlightsView />}
                 {activeTab === 'explore' && <ExplorePlacesView />}
                 {activeTab === 'deals' && <FindDealsView />}
                 {activeTab === 'my-plans' && <MyPlansView />}
@@ -79,20 +84,174 @@ const PlanTripView: React.FC<{startTravelWorkflow: TravelAgentAppProps['startTra
     )
 };
 
-const ExplorePlacesView = () => (
-    <div className="h-full w-full p-6 text-center flex flex-col items-center justify-center">
-        <MapIcon className="w-20 h-20 mb-4 text-emerald-400" />
-        <h2 className="text-2xl font-bold font-display">Explore Places</h2>
-        <p className="text-text-muted">This feature is under construction. Soon you'll be able to search for locations and get AI-powered insights.</p>
-    </div>
-);
-const FindDealsView = () => (
-    <div className="h-full w-full p-6 text-center flex flex-col items-center justify-center">
-        <SearchIcon className="w-20 h-20 mb-4 text-sky-400" />
-        <h2 className="text-2xl font-bold font-display">Find Deals</h2>
-        <p className="text-text-muted">This feature is under construction. Get ready to find the best travel deals with the help of AI search.</p>
-    </div>
-);
+const FlightsView: React.FC = () => {
+    const { t } = useLanguage();
+    const [origin, setOrigin] = useState('');
+    const [destination, setDestination] = useState('');
+    const [departureDate, setDepartureDate] = useState('');
+    const [returnDate, setReturnDate] = useState('');
+    const [isRoundTrip, setIsRoundTrip] = useState(true);
+    const [passengers, setPassengers] = useState(1);
+    const [cabinClass, setCabinClass] = useState<'Economy' | 'Premium Economy' | 'Business' | 'First'>('Economy');
+    const [isLoading, setIsLoading] = useState(false);
+    const [flightResults, setFlightResults] = useState<FlightOption[] | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleSearchFlights = async () => {
+        if (!origin || !destination || !departureDate || (isRoundTrip && !returnDate) || isLoading) {
+            setError('Please fill all required flight details.');
+            return;
+        }
+
+        setIsLoading(true);
+        setFlightResults(null);
+        setError(null);
+
+        try {
+            const results = await searchFlights({
+                origin,
+                destination,
+                departureDate,
+                returnDate: isRoundTrip ? returnDate : undefined,
+                passengers,
+                cabinClass,
+            });
+            setFlightResults(results);
+        } catch (err: any) {
+            setError(err.message || 'Failed to search for flights.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="h-full w-full flex flex-col p-6">
+            <div className="flex-grow w-full max-w-2xl mx-auto space-y-4">
+                <div className="text-center">
+                    <FlightsIcon className="w-16 h-16 mx-auto mb-2 text-primary-cyan" />
+                    <h2 className="text-xl font-bold font-display">{t('travel_agent.flights_tab')}</h2>
+                    <p className="text-text-muted">Find the best flight deals with AI.</p>
+                    {error && <p className="text-sm text-red-400 mt-2" role="alert">{error}</p>}
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-xl backdrop-blur-sm space-y-4">
+                    <div className="flex gap-2 mb-4">
+                        <button
+                            onClick={() => setIsRoundTrip(true)}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${isRoundTrip ? 'bg-primary-blue text-white' : 'bg-black/20 hover:bg-white/10'}`}
+                        >
+                            {t('travel_agent.round_trip')}
+                        </button>
+                        <button
+                            onClick={() => setIsRoundTrip(false)}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${!isRoundTrip ? 'bg-primary-blue text-white' : 'bg-black/20 hover:bg-white/10'}`}
+                        >
+                            {t('travel_agent.one_way')}
+                        </button>
+                    </div>
+
+                    <div>
+                        <label htmlFor="origin-input" className="block text-sm font-medium text-text-secondary mb-1">Origin</label>
+                        <input type="text" id="origin-input" placeholder={t('travel_agent.flight_input_placeholder')} className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={origin} onChange={(e) => setOrigin(e.target.value)} required />
+                    </div>
+                    <div>
+                        <label htmlFor="destination-input" className="block text-sm font-medium text-text-secondary mb-1">Destination</label>
+                        <input type="text" id="destination-input" placeholder={t('travel_agent.flight_input_placeholder')} className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={destination} onChange={(e) => setDestination(e.target.value)} required />
+                    </div>
+                    <div className="flex space-x-4">
+                        <div className="flex-1">
+                            <label htmlFor="departure-date" className="block text-sm font-medium text-text-secondary mb-1">Departure Date</label>
+                            <input type="date" id="departure-date" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={departureDate} onChange={(e) => setDepartureDate(e.target.value)} required />
+                        </div>
+                        {isRoundTrip && (
+                            <div className="flex-1">
+                                <label htmlFor="return-date" className="block text-sm font-medium text-text-secondary mb-1">Return Date</label>
+                                <input type="date" id="return-date" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} required={isRoundTrip} />
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex space-x-4">
+                        <div className="flex-1">
+                            <label htmlFor="passengers-input" className="block text-sm font-medium text-text-secondary mb-1">{t('travel_agent.passengers')}</label>
+                            <input type="number" id="passengers-input" min="1" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={passengers} onChange={(e) => setPassengers(parseInt(e.target.value))} />
+                        </div>
+                        <div className="flex-1">
+                            <label htmlFor="cabin-class-select" className="block text-sm font-medium text-text-secondary mb-1">{t('travel_agent.cabin_class')}</label>
+                            <select id="cabin-class-select" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={cabinClass} onChange={(e) => setCabinClass(e.target.value as 'Economy' | 'Premium Economy' | 'Business' | 'First')}>
+                                <option value="Economy">{t('travel_agent.economy')}</option>
+                                <option value="Premium Economy">{t('travel_agent.premium_economy')}</option>
+                                <option value="Business">{t('travel_agent.business')}</option>
+                                <option value="First">{t('travel_agent.first_class')}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-3 text-primary-cyan">
+                        <SparklesIcon className="w-8 h-8 animate-pulse" role="status"><span className="sr-only">Loading...</span></SparklesIcon>
+                        <p>{t('travel_agent.loading_flights')}</p>
+                    </div>
+                ) : flightResults ? (
+                    <div className="mt-6 space-y-4" aria-live="polite">
+                        <h3 className="font-display text-xl font-bold">Available Flights</h3>
+                        {flightResults.map((flight, index) => (
+                            <a href={flight.url} target="_blank" rel="noopener noreferrer" key={index} className="block bg-black/20 p-4 rounded-lg border border-border-color hover:border-primary-cyan transition-colors cursor-pointer">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="font-bold text-lg">{flight.carrier}</h4>
+                                    <span className="text-xl font-bold text-primary-cyan">${flight.price.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-text-secondary">
+                                    <span>{flight.departureTime} - {flight.arrivalTime}</span>
+                                    <span>{flight.duration}</span>
+                                </div>
+                                <div className="text-xs text-text-muted mt-1">
+                                    <span>{flight.stops === 0 ? 'Direct' : `${flight.stops} Stop${flight.stops > 1 ? 's' : ''}`}</span> &bull; <span>{cabinClass}</span>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-text-muted mt-8">
+                        <FlightsIcon className="w-20 h-20 mb-4 opacity-30" aria-hidden="true" />
+                        <p className="text-xl font-bold">{t('travel_agent.no_flights_results')}</p>
+                    </div>
+                )}
+            </div>
+            
+            <div className="flex-shrink-0 border-t border-white/10 pt-4">
+                <button
+                    onClick={handleSearchFlights}
+                    disabled={isLoading || !origin || !destination || !departureDate || (isRoundTrip && !returnDate)}
+                    className="w-full font-bold py-3 px-4 rounded-lg bg-gradient-to-r from-primary-cyan to-primary-blue hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {t('travel_agent.find_flights')}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const ExplorePlacesView = () => {
+    const { t } = useLanguage();
+    return (
+        <div className="h-full w-full p-6 text-center flex flex-col items-center justify-center">
+            <MapIcon className="w-20 h-20 mb-4 text-emerald-400" />
+            <h2 className="text-2xl font-bold font-display">Explore Places</h2>
+            <p className="text-text-muted">{t('travel_agent.explore_desc') || "This feature is under construction. Soon you'll be able to search for locations and get AI-powered insights."}</p>
+        </div>
+    );
+};
+const FindDealsView = () => {
+    const { t } = useLanguage();
+    return (
+        <div className="h-full w-full p-6 text-center flex flex-col items-center justify-center">
+            <SearchIcon className="w-20 h-20 mb-4 text-sky-400" />
+            <h2 className="text-2xl font-bold font-display">Find Deals</h2>
+            <p className="text-text-muted">{t('travel_agent.deals_desc') || "This feature is under construction. Get ready to find the best travel deals with the help of AI search."}</p>
+        </div>
+    );
+};
 const MyPlansView = () => {
     const mockPlans: Partial<TravelPlan>[] = [
         { tripTitle: 'Cyberpunk Adventure in Tokyo', destination: 'Tokyo, Japan', itinerary: [{day: 1, title: 'Shibuya Crossing & Neon Nights', activities:[]}] },
