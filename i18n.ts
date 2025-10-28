@@ -54,6 +54,7 @@ export const translations = {
     'app_titles.nexusProfile': 'Nexus Profile', // New
     'app_titles.travelServices': 'Travel Services', // New
     'app_titles.pricing': 'Pricing & Plans',
+    'app_titles.docsViewer': 'OS Documentation',
 
     'agent_prefix.agent': 'Agent',
 
@@ -139,6 +140,7 @@ export const translations = {
     'desktop_apps.smartwatch': 'Smart Watch',
     'desktop_apps.luna': 'Agent Luna',
     'desktop_apps.store': 'Gemini Store',
+    'desktop_apps.docsViewer': 'Docs',
 
     'app_launcher.creatorStudio': 'Creator Studio',
     'app_launcher.cognitoBrowser': 'Cognito Browser',
@@ -170,6 +172,7 @@ export const translations = {
     'app_launcher.settings': 'Settings',
     'app_launcher.terminal': 'Terminal',
     'app_launcher.store': 'Gemini Store',
+    'app_launcher.docsViewer': 'OS Docs',
     'app_launcher.devToolkit': 'Developer Toolkit',
     'app_launcher.growthHub': 'Growth Hub',
     'app_launcher.resourceHub': 'Resource Hub',
@@ -320,6 +323,8 @@ export const translations = {
     'travel_agent.premium_economy': 'Premium Economy', // New
     'travel_agent.business': 'Business', // New
     'travel_agent.first_class': 'First Class', // New
+    'travel_agent.flight_input_error_fill_all': 'Please fill all required flight details.',
+    'travel_agent.flight_search_failed': 'Failed to search for flights.',
 
     'loading_screen.welcome_message': 'Welcome to Amrikyy AI OS. Your AI-native experience awaits...', // New
     'loading_screen.init_ai_core': 'Initializing AI Core...',
@@ -386,6 +391,7 @@ export const translations = {
     'app_titles.nexusProfile': 'ملف نيكسوس',
     'app_titles.travelServices': 'خدمات السفر بالذكاء الاصطناعي',
     'app_titles.pricing': 'الأسعار والخطط',
+    'app_titles.docsViewer': 'وثائق نظام التشغيل',
 
     'agent_prefix.agent': 'وكيل',
 
@@ -471,6 +477,7 @@ export const translations = {
     'desktop_apps.smartwatch': 'الساعة الذكية',
     'desktop_apps.luna': 'الوكيلة لونا',
     'desktop_apps.store': 'متجر Gemini',
+    'desktop_apps.docsViewer': 'المستندات',
     
     'app_launcher.creatorStudio': 'استوديو المبدعين',
     'app_launcher.cognitoBrowser': 'متصفح كوجنيتو',
@@ -502,6 +509,7 @@ export const translations = {
     'app_launcher.settings': 'الإعدادات',
     'app_launcher.terminal': 'الطرفية',
     'app_launcher.store': 'متجر Gemini',
+    'app_launcher.docsViewer': 'مستندات النظام',
     'app_launcher.devToolkit': 'مجموعة أدوات المطور',
     'app_launcher.growthHub': 'مركز النمو',
     'app_launcher.resourceHub': 'مركز الموارد',
@@ -652,6 +660,8 @@ export const translations = {
     'travel_agent.premium_economy': 'اقتصادية ممتازة', // New
     'travel_agent.business': 'درجة رجال الأعمال', // New
     'travel_agent.first_class': 'الدرجة الأولى', // New
+    'travel_agent.flight_input_error_fill_all': 'يرجى ملء جميع تفاصيل الرحلة المطلوبة.',
+    'travel_agent.flight_search_failed': 'فشل البحث عن رحلات جوية.',
 
     'loading_screen.welcome_message': 'مرحبًا بك في نظام التشغيل Amrikyy AI. تنتظرك تجربتك الأصلية في الذكاء الاصطناعي...',
     'loading_screen.init_ai_core': 'تهيئة نواة الذكاء الاصطناعي...',

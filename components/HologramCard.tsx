@@ -1,5 +1,5 @@
 import React from 'react';
-import { Agent } from '../types';
+import { Agent } from '../types.ts';
 
 /**
  * Props for the HologramCard component.

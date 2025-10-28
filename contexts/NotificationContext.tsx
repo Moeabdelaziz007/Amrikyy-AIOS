@@ -74,8 +74,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 /**
  * Custom hook to access the notification context.
- * Throws an error if used outside of a `NotificationProvider`.
- * @returns {NotificationContextType} The current notification context.
+ * This hook provides a convenient way for components to interact with the notification system,
+ * allowing them to add new notifications and access the current lists of notifications.
+ * @returns {NotificationContextType} The current notification context, including historical
+ *   and toast notifications, and functions to add/clear them.
  * @throws {Error} If `useNotification` is not used within a `NotificationProvider`.
  */
 export const useNotification = (): NotificationContextType => {

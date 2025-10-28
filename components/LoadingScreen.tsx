@@ -15,6 +15,16 @@ interface LoadingStage {
     duration: number; // milliseconds
 }
 
+const loadingStages: LoadingStage[] = [
+    { id: 'ai_core', labelKey: 'loading_screen.init_ai_core', duration: 800 },
+    { id: 'ui_components', labelKey: 'loading_screen.loading_ui_components', duration: 1000 },
+    { id: 'agents', labelKey: 'loading_screen.booting_agents', duration: 1200 },
+    { id: 'user_data', labelKey: 'loading_screen.fetching_user_data', duration: 700 },
+    { id: 'network', labelKey: 'loading_screen.establishing_network', duration: 900 },
+    { id: 'preferences', labelKey: 'loading_screen.syncing_preferences', duration: 600 },
+    { id: 'ready', labelKey: 'loading_screen.all_systems_ready', duration: 500 },
+];
+
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
     const { t } = useLanguage();
     const [currentStageIndex, setCurrentStageIndex] = useState(0);
@@ -23,16 +33,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const logoRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
-
-    const loadingStages: LoadingStage[] = [
-        { id: 'ai_core', labelKey: 'loading_screen.init_ai_core', duration: 800 },
-        { id: 'ui_components', labelKey: 'loading_screen.loading_ui_components', duration: 1000 },
-        { id: 'agents', labelKey: 'loading_screen.booting_agents', duration: 1200 },
-        { id: 'user_data', labelKey: 'loading_screen.fetching_user_data', duration: 700 },
-        { id: 'network', labelKey: 'loading_screen.establishing_network', duration: 900 },
-        { id: 'preferences', labelKey: 'loading_screen.syncing_preferences', duration: 600 },
-        { id: 'ready', labelKey: 'loading_screen.all_systems_ready', duration: 500 },
-    ];
 
     useEffect(() => {
         // FIX: Replace NodeJS.Timeout with number
@@ -63,7 +63,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ userAccountName }) => {
             clearTimeout(stageTimer);
             clearInterval(progressInterval);
         };
-    }, [currentStageIndex, loadingStages]);
+    }, [currentStageIndex]);
 
     // Mouse parallax effect
     useEffect(() => {

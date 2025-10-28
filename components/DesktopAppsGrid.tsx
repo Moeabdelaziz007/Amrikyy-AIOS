@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppID } from '../types';
+import { AppID } from '../types.ts';
 
 /**
  * Defines the structure for an application definition used in the DesktopAppsGrid.

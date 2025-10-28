@@ -54,7 +54,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
             const suggestion = await suggestAgentPersona(role);
             setName(suggestion.name);
             setIcon(suggestion.icon);
-            setSelectedSkills(new Set(suggestion.skillIDs as SkillID[]));
+            setSelectedSkills(new Set(suggestion.skillIDs));
         } catch (error) {
             console.error("Failed to get agent suggestions:", error);
             alert("Sorry, I couldn't generate suggestions. Please try again.");

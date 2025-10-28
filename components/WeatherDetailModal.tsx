@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
-import { SparklesIcon } from './Icons';
-import { CurrentWeather, WeatherData, ForecastDay } from '../types';
-// FIX: Replaced non-existent `getAiWeatherReport` with an import from the correct service.
-import { getAiWeatherReport } from '../services/geminiAdvancedService';
+import { useLanguage } from '../contexts/LanguageContext.tsx';
+import { SparklesIcon } from './Icons.tsx';
+import { CurrentWeather, WeatherData, ForecastDay } from '../types.ts';
+import { getAiWeatherReport } from '../services/geminiAdvancedService.ts';
 
 /**
  * Props for the WeatherDetailModal component.

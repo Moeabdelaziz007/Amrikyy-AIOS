@@ -67,14 +67,17 @@ describe('SystemOverviewWidget', () => {
     expect(screen.getByText(/09:00 AM/i)).toBeInTheDocument();
   });
 
-  it('updates time every second', () => {
+  it('updates time every minute', () => { // Updated description
     render(<SystemOverviewWidget userAccount={mockUserAccount} currentWeather={null} />);
 
-    // Advance timers by 1 second
-    vi.advanceTimersByTime(1000);
-    expect(screen.getByText(/09:00 AM/i)).toBeInTheDocument(); // The minute should not change
+    // Advance timers by less than a minute, time should not change visually
+    vi.advanceTimersByTime(30000); // 30 seconds
+    expect(screen.getByText(/09:00 AM/i)).toBeInTheDocument();
+
+    // Advance timers by a full minute
+    vi.advanceTimersByTime(30000); // 30 more seconds to make a full minute
     vi.setSystemTime(new Date('2024-07-19T09:01:00.000Z')); // Manually set for next minute check
-    vi.advanceTimersByTime(1000); // Advance for re-render
+    vi.advanceTimersByTime(1); // Advance by minimal time to trigger re-render if it runs on interval
     expect(screen.getByText(/09:01 AM/i)).toBeInTheDocument();
   });
 

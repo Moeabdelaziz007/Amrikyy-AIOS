@@ -79,7 +79,10 @@ interface GeolocationState {
 
 /**
  * Custom hook to fetch and manage the user's current geolocation.
- * @returns {object} An object containing the current `location` (GeolocationState | null) and any `error` (string | null).
+ * It requests geolocation permission and updates the `location` and `error` states accordingly.
+ * @returns {object} An object containing:
+ *   - `location`: `GeolocationState | null` - The current geographical coordinates, or null if not available.
+ *   - `error`: `string | null` - An error message if geolocation fails, or null otherwise.
  */
 const useGeolocation = () => {
     const { t } = useLanguage();

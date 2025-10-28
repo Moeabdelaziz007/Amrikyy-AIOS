@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { VideoIcon, SparklesIcon, UploadIcon } from '../Icons';
-import { generateVideoFromImage } from '../../services/geminiAdvancedService';
-import { fileToBase64 } from '../../utils/fileUtils';
-import { UserAccount, AppID } from '../../types';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { VideoIcon, SparklesIcon, UploadIcon } from '../Icons.tsx';
+import { generateVideoFromImage } from '../../services/geminiAdvancedService.ts';
+import { fileToBase64 } from '../../utils/fileUtils.ts';
+import { UserAccount, AppID } from '../../types.ts';
+import { useLanguage } from '../../contexts/LanguageContext.tsx';
 
 /**
  * Defines the status of video generation.
@@ -48,6 +48,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
     // Checks if an API key has been selected on component mount.
     useEffect(() => {
         const checkKey = async () => {
+            // @ts-ignore
             const hasKey = await window.aistudio.hasSelectedApiKey();
             setIsKeySelected(hasKey);
         };
@@ -78,6 +79,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
      * Opens the API key selection dialog and updates the `isKeySelected` state.
      */
     const handleSelectKey = async () => {
+        // @ts-ignore
         await window.aistudio.openSelectKey();
         setIsKeySelected(true); // Assume success to improve UX
     };
@@ -117,7 +119,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
                     setStatus('error');
                     setMessage(result.message);
                      setUserAccount(prev => ({ ...prev, aiCredits: prev.aiCredits + VIDEO_GENERATION_COST })); // Refund credits on error
-                    if (result.message.includes('API key is invalid')) {
+                    if (result.message.includes('API key is invalid') || result.message.includes('Requested entity was not found')) {
                         setIsKeySelected(false); // Reset key state on invalid key error
                     }
                 }

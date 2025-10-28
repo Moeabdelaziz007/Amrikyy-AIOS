@@ -1,29 +1,28 @@
 import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
-import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types';
-import Dock from './components/Dock';
-import AppLauncher from './components/AppLauncher';
-import PoweredByGemini from './components/PoweredByGemini';
-import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget.tsx';
-import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService';
-import { createCalendarEventFromPlan } from './services/geminiAdvancedService';
-import DesktopAppsGrid from './components/DesktopAppsGrid';
-import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons';
-import { useLanguage } from './contexts/LanguageContext';
-import AnimatedBackground from './components/AnimatedBackground';
+import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types.ts';
+import Dock from './components/Dock.tsx';
+import AppLauncher from './components/AppLauncher.tsx';
+import PoweredByGemini from './components/PoweredByGemini.tsx';
+import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService.ts';
+import { createCalendarEventFromPlan } from './services/geminiAdvancedService.ts';
+import DesktopAppsGrid from './components/DesktopAppsGrid.tsx';
+import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon, DocsIcon } from './components/Icons.tsx';
+import { useLanguage } from './contexts/LanguageContext.tsx';
+import AnimatedBackground from './components/AnimatedBackground.tsx';
 import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
-import { NotificationCenter } from './components/NotificationCenter';
-import { useNotification } from './contexts/NotificationContext';
+import { NotificationCenter } from './components/NotificationCenter.tsx';
+import { useNotification } from './contexts/NotificationContext.tsx';
 import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx';
-import { useUserBehavior } from './contexts/UserBehaviorContext';
-import GlobalVoiceControl from './components/GlobalVoiceControl';
-import { useGoogleAuth } from './contexts/GoogleAuthContext';
+import { useUserBehavior } from './contexts/UserBehaviorContext.tsx';
+import GlobalVoiceControl from './components/GlobalVoiceControl.tsx';
+import { useGoogleAuth } from './contexts/GoogleAuthContext.tsx';
 import ProjectsWidget from './components/widgets/ProjectsWidget.tsx';
 import TasksWidget from './components/widgets/TasksWidget.tsx';
-import CreatePostModal from './components/CreatePostModal';
-import { bounties as mockBounties } from './data/bounties';
-import LoadingScreen from './components/LoadingScreen';
-import { initialNexusPosts as mockNexusPosts } from './data/nexus';
-import { TranslationKey } from './i18n';
+import CreatePostModal from './components/SharePreview.tsx';
+import { bounties as mockBounties } from './data/bounties.ts';
+import LoadingScreen from './components/LoadingScreen.tsx';
+import { initialNexusPosts as mockNexusPosts } from './data/nexus.ts';
+import { TranslationKey } from './i18n.ts';
 
 // Lazy load all application components for code-splitting and performance
 const Window = lazy(() => import('./components/Window.tsx'));
@@ -32,67 +31,77 @@ const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubW
 const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx'));
 const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx'));
 const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx'));
+const WorkflowDashboardWidget = lazy(() => import('./components/widgets/WorkflowDashboardWidget.tsx'));
 
 /**
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
  * This enables code-splitting for application components.
  */
-const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType<any>>> = {
-  [AppID.chat]: lazy(() => import('./components/apps/ChatApp')),
-  [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp')),
-  [AppID.files]: lazy(() => import('./components/apps/FilesApp')),
-  [AppID.settings]: lazy(() => import('./components/apps/SettingsApp')),
-  [AppID.luna]: lazy(() => import('./components/apps/LunaApp')),
-  [AppID.karim]: lazy(() => import('./components/apps/KarimApp')),
-  [AppID.scout]: lazy(() => import('./components/apps/ScoutApp')),
-  [AppID.maya]: lazy(() => import('./components/apps/MayaApp')),
-  [AppID.jules]: lazy(() => import('./components/apps/JulesApp')),
-  [AppID.voice]: lazy(() => import('./components/apps/VoiceAssistantApp')),
-  [AppID.workflow]: lazy(() => import('./components/apps/WorkflowStudioApp')),
-  [AppID.travelAgent]: lazy(() => import('./components/apps/TravelAgentApp')),
-  [AppID.marketing]: lazy(() => import('./components/apps/MarketingApp')),
-  [AppID.travelPlanViewer]: lazy(() => import('./components/apps/TravelPlanViewerApp')),
-  [AppID.search]: lazy(() => import('./components/apps/SearchApp')),
-  [AppID.maps]: lazy(() => import('./components/apps/MapsApp')),
-  [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp')),
-  [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp')),
-  [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp')),
-  [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp')),
-  [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp')),
-  [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp')),
-  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')),
-  [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp')),
-  [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp')),
-  [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp')),
-  [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp')),
-  [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp')),
-  [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp')),
-  [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.store]: lazy(() => import('./components/apps/StoreApp')),
-  [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp')),
-  [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp')),
-  [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp')),
-  [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp')),
-  [AppID.geminiAiNews]: lazy(() => import('./components/apps/GeminiAiNewsApp')),
-  [AppID.controlPanel]: lazy(() => import('./components/apps/ControlPanelApp')),
-  [AppID.atlasFinance]: lazy(() => import('./components/apps/AtlasApp')),
-  [AppID.cognitiveCanvas]: lazy(() => import('./components/apps/CognitiveCanvasApp')),
-  [AppID.veridianId]: lazy(() => import('./components/apps/VeridianIdApp')),
-  [AppID.translateHub]: lazy(() => import('./components/apps/TranslateHubApp')),
-  [AppID.nexusGo]: lazy(() => import('./components/apps/NexusGoApp')),
-  [AppID.nexusFeed]: lazy(() => import('./components/apps/NexusFeedApp')),
-  [AppID.nexusProfile]: lazy(() => import('./components/apps/NexusProfileApp')),
-  [AppID.travelServices]: lazy(() => import('./components/apps/TravelServicesApp')),
+const appComponents: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  [AppID.chat]: lazy(() => import('./components/apps/ChatApp.tsx')),
+  [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp.tsx')),
+  [AppID.files]: lazy(() => import('./components/apps/FilesApp.tsx')),
+  [AppID.settings]: lazy(() => import('./components/apps/SettingsApp.tsx')),
+  [AppID.luna]: lazy(() => import('./components/apps/LunaApp.tsx')),
+  [AppID.karim]: lazy(() => import('./components/apps/KarimApp.tsx')),
+  [AppID.scout]: lazy(() => import('./components/apps/ScoutApp.tsx')),
+  [AppID.maya]: lazy(() => import('./components/apps/MayaApp.tsx')),
+  [AppID.jules]: lazy(() => import('./components/apps/JulesApp.tsx')),
+  [AppID.voice]: lazy(() => import('./components/apps/VoiceAssistantApp.tsx')),
+  [AppID.workflow]: lazy(() => import('./components/apps/WorkflowStudioApp.tsx')),
+  [AppID.travelAgent]: lazy(() => import('./components/apps/TravelAgentApp.tsx')),
+  [AppID.marketing]: lazy(() => import('./components/apps/MarketingApp.tsx')),
+  [AppID.travelPlanViewer]: lazy(() => import('./components/apps/TravelPlanViewerApp.tsx')),
+  [AppID.search]: lazy(() => import('./components/apps/SearchApp.tsx')),
+  [AppID.maps]: lazy(() => import('./components/apps/MapsApp.tsx')),
+  [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp.tsx')),
+  [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp.tsx')),
+  [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp.tsx')),
+  [AppID.audio]: lazy(() => import('./components/apps/AudioStudioApp.tsx')),
+  [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp.tsx')),
+  [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp.tsx')),
+  [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp.tsx')),
+  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp.tsx')),
+  [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp.tsx')),
+  [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp.tsx')),
+  [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp.tsx')),
+  [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp.tsx')),
+  [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp.tsx')),
+  [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp.tsx')),
+  [AppID.avatarStudio]: lazy(() => import('./components/apps/AvatarStudioApp.tsx')),
+  [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.store]: lazy(() => import('./components/apps/StoreApp.tsx')),
+  [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp.tsx')),
+  [AppID.liveConversation]: lazy(() => import('./components/apps/LiveConversationApp.tsx')),
+  [AppID.imageAnalyzer]: lazy(() => import('./components/apps/ImageAnalyzerApp.tsx')),
+  [AppID.agora]: lazy(() => import('./components/apps/AgoraApp.tsx')),
+  [AppID.nexusChat]: lazy(() => import('./components/apps/NexusChatApp.tsx')),
+  [AppID.devConsole]: lazy(() => import('./components/apps/DevConsoleApp.tsx')),
+  [AppID.apiDocs]: lazy(() => import('./components/apps/ApiDocsApp.tsx')),
+  [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp.tsx')),
+  [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp.tsx')),
+  [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp.tsx')),
+  [AppID.geminiAiNews]: lazy(() => import('./components/apps/GeminiAiNewsApp.tsx')),
+  [AppID.controlPanel]: lazy(() => import('./components/apps/ControlPanelApp.tsx')),
+  [AppID.atlasFinance]: lazy(() => import('./components/apps/AtlasApp.tsx')),
+  [AppID.cognitiveCanvas]: lazy(() => import('./components/apps/CognitiveCanvasApp.tsx')),
+  [AppID.veridianId]: lazy(() => import('./components/apps/VeridianIdApp.tsx')),
+  [AppID.translateHub]: lazy(() => import('./components/apps/TranslateHubApp.tsx')),
+  [AppID.nexusGo]: lazy(() => import('./components/apps/NexusGoApp.tsx')),
+  [AppID.nexusFeed]: lazy(() => import('./components/apps/NexusFeedApp.tsx')),
+  [AppID.nexusProfile]: lazy(() => import('./components/apps/NexusProfileApp.tsx')),
+  [AppID.travelServices]: lazy(() => import('./components/apps/TravelServicesApp.tsx')),
+  [AppID.docsViewer]: lazy(() => import('./components/apps/DocsViewerApp.tsx')),
   // Existing agents (AgentProfileApp is a generic viewer for them)
-  [AppID.atlas]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.cortex]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.orion]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.helios]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.leo]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.zara]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.rex]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.clio]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.pricing]: lazy(() => import('./components/apps/SettingsApp')),
+  [AppID.atlas]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.cortex]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.orion]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.helios]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.leo]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.zara]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.rex]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.clio]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.pricing]: lazy(() => import('./components/apps/SettingsApp.tsx')),
 };
 
 /**
@@ -127,7 +136,7 @@ const AppLoadingSpinner: React.FC = () => (
  * @returns {JSX.Element} The rendered Amrikyy AI OS.
  */
 const App: React.FC = () => {
-  const [isOSLoaded, setIsOSLoaded] = useState(false);
+  const [isOSLoaded, setIsOSLoaded] = useState(true);
   const [windows, setWindows] = useState<WindowInstance[]>([]);
   const [nextZIndex, setNextZIndex] = useState(10);
   const [nextId, setNextId] = useState(1);
@@ -177,6 +186,8 @@ const App: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [gmailMessages, setGmailMessages] = useState<GmailMessage[]>([]);
+  const [isLoadingWorkspaceData, setIsLoadingWorkspaceData] = useState(false);
+  const [isLoadingCurrentWeather, setIsLoadingCurrentWeather] = useState(false);
 
   /**
    * Handles a credit transaction, updating the user's AI credits and transaction history.
@@ -348,52 +359,43 @@ const App: React.FC = () => {
     }, [addNotification, completedBounties, handleCompleteBounty, handleCreditTransaction]);
 
   /**
-   * Simulates the operating system's loading process.
-   * Sets `isOSLoaded` to `true` after a delay.
-   */
-  useEffect(() => {
-    const loadingTimer = setTimeout(() => {
-      setIsOSLoaded(true);
-    }, 5000); // Adjust based on desired loading time
-    return () => clearTimeout(loadingTimer);
-  }, []);
-
-  /**
    * Fetches Google Workspace data (Calendar events, Drive files, Gmail messages)
    * when the user signs in. Clears data on sign-out.
+   * Displays loading state while fetching and sends notifications on errors.
    */
   useEffect(() => {
     const fetchWorkspaceData = async () => {
+      setIsLoadingWorkspaceData(true);
       if (isSignedIn) {
-        const results = await Promise.allSettled([
-          getCalendarEvents(),
-          getDriveFiles(),
-          getGmailMessages(),
-        ]);
-
-        if (results[0].status === 'fulfilled') setCalendarEvents(results[0].value);
-        else addNotification(results[0].reason.message, 'error');
-
-        if (results[1].status === 'fulfilled') setDriveFiles(results[1].value);
-        else addNotification(results[1].reason.message, 'error');
-
-        if (results[2].status === 'fulfilled') setGmailMessages(results[2].value);
-        else addNotification(results[2].reason.message, 'error');
-
+        try {
+          const [events, files, messages] = await Promise.all([
+            getCalendarEvents(),
+            getDriveFiles(),
+            getGmailMessages(),
+          ]);
+          setCalendarEvents(events);
+          setDriveFiles(files);
+          setGmailMessages(messages);
+        } catch (error: any) {
+          addNotification(error.message || "Failed to sync Google Workspace.", 'error', 'System');
+        }
       } else {
         setCalendarEvents([]);
         setDriveFiles([]);
         setGmailMessages([]);
       }
+      setIsLoadingWorkspaceData(false);
     };
     fetchWorkspaceData();
   }, [isSignedIn, addNotification]);
   
   /**
    * Fetches ambient weather data using geolocation and updates it periodically.
+   * Displays loading state while fetching and handles geolocation errors gracefully.
    */
   useEffect(() => {
     const fetchWeather = () => {
+      setIsLoadingCurrentWeather(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           // Mock weather data based on location (simplified)
@@ -407,10 +409,21 @@ const App: React.FC = () => {
             high: Math.floor(Math.random() * 5) + 25,
             low: Math.floor(Math.random() * 5) + 15,
           });
+          setIsLoadingCurrentWeather(false);
         },
         (error) => {
-            addNotification(`Geolocation failed: ${error.message}. Weather will be unavailable.`, 'warning');
-            setCurrentWeather(null);
+          console.error('Geolocation failed:', error);
+          addNotification(`Could not get location: ${error.message}. Please check your browser's location permissions.`, 'error', 'System');
+          // Provide default/fallback weather data on error
+          setCurrentWeather({
+            location: 'Unknown',
+            temp: 20,
+            condition: 'Clear',
+            icon: 'sunny',
+            high: 25,
+            low: 15,
+          });
+          setIsLoadingCurrentWeather(false);
         }
       );
     };
@@ -418,10 +431,10 @@ const App: React.FC = () => {
     fetchWeather();
     const interval = setInterval(fetchWeather, 3600000); // Update every hour
     return () => clearInterval(interval);
-  }, []);
+  }, [addNotification]);
 
   /**
-   * Populates `nexusProfile` related state with mock data if it is not already set.
+   * Populates `nexusProfile` related state with mock data if it exists and is not already set.
    * This ensures basic user account information is available for display purposes.
    */
   useEffect(() => {
@@ -499,8 +512,8 @@ const App: React.FC = () => {
     [AppID.nexusProfile]: t('app_titles.nexusProfile'),
     [AppID.travelServices]: t('app_titles.travelServices'),
     [AppID.pricing]: t('app_titles.pricing'),
+    [AppID.docsViewer]: t('app_titles.docsViewer' as TranslationKey),
     // Agent aliases pointing to AgentProfileApp
-    // FIX: Cast string literals to TranslationKey to fix TypeScript type errors.
     [AppID.atlas]: t('app_titles.atlas' as TranslationKey),
     [AppID.cortex]: t('app_titles.cortex' as TranslationKey),
     [AppID.orion]: t('app_titles.orion' as TranslationKey),
@@ -706,7 +719,9 @@ const App: React.FC = () => {
   };
   
   /** The ID of the currently active (focused) window. */
-  const activeWindowId = windows.length > 0 ? windows.filter(w => !w.isMinimized).sort((a, b) => b.zIndex - a.zIndex)[0]?.id : null;
+  const activeWindowId = useMemo(() => {
+    return windows.length > 0 ? windows.filter(w => !w.isMinimized).sort((a, b) => b.zIndex - a.zIndex)[0]?.id : null;
+  }, [windows]);
   
   /**
    * Memoized list of applications displayed on the desktop grid.
@@ -726,6 +741,7 @@ const App: React.FC = () => {
     { id: AppID.translateHub, name: t('app_titles.translateHub'), icon: TranslateIcon },
     { id: AppID.controlPanel, name: t('app_titles.controlPanel'), icon: ControlPanelIcon },
     { id: AppID.agentForge, name: t('desktop_apps.agentForge'), icon: AgentForgeIcon },
+    { id: AppID.docsViewer, name: t('desktop_apps.docsViewer' as TranslationKey), icon: DocsIcon },
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
@@ -765,11 +781,12 @@ const App: React.FC = () => {
     { id: AppID.files, name: t('app_launcher.files'), icon: FileIcon },
     { id: AppID.settings, name: t('app_launcher.settings'), icon: SettingsIcon },
     { id: AppID.terminal, name: t('app_launcher.terminal'), icon: TerminalIcon },
+    { id: AppID.docsViewer, name: t('app_launcher.docsViewer' as TranslationKey), icon: DocsIcon },
     { id: AppID.devToolkit, name: t('app_launcher.devToolkit'), icon: DevToolkitIcon },
     { id: AppID.growthHub, name: t('app_launcher.growthHub'), icon: GrowthHubIcon },
     { id: AppID.resourceHub, name: t('app_launcher.resourceHub'), icon: ResourceHubIcon },
     { id: AppID.geminiAiNews, name: t('app_launcher.geminiAiNews'), icon: NewsIcon },
-    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), icon: ControlPanelIcon }, // Removed duplicate controlPanel
+    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), icon: ControlPanelIcon },
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
@@ -797,7 +814,7 @@ const App: React.FC = () => {
         return (
           <>
             <Suspense fallback={null}><ProactiveSuggestionsWidget onOpenApp={openWindow} /></Suspense>
-            <WorkflowDashboardWidget onOpenApp={openWindow} />
+            <Suspense fallback={null}><WorkflowDashboardWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><CryptoDashboardWidget /></Suspense>
           </>
         );
@@ -807,7 +824,7 @@ const App: React.FC = () => {
           <>
             <Suspense fallback={null}><QuickActionsWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><GeminiAiNewsWidget onOpenApp={openWindow} /></Suspense>
-            <WorkflowDashboardWidget onOpenApp={openWindow} />
+            <Suspense fallback={null}><WorkflowDashboardWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><NexusFeedWidget posts={nexusPosts} /></Suspense>
             <Suspense fallback={null}><CryptoDashboardWidget /></Suspense>
           </>
@@ -963,9 +980,10 @@ const App: React.FC = () => {
                               props.onPurchase = handlePurchase;
                           } else if (window.appId === AppID.creatorStudio) {
                                 props.projects = projects;
-                                props.tasks = tasks; // Ensure tasks are passed to CreatorStudio
+                                props.tasks = tasks;
+                                props.setTasks = setTasks;
                                 props.onAddProject = (p: Project) => { setProjects(prev => [p, ...prev]); logAction(AppID.creatorStudio, { event: 'project_created', projectName: p.name }); };
-                                props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]); // Ensure onAddTask is passed
+                                props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]);
                                 props.onShare = setShareContent;
                                 props.onOpenApp = openWindow;
                           } else if (window.appId === AppID.growthHub) {
@@ -987,10 +1005,10 @@ const App: React.FC = () => {
                                 props.onLikePost = handleLikePost;
                                 props.onAddComment = handleAddComment;
                                 props.onBoostPost = handleBoostPost;
-                                props.onCreatePost = setShareContent; // Open CreatePostModal
+                                props.onCreatePost = setShareContent;
                           } else if (window.appId === AppID.nexusProfile) {
                                 props.userAccount = userAccount;
-                                props.nexusPosts = nexusPosts.filter(p => p.osId === userAccount.osId); // Filter for user's posts
+                                props.nexusPosts = nexusPosts.filter(p => p.osId === userAccount.osId);
                                 props.onOpenApp = openWindow;
                                 props.creditTransactions = creditTransactions;
                           } else if (window.appId === AppID.travelServices) {
@@ -1003,9 +1021,11 @@ const App: React.FC = () => {
                                     rate: settings.speechRate,
                                     pitch: settings.speechPitch,
                                 };
+                          } else if (window.appId === AppID.cognitoBrowser) {
+                                props.onOpenApp = openWindow;
                           }
                           
-                          return <AppComponent {...props} onOpenApp={openWindow} />;
+                          return <AppComponent {...props} />;
                       })()
                     }
                   </Suspense>

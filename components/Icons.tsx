@@ -105,6 +105,10 @@ export const LoadIcon: React.FC<{className?: string}> = ({className}) => (<Mater
 export const UpTimeIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>hourglass_empty</MaterialIcon>);
 /** Error icon. */
 export const ErrorIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>error</MaterialIcon>);
+/** Globe/language icon. */
+export const GlobeIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>language</MaterialIcon>);
+/** Book icon for documentation. */
+export const DocsIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>menu_book</MaterialIcon>);
 
 
 // Agent Icons (using generic smart_toy for most)

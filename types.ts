@@ -80,6 +80,7 @@ export enum AppID {
   nexusFeed = 'nexusFeed',
   nexusProfile = 'nexusProfile',
   travelServices = 'travelServices',
+  docsViewer = 'docsViewer',
   atlas = 'atlas',
   cortex = 'cortex',
   orion = 'orion',
@@ -445,6 +446,9 @@ export interface Task {
     text: string;
     completed: boolean;
     projectId?: string;
+    createdAt: string; // ISO string
+    dueDate?: string; // ISO string (YYYY-MM-DD)
+    priority: 'Low' | 'Medium' | 'High';
 }
 
 /**

@@ -1,0 +1,66 @@
+{
+      "documentation": {
+        "apps": [
+          {
+            "id": "chat",
+            "name": { "en": "AI Chat", "ar": "دردشة الذكاء الاصطناعي" },
+            "description": {
+              "en": "Interact with Maya, your AI travel assistant. Ask questions, get recommendations, and plan your adventures.",
+              "ar": "تفاعل مع مايا، مساعدة السفر الذكية. اطرح الأسئلة، احصل على توصيات، وخطط لمغامراتك."
+            },
+            "how_to_use": {
+              "en": "Type your message in the input box at the bottom and press Enter or the send button. The conversation history is displayed above. You can also click the speaker icon to hear the AI's response.",
+              "ar": "اكتب رسالتك في مربع الإدخال بالأسفل واضغط على Enter أو زر الإرسال. يظهر سجل المحادثة أعلاه. يمكنك أيضًا النقر على أيقونة مكبر الصوت لسماع رد الذكاء الاصطناعي."
+            }
+          },
+          {
+            "id": "creatorStudio",
+            "name": { "en": "Creator Studio", "ar": "استوديو المبدعين" },
+            "description": {
+              "en": "The central hub for managing your creative projects, tasks, and interacting with Atlas, the business and monetization strategist.",
+              "ar": "المركز الرئيسي لإدارة مشاريعك الإبداعية ومهامك، والتفاعل مع أطلس، استراتيجي الأعمال وتحقيق الدخل."
+            },
+            "how_to_use": {
+              "en": "Use the tabs to navigate between your Dashboard, the AI Assistant, and creating a new Project or Task. Share your completed projects to the Nexus Feed.",
+              "ar": "استخدم علامات التبويب للتنقل بين لوحة التحكم، ومساعد الذكاء الاصطناعي، وإنشاء مشروع أو مهمة جديدة. شارك مشاريعك المكتملة على موجز نيكسوس."
+            }
+          },
+          {
+            "id": "workflow",
+            "name": { "en": "Workflow Studio", "ar": "استوديو سير العمل" },
+            "description": {
+              "en": "Visually design and execute complex, multi-agent automation workflows. Drag and drop agents to create a sequence of tasks.",
+              "ar": "صمم ونفذ بصريًا مهام سير عمل آلية معقدة ومتعددة الوكلاء. اسحب وأفلت الوكلاء لإنشاء تسلسل من المهام."
+            },
+            "how_to_use": {
+              "en": "Drag agents from the sidebar onto the canvas. Connect them by clicking the dots on the sides of the nodes to create a workflow. The OS can execute these workflows to automate complex tasks.",
+              "ar": "اسحب الوكلاء من الشريط الجانبي إلى اللوحة. قم بتوصيلهم عن طريق النقر على النقاط الموجودة على جوانب العقد لإنشاء سير عمل. يمكن لنظام التشغيل تنفيذ مهام سير العمل هذه لأتمتة المهام المعقدة."
+            }
+          },
+          {
+            "id": "agentForge",
+            "name": { "en": "Agent Forge", "ar": "ورشة الوكلاء" },
+            "description": {
+              "en": "Create and deploy your own custom AI agents. Define their persona, role, and equip them with a unique set of skills from the system library.",
+              "ar": "أنشئ وانشر وكلاء ذكاء اصطناعي مخصصين. حدد شخصيتهم ودورهم وجهزهم بمجموعة فريدة من المهارات من مكتبة النظام."
+            },
+            "how_to_use": {
+              "en": "Define the agent's role and get AI-powered suggestions for its name and skills, or configure it manually. Once defined, click 'Deploy Agent' to make it available across the OS.",
+              "ar": "حدد دور الوكيل واحصل على اقتراحات مدعومة بالذكاء الاصطناعي لاسمه ومهاراته، أو قم بتكوينه يدويًا. بمجرد التحديد، انقر فوق 'نشر الوكيل' لجعله متاحًا عبر نظام التشغيل."
+            }
+          },
+          {
+            "id": "store",
+            "name": { "en": "Gemini Store", "ar": "متجر Gemini" },
+            "description": {
+              "en": "Discover and install community-created AI agents. Browse by category, search for specific functionalities, and expand your OS capabilities.",
+              "ar": "اكتشف وثبت وكلاء ذكاء اصطناعي أنشأهم المجتمع. تصفح حسب الفئة، وابحث عن وظائف محددة، ووسع قدرات نظام التشغيل الخاص بك."
+            },
+            "how_to_use": {
+              "en": "Browse the available agents. Click on an agent to see details. Click 'Get' to install it. Pro users have access to premium agents.",
+              "ar": "تصفح الوكلاء المتاحين. انقر فوق وكيل لرؤية التفاصيل. انقر فوق 'الحصول' لتثبيته. يتمتع مستخدمو Pro بإمكانية الوصول إلى الوكلاء المميزين."
+            }
+          }
+        ]
+      }
+    }
