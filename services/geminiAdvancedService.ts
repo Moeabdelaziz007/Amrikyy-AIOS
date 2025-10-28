@@ -1,8 +1,8 @@
 import { GoogleGenAI, GenerateContentResponse, Content, Type, Modality, FunctionDeclaration } from "@google/genai";
-import { TravelPlan, Workflow, SystemVoice, WorkflowNode, WorkflowConnection, ExecutionLogEntry, SkillID, Engram, UserAction, DashboardLayout, AppID, SocialPost, SharedContent, RideOption, WeatherData, FastFoodRestaurant, CleaningService, NightlifeEvent, CurrentWeather, ForecastDay, FinancialNews, FinancialAnalysis, FlightOption, FlightSearchDetails, TrendingItem, CustomAgent } from "../types";
-import { skills } from '../data/skills';
-import { initialNexusPosts } from "../data/nexus";
-import { aiNewsData, aiMarketData } from "../data/aiNews";
+import { TravelPlan, Workflow, SystemVoice, WorkflowNode, WorkflowConnection, ExecutionLogEntry, SkillID, Engram, UserAction, DashboardLayout, AppID, SocialPost, SharedContent, RideOption, WeatherData, FastFoodRestaurant, CleaningService, NightlifeEvent, CurrentWeather, ForecastDay, FinancialNews, FinancialAnalysis, FlightOption, FlightSearchDetails, TrendingItem, CustomAgent } from "../types.ts";
+import { skills } from '../data/skills.ts';
+import { initialNexusPosts } from "../data/nexus.ts";
+import { aiNewsData, aiMarketData } from "../data/aiNews.ts";
 
 const API_KEY = process.env.API_KEY;
 
@@ -793,26 +793,52 @@ export const interpretVoiceCommand = async (transcript: string): Promise<{ actio
 
 export const generateProactiveSuggestion = async (actions: UserAction[]): Promise<{ title: string, suggestions: { text: string, actionAppId?: AppID }[] }> => {
     if (!API_KEY) {
+        await new Promise(resolve => setTimeout(resolve, 500));
         return { title: 'Mock Suggestions', suggestions: [{ text: 'Open the travel planner?', actionAppId: AppID.travelAgent }] };
     }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const prompt = `Based on the user's recent actions: ${JSON.stringify(actions)}, provide a title and a list of 1-2 proactive suggestions. Each suggestion should have text and an optional actionAppId.`;
+    const prompt = `Based on the user's recent actions: ${JSON.stringify(actions)}, provide a title and a list of 1-2 proactive suggestions. Each suggestion should have text and an optional actionAppId if it directly relates to opening an app.`;
+
+    const createSuggestionsTool: FunctionDeclaration = {
+        name: 'createProactiveSuggestions',
+        description: 'Creates a list of proactive suggestions for the user based on their recent actions.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                title: { type: Type.STRING, description: "A creative title for the suggestion box, e.g., 'Creative Spark?' or 'Next Steps?'." },
+                suggestions: {
+                    type: Type.ARRAY,
+                    description: "A list of 1 to 2 suggestion objects.",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            text: { type: Type.STRING, description: "The suggestion text to show the user." },
+                            actionAppId: { type: Type.STRING, description: "Optional. If the suggestion is to open an app, provide its AppID." }
+                        },
+                        required: ["text"]
+                    }
+                }
+            },
+            required: ["title", "suggestions"]
+        }
+    };
+
     try {
-        const response = await ai.models.generateContent({
+        const response: GenerateContentResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                responseMimeType: 'application/json',
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING },
-                        suggestions: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { text: { type: Type.STRING }, actionAppId: { type: Type.STRING } } } }
-                    }
-                }
+                tools: [{ functionDeclarations: [createSuggestionsTool] }]
             }
         });
-        return JSON.parse(response.text.trim());
+
+        const functionCall = response.functionCalls?.find(fc => fc.name === 'createProactiveSuggestions');
+        if (functionCall?.args) {
+            return functionCall.args as any;
+        }
+
+        throw new Error("AI did not generate a valid suggestion structure.");
+
     } catch (error) {
         console.error("Error generating proactive suggestion:", error);
         throw new Error("Failed to generate proactive suggestion.");
@@ -1103,5 +1129,24 @@ export const runSystemDiagnostics = async (): Promise<string> => {
     } catch (error) {
         console.error("Error running system diagnostics:", error);
         throw new Error("Failed to run system diagnostics.");
+    }
+};
+
+export const generateDocsSummary = async (query: string, lang: 'en' | 'ar'): Promise<string> => {
+    if (!API_KEY) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return lang === 'ar' ? `هذا ملخص محاكى لـ: ${query}` : `This is a mock summary for: ${query}`;
+    }
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+    try {
+        const model = 'gemini-2.5-flash';
+        const prompt = lang === "ar"
+            ? `قدّم ملخصًا ذكيًا وواضحًا حول: ${query}`
+            : `Generate a concise, intelligent summary about: ${query}`;
+        const response = await ai.models.generateContent({ model, contents: prompt });
+        return response.text;
+    } catch (error) {
+        console.error("AI Docs Summary Error:", error);
+        throw new Error(lang === "ar" ? "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي." : "AI request failed.");
     }
 };

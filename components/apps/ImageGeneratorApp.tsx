@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ImageIcon, SparklesIcon, UploadIcon } from '../Icons';
-import { generateImage, editImage } from '../../services/geminiAdvancedService';
-import { fileToBase64 } from '../../utils/fileUtils';
-import { AppID } from '../../types';
+import { ImageIcon, SparklesIcon, UploadIcon } from '../Icons.tsx';
+import { generateImage, editImage } from '../../services/geminiAdvancedService.ts';
+import { fileToBase64 } from '../../utils/fileUtils.ts';
+import { AppID } from '../../types.ts';
 
 /**
  * Defines the mode of operation for the image generator.

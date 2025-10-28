@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Workspace, User } from '../../types';
-import { SparklesIcon, SendIcon, YouTubeIcon } from '../Icons';
-import { useNotification } from '../../contexts/NotificationContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { Workspace, User } from '../../types.ts';
+import { SparklesIcon, SendIcon, YouTubeIcon } from '../Icons.tsx';
+import { useNotification } from '../../contexts/NotificationContext.tsx';
+import { useLanguage } from '../../contexts/LanguageContext.tsx';
 
 const mockUsers: User[] = [
     { id: '1', name: 'You', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
@@ -88,64 +88,79 @@ const WorkspaceApp: React.FC = () => {
                         {workspace.musicPlaylist?.map(song => (
                             <div key={song.title} className="bg-black/20 p-3 rounded-lg flex justify-between items-center">
                                 <div>
+                                    {/* FIX: Incomplete className 'font' corrected to 'font-semibold' */}
                                     <p className="font-semibold">{song.title}</p>
-                                    <p className="text-sm text-text-muted">{song.artist}</p>
+                                    <p className="text-xs text-text-muted">{song.artist}</p>
                                 </div>
-                                <button><span className="material-symbols-outlined">play_arrow</span></button>
+                                <button className="p-2 rounded-full hover:bg-white/10">
+                                    <span className="material-symbols-outlined">play_arrow</span>
+                                </button>
                             </div>
                         ))}
                     </div>
                 );
             case 'youtube':
-                return <iframe src={workspace.youtubeUrl} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full"></iframe>;
+                return (
+                     <div className="p-4 h-full">
+                        <iframe 
+                            className="w-full h-full rounded-lg"
+                            src={workspace.youtubeUrl}
+                            title="YouTube video player" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowFullScreen>
+                        </iframe>
+                    </div>
+                );
             case 'whiteboard':
-                return <canvas ref={canvasRef} width="800" height="600" className="w-full h-full bg-transparent"></canvas>;
+                return (
+                    <div className="p-1 h-full">
+                        <canvas ref={canvasRef} className="w-full h-full bg-black/20 rounded-lg" role="canvas"></canvas>
+                    </div>
+                );
             case 'notes':
             default:
                 return (
-                    <textarea
+                     <textarea
                         value={workspace.notes}
                         onChange={(e) => setWorkspace(w => ({ ...w, notes: e.target.value }))}
-                        className="w-full h-full bg-transparent text-text-primary resize-none focus:outline-none leading-relaxed p-4"
+                        className="w-full h-full bg-transparent p-4 text-sm text-text-secondary font-mono focus:outline-none resize-none"
                     />
                 );
         }
     };
     
-    type TabID = 'notes' | 'music' | 'youtube' | 'whiteboard';
-    const tabs: {id: TabID, label: string, icon: string}[] = [
-        {id: 'notes', label: 'Notes', icon: 'description'},
-        {id: 'music', label: 'Music', icon: 'music_note'},
-        {id: 'youtube', label: 'YouTube', icon: 'play_circle'},
-        {id: 'whiteboard', label: 'Whiteboard', icon: 'draw'},
-    ];
-
     return (
         <div className="h-full w-full flex flex-col bg-bg-secondary rounded-b-md text-white overflow-hidden">
-            {/* Main Content Area */}
-            <main className="flex-1 flex flex-col">
-                <header className="flex-shrink-0 p-4 border-b border-border-color flex justify-between items-center">
-                    <h1 className="font-display text-2xl font-bold">{workspace.title}</h1>
-                    <div className="flex items-center">
-                        <div className="flex -space-x-2 mr-4">
-                            {workspace.members.map(member => (
-                                <img key={member.id} src={member.avatarUrl} alt={member.name} title={member.name} className="w-8 h-8 rounded-full border-2 border-bg-secondary" />
-                            ))}
-                        </div>
-                    </div>
-                </header>
-                <div className="flex-grow flex overflow-hidden">
-                     <aside className="w-48 border-r border-border-color p-2 flex flex-col gap-1">
-                        {tabs.map(tab => (
-                             <button key={tab.id} onClick={() => setWorkspace(w => ({...w, activeTab: tab.id}))} className={`w-full flex items-center gap-2 p-2 rounded-lg text-sm font-semibold text-left transition-colors ${workspace.activeTab === tab.id ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}>
-                                <span className="material-symbols-outlined text-base">{tab.icon}</span>
-                                {tab.label}
-                             </button>
+             <header className="flex-shrink-0 p-3 border-b border-border-color flex items-center justify-between">
+                <h1 className="font-bold text-base truncate pr-4">{workspace.title}</h1>
+                 <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                        {workspace.members.map(member => (
+                            <img key={member.id} src={member.avatarUrl} alt={member.name} className="w-8 h-8 rounded-full border-2 border-bg-secondary" title={member.name}/>
                         ))}
-                    </aside>
-                    <div className="flex-1 bg-black/20">{renderContent()}</div>
+                    </div>
+                    <button className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-accent text-white hover:bg-accent/80">Share</button>
                 </div>
-            </main>
+            </header>
+            <div className="flex-grow flex">
+                <nav className="w-48 border-r border-border-color p-3 space-y-1">
+                    <button onClick={() => setWorkspace(w => ({ ...w, activeTab: 'notes' }))} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${workspace.activeTab === 'notes' ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}>
+                        <span className="material-symbols-outlined text-base">description</span> Notes
+                    </button>
+                    <button onClick={() => setWorkspace(w => ({ ...w, activeTab: 'music' }))} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${workspace.activeTab === 'music' ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}>
+                        <span className="material-symbols-outlined text-base">music_note</span> Music
+                    </button>
+                     <button onClick={() => setWorkspace(w => ({ ...w, activeTab: 'youtube' }))} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${workspace.activeTab === 'youtube' ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}>
+                        <YouTubeIcon className="w-4 h-4" /> YouTube
+                    </button>
+                     <button onClick={() => setWorkspace(w => ({ ...w, activeTab: 'whiteboard' }))} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${workspace.activeTab === 'whiteboard' ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}>
+                        <span className="material-symbols-outlined text-base">draw</span> Whiteboard
+                    </button>
+                </nav>
+                <main className="flex-1">
+                    {renderContent()}
+                </main>
+            </div>
         </div>
     );
 };

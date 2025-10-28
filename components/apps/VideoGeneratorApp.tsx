@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { VideoIcon, SparklesIcon, UploadIcon } from '../Icons';
-import { generateVideoFromImage } from '../../services/geminiAdvancedService';
-import { fileToBase64 } from '../../utils/fileUtils';
-import { UserAccount, AppID } from '../../types';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { VideoIcon, SparklesIcon, UploadIcon } from '../Icons.tsx';
+import { generateVideoFromImage } from '../../services/geminiAdvancedService.ts';
+import { fileToBase64 } from '../../utils/fileUtils.ts';
+import { UserAccount, AppID } from '../../types.ts';
+import { useLanguage } from '../../contexts/LanguageContext.tsx';
 
 /**
  * Defines the status of video generation.

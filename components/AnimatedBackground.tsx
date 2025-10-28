@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { WeatherCondition } from '../types';
+import { WeatherCondition } from '../types.ts';
 
 /**
  * Props for the AnimatedBackground component.

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Message } from '../../types';
-import { SearchIcon, SparklesIcon } from '../Icons';
-import { groundedSearch } from '../../services/geminiAdvancedService';
+import { Message } from '../../types.ts';
+import { SearchIcon, SparklesIcon } from '../Icons.tsx';
+import { groundedSearch } from '../../services/geminiAdvancedService.ts';
 
 /**
  * The SearchApp component provides an AI-powered search interface.

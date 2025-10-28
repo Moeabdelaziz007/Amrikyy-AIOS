@@ -5,9 +5,12 @@ import { Task } from '../types';
 
 describe('TasksWidget', () => {
   const mockTasks: Task[] = [
-    { id: 't1', text: 'Prepare Q3 report', completed: false, projectId: 'p1' },
-    { id: 't2', text: 'Review design mockups', completed: true, projectId: 'p1' },
-    { id: 't3', text: 'Schedule team meeting', completed: false, projectId: 'p2' },
+    // FIX: Add missing `createdAt` and `priority` properties to match Task type.
+    { id: 't1', text: 'Prepare Q3 report', completed: false, projectId: 'p1', createdAt: new Date().toISOString(), priority: 'High' },
+    // FIX: Add missing `createdAt` and `priority` properties to match Task type.
+    { id: 't2', text: 'Review design mockups', completed: true, projectId: 'p1', createdAt: new Date().toISOString(), priority: 'Medium' },
+    // FIX: Add missing `createdAt` and `priority` properties to match Task type.
+    { id: 't3', text: 'Schedule team meeting', completed: false, projectId: 'p2', createdAt: new Date().toISOString(), priority: 'Low' },
   ];
 
   it('renders the "My Tasks" title', () => {

@@ -13,11 +13,7 @@
     "test": "vitest",
     "prepare": "husky"
   },
-  "dependencies": {
-    "@google/genai": "^1.27.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",

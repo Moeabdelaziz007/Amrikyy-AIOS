@@ -1,7 +1,8 @@
 
+
 import React from 'react';
-import { WorkflowIcon } from './Icons';
-import { AppID } from '../types';
+import { WorkflowIcon } from './Icons.tsx';
+import { AppID } from '../types.ts';
 
 /**
  * Props for the WorkflowDashboardWidget component.
@@ -15,43 +16,4 @@ interface WorkflowDashboardWidgetProps {
 }
 
 /**
- * The WorkflowDashboardWidget displays a summary of active workflows
- * and provides a quick action button to create a new workflow.
- * It simulates an ongoing workflow for demonstration purposes.
- * @param {WorkflowDashboardWidgetProps} props - The component props.
- * @returns {JSX.Element} The WorkflowDashboardWidget component.
- */
-const WorkflowDashboardWidget: React.FC<WorkflowDashboardWidgetProps> = ({ onOpenApp }) => {
-    return (
-        <div className="workflow-dashboard-widget" aria-label="Active Workflows Dashboard">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                    <WorkflowIcon className="text-neon-cyan text-lg" aria-hidden="true" />
-                    <h2 className="font-medium text-sm">Active Workflows</h2>
-                </div>
-                <button 
-                    onClick={() => onOpenApp(AppID.workflow)} 
-                    className="text-xs bg-neon-cyan/80 hover:bg-neon-cyan text-black font-semibold px-2 py-1 rounded transition-colors"
-                    aria-label="Create new workflow"
-                >
-                    New +
-                </button>
-            </div>
-            <div className="space-y-3 p-4">
-                {/* Mock Active Workflow */}
-                <div role="status" aria-label="Workflow: Generating Travel Plan for Tokyo, 75% complete. Agent Karim optimizing budget.">
-                    <div className="flex justify-between items-center mb-1">
-                        <p className="text-sm font-semibold">Generating Travel Plan: Tokyo</p>
-                        <p className="text-xs font-mono text-neon-cyan">75%</p>
-                    </div>
-                    <div className="w-full bg-black/30 rounded-full h-1">
-                        <div className="bg-neon-cyan h-1 rounded-full" style={{ width: '75%' }}></div>
-                    </div>
-                    <p className="text-xs text-text-muted mt-1">Agent: Karim - Optimizing Budget</p>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default WorkflowDashboardWidget;
+ *

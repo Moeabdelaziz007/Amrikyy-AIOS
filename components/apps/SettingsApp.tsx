@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Settings, SettingsAppProps, Theme, WallpaperID, WindowStyle, SystemVoice, DashboardLayout, VoiceOption, CreditTransaction, CreditTransactionType } from '../../types';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { voices } from '../../data/voices';
+import { Settings, SettingsAppProps, Theme, WallpaperID, WindowStyle, SystemVoice, DashboardLayout, VoiceOption, CreditTransaction, CreditTransactionType } from '../../types.ts';
+import { useLanguage } from '../../contexts/LanguageContext.tsx';
+import { voices } from '../../data/voices.ts';
 // FIX: Imported suggestDashboardLayout from geminiAdvancedService
-import { suggestDashboardLayout } from '../../services/geminiAdvancedService';
-import { useGoogleAuth } from '../../contexts/GoogleAuthContext';
+import { suggestDashboardLayout } from '../../services/geminiAdvancedService.ts';
+import { useGoogleAuth } from '../../contexts/GoogleAuthContext.tsx';
 // FIX: Imported TranslationKey
-import { TranslationKey } from '../../i18n';
+import { TranslationKey } from '../../i18n.ts';
 
 /**
  * Defines the available sections within the Settings application.

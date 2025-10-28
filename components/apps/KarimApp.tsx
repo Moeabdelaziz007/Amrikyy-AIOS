@@ -1,8 +1,8 @@
 import React from 'react';
-import { Agent } from '../../types';
-import HologramCard from '../HologramCard';
-import { agents } from '../../data/agents';
-import { skills } from '../../data/skills';
+import { Agent } from '../../types.ts';
+import HologramCard from '../HologramCard.tsx';
+import { agents } from '../../data/agents.ts';
+import { skills } from '../../data/skills.ts';
 
 const karimAgent = agents.find(a => a.id === 'karim') as Agent;
 const equippedSkills = skills.filter(s => karimAgent.skillIDs.includes(s.id));

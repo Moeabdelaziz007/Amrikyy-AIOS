@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alarm, Automation } from '../../types';
+import { Alarm, Automation } from '../../types.ts';
 
 type View = 'clock' | 'alarms' | 'automations';
 const views: View[] = ['clock', 'alarms', 'automations'];

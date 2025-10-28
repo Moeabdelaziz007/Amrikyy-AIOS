@@ -6,7 +6,7 @@ import PoweredByGemini from './components/PoweredByGemini.tsx';
 import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService.ts';
 import { createCalendarEventFromPlan } from './services/geminiAdvancedService.ts';
 import DesktopAppsGrid from './components/DesktopAppsGrid.tsx';
-import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons.tsx';
+import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon, DocsIcon } from './components/Icons.tsx';
 import { useLanguage } from './contexts/LanguageContext.tsx';
 import AnimatedBackground from './components/AnimatedBackground.tsx';
 import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
@@ -37,7 +37,7 @@ const WorkflowDashboardWidget = lazy(() => import('./components/widgets/Workflow
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
  * This enables code-splitting for application components.
  */
-const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType<any>>> = {
+const appComponents: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
   [AppID.chat]: lazy(() => import('./components/apps/ChatApp.tsx')),
   [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp.tsx')),
   [AppID.files]: lazy(() => import('./components/apps/FilesApp.tsx')),
@@ -91,6 +91,7 @@ const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType
   [AppID.nexusFeed]: lazy(() => import('./components/apps/NexusFeedApp.tsx')),
   [AppID.nexusProfile]: lazy(() => import('./components/apps/NexusProfileApp.tsx')),
   [AppID.travelServices]: lazy(() => import('./components/apps/TravelServicesApp.tsx')),
+  [AppID.docsViewer]: lazy(() => import('./components/apps/DocsViewerApp.tsx')),
   // Existing agents (AgentProfileApp is a generic viewer for them)
   [AppID.atlas]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
   [AppID.cortex]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
@@ -135,7 +136,7 @@ const AppLoadingSpinner: React.FC = () => (
  * @returns {JSX.Element} The rendered Amrikyy AI OS.
  */
 const App: React.FC = () => {
-  const [isOSLoaded, setIsOSLoaded] = useState(false);
+  const [isOSLoaded, setIsOSLoaded] = useState(true);
   const [windows, setWindows] = useState<WindowInstance[]>([]);
   const [nextZIndex, setNextZIndex] = useState(10);
   const [nextId, setNextId] = useState(1);
@@ -358,17 +359,6 @@ const App: React.FC = () => {
     }, [addNotification, completedBounties, handleCompleteBounty, handleCreditTransaction]);
 
   /**
-   * Simulates the operating system's loading process.
-   * Sets `isOSLoaded` to `true` after a delay.
-   */
-  useEffect(() => {
-    const loadingTimer = setTimeout(() => {
-      setIsOSLoaded(true);
-    }, 5000); // Adjust based on desired loading time
-    return () => clearTimeout(loadingTimer);
-  }, []);
-
-  /**
    * Fetches Google Workspace data (Calendar events, Drive files, Gmail messages)
    * when the user signs in. Clears data on sign-out.
    * Displays loading state while fetching and sends notifications on errors.
@@ -522,6 +512,7 @@ const App: React.FC = () => {
     [AppID.nexusProfile]: t('app_titles.nexusProfile'),
     [AppID.travelServices]: t('app_titles.travelServices'),
     [AppID.pricing]: t('app_titles.pricing'),
+    [AppID.docsViewer]: t('app_titles.docsViewer' as TranslationKey),
     // Agent aliases pointing to AgentProfileApp
     [AppID.atlas]: t('app_titles.atlas' as TranslationKey),
     [AppID.cortex]: t('app_titles.cortex' as TranslationKey),
@@ -750,6 +741,7 @@ const App: React.FC = () => {
     { id: AppID.translateHub, name: t('app_titles.translateHub'), icon: TranslateIcon },
     { id: AppID.controlPanel, name: t('app_titles.controlPanel'), icon: ControlPanelIcon },
     { id: AppID.agentForge, name: t('desktop_apps.agentForge'), icon: AgentForgeIcon },
+    { id: AppID.docsViewer, name: t('desktop_apps.docsViewer' as TranslationKey), icon: DocsIcon },
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
@@ -789,6 +781,7 @@ const App: React.FC = () => {
     { id: AppID.files, name: t('app_launcher.files'), icon: FileIcon },
     { id: AppID.settings, name: t('app_launcher.settings'), icon: SettingsIcon },
     { id: AppID.terminal, name: t('app_launcher.terminal'), icon: TerminalIcon },
+    { id: AppID.docsViewer, name: t('app_launcher.docsViewer' as TranslationKey), icon: DocsIcon },
     { id: AppID.devToolkit, name: t('app_launcher.devToolkit'), icon: DevToolkitIcon },
     { id: AppID.growthHub, name: t('app_launcher.growthHub'), icon: GrowthHubIcon },
     { id: AppID.resourceHub, name: t('app_launcher.resourceHub'), icon: ResourceHubIcon },
@@ -988,6 +981,7 @@ const App: React.FC = () => {
                           } else if (window.appId === AppID.creatorStudio) {
                                 props.projects = projects;
                                 props.tasks = tasks;
+                                props.setTasks = setTasks;
                                 props.onAddProject = (p: Project) => { setProjects(prev => [p, ...prev]); logAction(AppID.creatorStudio, { event: 'project_created', projectName: p.name }); };
                                 props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]);
                                 props.onShare = setShareContent;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TravelPlan, FlightOption } from '../../types';
-import { SparklesIcon, SearchIcon, MapIcon, TripIcon, FlightsIcon } from '../Icons';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { searchFlights } from '../../services/geminiAdvancedService';
-import { TranslationKey } from '../../i18n'; // Import TranslationKey
+import { TravelPlan, FlightOption, FlightSearchDetails } from '../../types.ts';
+import { SparklesIcon, SearchIcon, MapIcon, TripIcon, FlightsIcon } from '../Icons.tsx';
+import { useLanguage } from '../../contexts/LanguageContext.tsx';
+import { searchFlights } from '../../services/geminiAdvancedService.ts';
+import { TranslationKey } from '../../i18n.ts'; // Import TranslationKey
 
 /**
  * Defines the available tabs within the Travel Agent application.
