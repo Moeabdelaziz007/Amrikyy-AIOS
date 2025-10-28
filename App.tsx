@@ -379,21 +379,18 @@ const App: React.FC = () => {
     const fetchWorkspaceData = async () => {
       setIsLoadingWorkspaceData(true);
       if (isSignedIn) {
-        const results = await Promise.allSettled([
-          getCalendarEvents(),
-          getDriveFiles(),
-          getGmailMessages(),
-        ]);
-
-        if (results[0].status === 'fulfilled') setCalendarEvents(results[0].value);
-        else addNotification(results[0].reason?.message || "Failed to fetch calendar events.", 'error', 'System');
-        
-        if (results[1].status === 'fulfilled') setDriveFiles(results[1].value);
-        else addNotification(results[1].reason?.message || "Failed to fetch drive files.", 'error', 'System');
-
-        if (results[2].status === 'fulfilled') setGmailMessages(results[2].value);
-        else addNotification(results[2].reason?.message || "Failed to fetch gmail messages.", 'error', 'System');
-
+        try {
+          const [events, files, messages] = await Promise.all([
+            getCalendarEvents(),
+            getDriveFiles(),
+            getGmailMessages(),
+          ]);
+          setCalendarEvents(events);
+          setDriveFiles(files);
+          setGmailMessages(messages);
+        } catch (error: any) {
+          addNotification(error.message || "Failed to sync Google Workspace.", 'error', 'System');
+        }
       } else {
         setCalendarEvents([]);
         setDriveFiles([]);
@@ -428,7 +425,7 @@ const App: React.FC = () => {
         },
         (error) => {
           console.warn('Geolocation failed:', error);
-          addNotification('Could not get location. Weather data may be inaccurate.', 'error', 'System');
+          addNotification(`Could not get location: ${error.message}. Weather data may be inaccurate.`, 'error', 'System');
           // Provide default/fallback weather data on error
           setCurrentWeather({
             location: 'Unknown',

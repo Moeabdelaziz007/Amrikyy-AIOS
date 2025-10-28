@@ -1,11 +1,5 @@
 import { GoogleGenAI, GenerateContentResponse, Content } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  console.warn("Gemini API key not found. Please set the API_KEY environment variable.");
-}
-
 /**
  * Generates a response from the Gemini model based on a prompt and conversation history.
  * If API_KEY is not set, it returns a simulated response.
@@ -13,15 +7,17 @@ if (!API_KEY) {
  * @param {string} prompt - The user's input prompt.
  * @param {Content[]} history - An array of previous messages in the conversation.
  * @returns {Promise<string>} A promise that resolves to the AI's generated text response.
- * @throws {Error} If an error occurs during the API call.
+ * @throws {Error} If an error occurs during the API call or if the API key is missing.
  */
 export const generateResponse = async (prompt: string, history: Content[]): Promise<string> => {
+  const API_KEY = process.env.API_KEY;
+
   if (!API_KEY) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return "This is a simulated response. To connect to Gemini, please provide an API key. I am Maya, ready to assist with your travel intelligence needs.";
+    // In a real scenario, we'd throw an error, but for the playground we can return a mock response.
+    // However, to align with robust error handling, let's throw. Components can decide to mock.
+    throw new Error("Gemini API key not found. Please set the API_KEY environment variable.");
   }
 
-  // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   try {
