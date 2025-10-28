@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 // FIX: Changed default import to named import.
-import NexusGoApp from './NexusGoApp';
+import { NexusGoApp } from './NexusGoApp';
 import { useLanguage } from '../../contexts/LanguageContext';
 import * as geminiAdvancedService from '../../services/geminiAdvancedService';
 import { DeliveryOption, RideOption, FastFoodRestaurant } from '../../types';

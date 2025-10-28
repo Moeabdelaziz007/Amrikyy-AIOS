@@ -1,24 +1,25 @@
+
 import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
 import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types';
-import Dock from './components/Dock';
+import Dock from './components/Dock.tsx'; // Explicit .tsx extension for troubleshooting module resolution
 import AppLauncher from './components/AppLauncher';
 import PoweredByGemini from './components/PoweredByGemini';
-import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget'; // FIX: Ensure explicit relative import to resolve module specifier issues.
+import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
 import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService';
 import { createCalendarEventFromPlan } from './services/geminiAdvancedService';
 import DesktopAppsGrid from './components/DesktopAppsGrid';
 import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons';
 import { useLanguage } from './contexts/LanguageContext';
 import AnimatedBackground from './components/AnimatedBackground';
-import SystemOverviewWidget from './components/widgets/SystemOverviewWidget'; // Explicit relative import
+import SystemOverviewWidget from './components/widgets/SystemOverviewWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
 import { NotificationCenter } from './components/NotificationCenter';
 import { useNotification } from './contexts/NotificationContext';
-import CryptoDashboardWidget from './components/widgets/CryptoDashboardWidget'; // Explicit relative import
+import CryptoDashboardWidget from './components/widgets/CryptoDashboardWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
 import { useUserBehavior } from './contexts/UserBehaviorContext';
 import GlobalVoiceControl from './components/GlobalVoiceControl';
 import { useGoogleAuth } from './contexts/GoogleAuthContext';
-import ProjectsWidget from './components/widgets/ProjectsWidget'; // Explicit relative import
-import TasksWidget from './components/widgets/TasksWidget'; // Explicit relative import
+import ProjectsWidget from './components/widgets/ProjectsWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
+import TasksWidget from './components/widgets/TasksWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
 import CreatePostModal from './components/CreatePostModal';
 import { bounties as mockBounties } from './data/bounties';
 import LoadingScreen from './components/LoadingScreen'; // Re-added LoadingScreen import
@@ -27,11 +28,11 @@ import { TranslationKey } from './i18n';
 
 // Lazy load all application components for code-splitting and performance
 const Window = lazy(() => import('./components/Window'));
-const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget')); // Explicit relative import
-const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget')); // Explicit relative import
-const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget')); // Explicit relative import // Replaced ViralFeedWidget
-const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget')); // Explicit relative import
-const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget')); // Explicit relative import
+const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
+const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
+const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution // Replaced ViralFeedWidget
+const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
+const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
 
 /**
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
@@ -185,6 +186,8 @@ const App: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [gmailMessages, setGmailMessages] = useState<GmailMessage[]>([]);
+  const [isLoadingWorkspaceData, setIsLoadingWorkspaceData] = useState(false); // New loading state for Workspace
+  const [isLoadingCurrentWeather, setIsLoadingCurrentWeather] = useState(false); // New loading state for Weather
 
   /**
    * Handles a credit transaction, updating the user's AI credits and transaction history.
@@ -369,9 +372,11 @@ const App: React.FC = () => {
   /**
    * Fetches Google Workspace data (Calendar events, Drive files, Gmail messages)
    * when the user signs in. Clears data on sign-out.
+   * Displays loading state while fetching.
    */
   useEffect(() => {
     const fetchWorkspaceData = async () => {
+      setIsLoadingWorkspaceData(true);
       if (isSignedIn) {
         const results = await Promise.allSettled([
           getCalendarEvents(),
@@ -393,15 +398,18 @@ const App: React.FC = () => {
         setDriveFiles([]);
         setGmailMessages([]);
       }
+      setIsLoadingWorkspaceData(false);
     };
     fetchWorkspaceData();
   }, [isSignedIn, addNotification]);
   
   /**
    * Fetches ambient weather data using geolocation and updates it periodically.
+   * Displays loading state while fetching.
    */
   useEffect(() => {
     const fetchWeather = () => {
+      setIsLoadingCurrentWeather(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           // Mock weather data based on location (simplified)
@@ -415,6 +423,7 @@ const App: React.FC = () => {
             high: Math.floor(Math.random() * 5) + 25,
             low: Math.floor(Math.random() * 5) + 15,
           });
+          setIsLoadingCurrentWeather(false);
         },
         (error) => {
           console.warn('Geolocation failed:', error);
@@ -426,6 +435,7 @@ const App: React.FC = () => {
             high: 25,
             low: 15,
           });
+          setIsLoadingCurrentWeather(false);
         }
       );
     };
@@ -436,7 +446,7 @@ const App: React.FC = () => {
   }, []);
 
   /**
-   * Populates `nexusProfile` related state with mock data if it is not already set.
+   * Populates `nexusProfile` related state with mock data if it exists and is not already set.
    * This ensures basic user account information is available for display purposes.
    */
   useEffect(() => {
@@ -721,7 +731,9 @@ const App: React.FC = () => {
   };
   
   /** The ID of the currently active (focused) window. */
-  const activeWindowId = windows.length > 0 ? windows.filter(w => !w.isMinimized).sort((a, b) => b.zIndex - a.zIndex)[0]?.id : null;
+  const activeWindowId = useMemo(() => {
+    return windows.length > 0 ? windows.filter(w => !w.isMinimized).sort((a, b) => b.zIndex - a.zIndex)[0]?.id : null;
+  }, [windows]);
   
   /**
    * Memoized list of applications displayed on the desktop grid.
@@ -802,7 +814,7 @@ const App: React.FC = () => {
       case 'work':
         return (
           <>
-            <Suspense fallback={null}><WorkspaceHubWidget isConnected={isSignedIn} events={calendarEvents} files={driveFiles} messages={gmailMessages} /></Suspense>
+            <Suspense fallback={null}><WorkspaceHubWidget isConnected={isSignedIn} events={calendarEvents} files={driveFiles} messages={gmailMessages} isLoading={isLoadingWorkspaceData} /></Suspense>
             <Suspense fallback={null}><ProactiveSuggestionsWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><ProjectsWidget projects={projects} /></Suspense>
             <Suspense fallback={null}><TasksWidget tasks={tasks.filter(t => !t.completed)} /></Suspense>
@@ -889,7 +901,7 @@ const App: React.FC = () => {
 
       <div className="relative w-full h-full flex flex-col items-center p-4 @container">
         <header className="w-full flex-shrink-0 z-10">
-            <SystemOverviewWidget userAccount={userAccount} currentWeather={currentWeather} />
+            <SystemOverviewWidget userAccount={userAccount} currentWeather={currentWeather} isLoadingWeather={isLoadingCurrentWeather} />
         </header>
 
         <section className="flex-grow grid grid-cols-1 @[60rem]:grid-cols-3 gap-8 w-full mt-8">

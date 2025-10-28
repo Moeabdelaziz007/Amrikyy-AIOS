@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CryptoData } from '../types';
 
@@ -52,7 +53,7 @@ const Sparkline: React.FC<SparklineProps> = ({ data, color }) => {
     }).join(' ');
 
     return (
-        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+        <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible" aria-hidden="true">
             <polyline
                 fill="none"
                 stroke={color}
@@ -90,16 +91,16 @@ const CryptoDashboardWidget: React.FC = () => {
     }, []);
 
     return (
-        <div className="glass-effect rounded-xl">
+        <div className="glass-effect rounded-xl" aria-label="Cryptocurrency Dashboard">
              <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-amber-400 text-lg">monitoring</span>
+                    <span className="material-symbols-outlined text-amber-400 text-lg" aria-hidden="true">monitoring</span>
                     <h2 className="font-medium text-sm">Crypto Dashboard</h2>
                 </div>
             </div>
-            <div className="space-y-3 p-4">
+            <div className="space-y-3 p-4" aria-live="polite" aria-atomic="true">
                 {cryptoData.map(crypto => (
-                    <div key={crypto.id} className="flex items-center justify-between">
+                    <div key={crypto.id} className="flex items-center justify-between" aria-label={`${crypto.name} (${crypto.ticker}) price is ${crypto.price.toFixed(2)} with ${crypto.change >= 0 ? 'an increase of' : 'a decrease of'} ${Math.abs(crypto.change).toFixed(2)} percent`}>
                         <div className="flex items-center gap-3">
                             <img src={crypto.icon} alt={crypto.name} className="w-8 h-8"/>
                             <div>

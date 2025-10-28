@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { UserAccount, CurrentWeather } from '../types';
@@ -45,28 +46,30 @@ const SystemOverviewWidget: React.FC<SystemOverviewWidgetProps> = ({ userAccount
     };
 
     return (
-        <div className="w-full max-w-4xl glass-effect rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-slide-up">
+        <div className="w-full max-w-4xl glass-effect rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-slide-up"
+             aria-label="System Overview Widget">
             <div className="flex items-center gap-4">
-                 <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 hidden sm:flex items-center justify-center text-3xl bg-black/20">
+                 <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 hidden sm:flex items-center justify-center text-3xl bg-black/20"
+                      aria-hidden="true">
                     {userAccount.avatar || '👩‍🚀'}
                  </div>
                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold font-display">{getGreeting()}</h1>
-                    <p className="text-sm sm:text-base opacity-80">{time.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold font-display" aria-live="polite">{getGreeting()}</h1>
+                    <p className="text-sm sm:text-base opacity-80" aria-label="Current date">{time.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                 </div>
             </div>
             <div className="flex items-center gap-6">
-                 <div className="text-center">
+                 <div className="text-center" aria-label="User plan status">
                     <p className="text-xs opacity-70">{t('overview.plan', { tier: userAccount.tier })}</p>
                     <p className="font-semibold text-green-400 flex items-center gap-1">
-                        <span className="relative flex h-2 w-2">
+                        <span className="relative flex h-2 w-2" aria-hidden="true">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
                         Active
                     </p>
                 </div>
-                 <div className="text-center">
+                 <div className="text-center" aria-label="AI Credits balance">
                     <p className="text-xs opacity-70">{t('overview.credits')}</p>
                     <p className="font-semibold text-cyan-400">{userAccount.aiCredits.toLocaleString()}</p>
                 </div>
@@ -74,13 +77,13 @@ const SystemOverviewWidget: React.FC<SystemOverviewWidgetProps> = ({ userAccount
                     <button 
                         onClick={() => setIsWeatherModalOpen(true)} // Open modal on click
                         className="flex items-center gap-2 text-xl sm:text-2xl font-bold font-mono text-[var(--accent-color)] text-right hover:text-white transition-colors"
-                        aria-label={`Current weather: ${currentWeather.temp}° ${currentWeather.condition}`}
+                        aria-label={`Current weather: ${currentWeather.temp}° ${currentWeather.condition}. Click for details.`}
                     >
-                        <span className="material-symbols-outlined text-3xl">{currentWeather.icon}</span>
+                        <span className="material-symbols-outlined text-3xl" aria-hidden="true">{currentWeather.icon}</span>
                         <span>{currentWeather.temp}°</span>
                     </button>
                 )}
-                <div className="text-3xl sm:text-5xl font-bold font-mono text-[var(--accent-color)] text-right">
+                <div className="text-3xl sm:text-5xl font-bold font-mono text-[var(--accent-color)] text-right" aria-label="Current time" aria-live="polite">
                     {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
             </div>

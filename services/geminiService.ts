@@ -28,7 +28,7 @@ export const generateResponse = async (prompt: string, history: Content[]): Prom
     const contents: Content[] = [...history, { role: 'user', parts: [{ text: prompt }] }];
 
     const response: GenerateContentResponse = await ai.models.generateContent({
-      model: 'gemini-flash-lite-latest',
+      model: 'gemini-2.5-flash',
       contents: contents,
       config: {
         systemInstruction: "You are Maya, a helpful AI assistant for the Amrikyy AI OS, specializing in travel intelligence. Be friendly, helpful, and concise.",

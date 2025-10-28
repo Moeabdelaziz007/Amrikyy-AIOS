@@ -63,6 +63,41 @@ const MapsApp: React.FC = () => {
 
             <div className="w-full max-w-lg p-4 bg-black/20 border border-white/10 rounded-xl min-h-[100px] flex items-center justify-center">
                 {isLoading ? (
-                    <div className="flex items-center gap-3 justify-center text-emerald-400">
+                    <div className="flex items-center justify-center h-full gap-3 text-emerald-400">
                         <SparklesIcon className="w-6 h-6 animate-pulse" />
-                        <p>Searching
+                        <p>Searching for locations...</p>
+                    </div>
+                ) : response ? (
+                    <p className="text-sm whitespace-pre-wrap">{response}</p>
+                ) : (
+                    <p className="text-sm text-text-muted">Your map search results will appear here.</p>
+                )}
+            </div>
+
+            <div className="w-full max-w-lg">
+                <div className="relative">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                        placeholder="e.g., What are the best restaurants near me?"
+                        disabled={isLoading || !location}
+                        className="w-full h-12 bg-white/5 border border-white/10 rounded-full pl-5 pr-14 text-text-primary focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                    <button
+                        onClick={handleSend}
+                        disabled={isLoading || !input || !location}
+                        aria-label="Send map query"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 bg-emerald-500 rounded-full flex items-center justify-center hover:bg-emerald-500/80 transition-colors disabled:bg-gray-500"
+                    >
+                        <MapIcon className="h-5 w-5 text-white" />
+                    </button>
+                </div>
+            </div>
+        </div>
+      </div>
+    );
+};
+
+export default MapsApp;
