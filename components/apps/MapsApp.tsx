@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MapIcon, SparklesIcon } from '../Icons';
-import { mapsSearch } from '../../services/geminiAdvancedService';
+import { MapIcon, SparklesIcon } from '../Icons.tsx';
+import { mapsSearch } from '../../services/geminiAdvancedService.ts';
 
 /**
  * The MapsApp component provides an AI-powered interface for searching geographical information.

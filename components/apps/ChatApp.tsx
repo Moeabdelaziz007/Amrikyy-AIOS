@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Message, SystemVoice } from '../../types';
-import { generateResponse } from '../../services/geminiService';
-import { generateSpeech } from '../../services/geminiAdvancedService';
-import { playDecodedAudio, decode } from '../../utils/audioUtils';
-import { SendIcon, SparklesIcon, SpeakerIcon } from '../Icons';
+import { Message, SystemVoice } from '../../types.ts';
+import { generateResponse } from '../../services/geminiService.ts';
+import { generateSpeech } from '../../services/geminiAdvancedService.ts';
+import { playDecodedAudio, decode } from '../../utils/audioUtils.ts';
+import { SendIcon, SparklesIcon, SpeakerIcon } from '../Icons.tsx';
 import { Content } from '@google/genai';
 
 /**

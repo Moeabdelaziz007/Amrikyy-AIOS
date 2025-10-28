@@ -54,6 +54,10 @@ export const groundedSearch = async (prompt: string, thinkingMode: boolean): Pro
             config: config,
         });
         
+        if (!response.text) {
+            throw new Error("The AI search returned an empty response. This could be due to the topic or an internal error. Please try a different query.");
+        }
+        
         const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
         const sources = groundingChunks
             .map(chunk => ({ title: chunk.web?.title || '', uri: chunk.web?.uri || ''}))
@@ -92,6 +96,10 @@ export const mapsSearch = async (prompt: string, location: {latitude: number, lo
                 }
             },
         });
+        
+        if (!response.text) {
+            throw new Error("The AI maps search returned an empty response. Please try a different location or query.");
+        }
         
         const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
         const sources = groundingChunks
@@ -186,6 +194,8 @@ export const searchFlights = async (details: FlightSearchDetails): Promise<Fligh
         if (response.functionCalls && response.functionCalls.length > 0) {
             const flightCall = response.functionCalls.find(fc => fc.name === 'findFlights');
             if (flightCall) {
+                // In a real app, we'd use flightCall.args to query a flight API.
+                // For this playground, we'll return mock data as if the tool was called.
                 const mockFlights: FlightOption[] = [
                     {
                         carrier: 'MockAir', price: 350, currency: 'USD', departureTime: '08:00', arrivalTime: '14:30', duration: '6h 30m', stops: 1, url: 'https://mockair.com/book/1',
@@ -201,13 +211,13 @@ export const searchFlights = async (details: FlightSearchDetails): Promise<Fligh
             }
         }
         
+        // If the AI doesn't call the tool, it means no flights were found or it couldn't understand.
+        // We can either return an empty array or throw an error. Throwing an error provides more feedback to the UI.
         throw new Error("AI did not determine a flight search was needed or failed to provide a valid function call.");
 
     } catch (error) {
         console.error("Error searching flights:", error);
-        if (error instanceof SyntaxError) {
-             throw new Error(`Invalid AI response format: ${error.message}. This might indicate a configuration issue or that the AI did not return a function call as expected.`);
-        }
+        // The specific SyntaxError check is no longer needed as we are not parsing JSON.
         throw new Error("Failed to search flights from AI.");
     }
 };
@@ -240,27 +250,73 @@ export const generateTravelPlan = async (tripDetails: { destination: string, sta
         };
     }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+    const createTravelPlanTool: FunctionDeclaration = {
+        name: 'createTravelPlan',
+        description: 'Creates a structured travel plan including itinerary, budget, and links.',
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                destination: { type: Type.STRING },
+                tripTitle: { type: Type.STRING },
+                itinerary: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            day: { type: Type.INTEGER },
+                            title: { type: Type.STRING },
+                            activities: { type: Type.ARRAY, items: { type: Type.STRING } }
+                        },
+                        required: ["day", "title", "activities"]
+                    }
+                },
+                budget: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            category: { type: Type.STRING },
+                            cost: { type: Type.NUMBER }
+                        },
+                        required: ["category", "cost"]
+                    }
+                },
+                dealsAndLinks: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            title: { type: Type.STRING },
+                            url: { type: Type.STRING }
+                        },
+                        required: ["title", "url"]
+                    }
+                }
+            },
+            required: ["destination", "tripTitle", "itinerary", "budget", "dealsAndLinks"]
+        }
+    };
+
     try {
-        const prompt = `Create a detailed travel plan for a trip to ${tripDetails.destination} from ${tripDetails.startDate} to ${tripDetails.endDate} with a budget of $${tripDetails.budget}. The plan should include a creative trip title, a day-by-day itinerary with specific activities, a detailed budget breakdown into categories, and a list of useful web links and potential deals.`;
+        const prompt = `Create a detailed travel plan for a trip to ${tripDetails.destination} from ${tripDetails.startDate} to ${tripDetails.endDate} with a budget of $${tripDetails.budget}. Use the createTravelPlan tool. The plan should include a creative trip title, a day-by-day itinerary with specific activities, a detailed budget breakdown into categories, and a list of useful web links and potential deals.`;
         
         const response: GenerateContentResponse = await ai.models.generateContent({
             model: "gemini-2.5-pro",
             contents: prompt,
             config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT, properties: {
-                        destination: { type: Type.STRING }, tripTitle: { type: Type.STRING },
-                        itinerary: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { day: { type: Type.INTEGER }, title: { type: Type.STRING }, activities: { type: Type.ARRAY, items: { type: Type.STRING } } } } },
-                        budget: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { category: { type: Type.STRING }, cost: { type: Type.NUMBER } } } },
-                        dealsAndLinks: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { title: { type: Type.STRING }, url: { type: Type.STRING } } } }
-                    },
-                    required: ["destination", "tripTitle", "itinerary", "budget", "dealsAndLinks"]
-                },
+                tools: [{ functionDeclarations: [createTravelPlanTool] }],
             },
         });
-        const jsonText = response.text.trim();
-        return JSON.parse(jsonText);
+
+        const functionCall = response.functionCalls?.find(fc => fc.name === 'createTravelPlan');
+        if (functionCall?.args) {
+            // The arguments from the function call are the structured travel plan.
+            return functionCall.args as unknown as TravelPlan;
+        }
+
+        throw new Error("AI did not generate a valid travel plan structure.");
+
     } catch (error) {
         console.error("Error generating travel plan:", error);
         throw new Error("Failed to generate travel plan from AI.");
@@ -1024,4 +1080,28 @@ export const findNightlifeEvents = async (query: string, location: { latitude: n
         });
         return JSON.parse(response.text.trim());
     } catch (e) { console.error("Error finding nightlife events:", e); throw new Error("Failed to find nightlife events."); }
+};
+
+export const runSystemDiagnostics = async (): Promise<string> => {
+    if (!API_KEY) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return `### System Diagnostic Report
+**AI Core:** Nominal. All models responding within parameters.
+**Agent Comm Bus:** Healthy. Latency at 12ms.
+**Memory Subsystem:** Stable. 76% Engram capacity utilized.
+**Cognitive Load:** Optimal at 38%.`;
+    }
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+    const systemInstruction = `You are Jules, an AI system diagnostics and self-healing agent for the Amrikyy AI OS. Your goal is to provide a concise, technical, but optimistic system status report. The user has requested a diagnostic scan. Report on key areas like AI Core, Agent Communication Bus, Memory Subsystem (Engrams), and Cognitive Load. Use markdown for formatting, specifically headings (###) and bold text (**). Keep the report under 50 words.`;
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: "Run a full system diagnostic and report status.",
+            config: { systemInstruction }
+        });
+        return response.text;
+    } catch (error) {
+        console.error("Error running system diagnostics:", error);
+        throw new Error("Failed to run system diagnostics.");
+    }
 };

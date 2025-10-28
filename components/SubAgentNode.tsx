@@ -1,6 +1,6 @@
 import React from 'react';
-import { SubAgent } from '../types';
-import { SparklesIcon } from './Icons';
+import { SubAgent } from '../types.ts';
+import { SparklesIcon } from './Icons.tsx';
 
 /**
  * Props for the SubAgentNode component.

@@ -1,20 +1,29 @@
 import React, { useState } from 'react';
-import { Agent } from '../../types';
-import HologramCard from '../HologramCard';
-import { agents } from '../../data/agents';
-import { skills } from '../../data/skills';
+import { Agent } from '../../types.ts';
+import HologramCard from '../HologramCard.tsx';
+import { agents } from '../../data/agents.ts';
+import { skills } from '../../data/skills.ts';
+import { runSystemDiagnostics } from '../../services/geminiAdvancedService.ts';
 
 const julesAgent = agents.find(a => a.id === 'jules') as Agent;
 const equippedSkills = skills.filter(s => julesAgent.skillIDs.includes(s.id));
 
 const JulesApp: React.FC = () => {
-    const [status, setStatus] = useState('Idle');
+    const [status, setStatus] = useState('Idle. Press "Run Diagnostics" to start.');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const runDiagnostics = () => {
-        setStatus('Running...');
-        setTimeout(() => {
-            setStatus('All systems nominal.');
-        }, 3000);
+    const handleRunDiagnostics = async () => {
+        setIsLoading(true);
+        setStatus('Scanning system...');
+        try {
+            const report = await runSystemDiagnostics();
+            setStatus(report);
+        } catch (error) {
+            setStatus('Error: Could not run diagnostics.');
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
   return (
@@ -45,16 +54,18 @@ const JulesApp: React.FC = () => {
         </div>
         <div className="max-w-md w-full mt-2 text-center">
             <button 
-                onClick={runDiagnostics}
-                disabled={status === 'Running...'}
+                onClick={handleRunDiagnostics}
+                disabled={isLoading}
                 className="px-6 py-3 font-bold rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50"
             >
-                {status === 'Running...' ? 'Running Diagnostics...' : 'Run Diagnostics'}
+                {isLoading ? 'Running Diagnostics...' : 'Run Diagnostics'}
             </button>
-            <p className="font-mono text-sm mt-4 text-green-300 h-6">
-                Status: {status}
-                {status === 'Running...' && <span className="animate-pulse">...</span>}
-            </p>
+            <div className="font-mono text-sm mt-4 text-green-300 min-h-[6rem] bg-black/20 p-3 rounded-lg border border-green-500/20 text-left">
+                <p className="font-bold mb-2">Status Report:</p>
+                <pre className="whitespace-pre-wrap text-xs">
+                    {isLoading ? <span className="animate-pulse">Scanning system...</span> : status}
+                </pre>
+            </div>
         </div>
     </div>
   );

@@ -1,31 +1,31 @@
 import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
-import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types';
+import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types.ts';
 import Dock from './components/Dock.tsx';
-import AppLauncher from './components/AppLauncher';
-import PoweredByGemini from './components/PoweredByGemini';
-import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService';
-import { createCalendarEventFromPlan } from './services/geminiAdvancedService';
-import DesktopAppsGrid from './components/DesktopAppsGrid';
-import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons';
-import { useLanguage } from './contexts/LanguageContext';
-import AnimatedBackground from './components/AnimatedBackground';
+import AppLauncher from './components/AppLauncher.tsx';
+import PoweredByGemini from './components/PoweredByGemini.tsx';
+import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService.ts';
+import { createCalendarEventFromPlan } from './services/geminiAdvancedService.ts';
+import DesktopAppsGrid from './components/DesktopAppsGrid.tsx';
+import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons.tsx';
+import { useLanguage } from './contexts/LanguageContext.tsx';
+import AnimatedBackground from './components/AnimatedBackground.tsx';
 import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
-import { NotificationCenter } from './components/NotificationCenter';
-import { useNotification } from './contexts/NotificationContext';
+import { NotificationCenter } from './components/NotificationCenter.tsx';
+import { useNotification } from './contexts/NotificationContext.tsx';
 import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx';
-import { useUserBehavior } from './contexts/UserBehaviorContext';
-import GlobalVoiceControl from './components/GlobalVoiceControl';
-import { useGoogleAuth } from './contexts/GoogleAuthContext';
+import { useUserBehavior } from './contexts/UserBehaviorContext.tsx';
+import GlobalVoiceControl from './components/GlobalVoiceControl.tsx';
+import { useGoogleAuth } from './contexts/GoogleAuthContext.tsx';
 import ProjectsWidget from './components/widgets/ProjectsWidget.tsx';
 import TasksWidget from './components/widgets/TasksWidget.tsx';
-import CreatePostModal from './components/CreatePostModal';
-import { bounties as mockBounties } from './data/bounties';
-import LoadingScreen from './components/LoadingScreen';
-import { initialNexusPosts as mockNexusPosts } from './data/nexus';
-import { TranslationKey } from './i18n';
+import CreatePostModal from './components/SharePreview.tsx';
+import { bounties as mockBounties } from './data/bounties.ts';
+import LoadingScreen from './components/LoadingScreen.tsx';
+import { initialNexusPosts as mockNexusPosts } from './data/nexus.ts';
+import { TranslationKey } from './i18n.ts';
 
 // Lazy load all application components for code-splitting and performance
-const Window = lazy(() => import('./components/Window'));
+const Window = lazy(() => import('./components/Window.tsx'));
 const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget.tsx'));
 const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget.tsx'));
 const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx'));
@@ -38,69 +38,69 @@ const WorkflowDashboardWidget = lazy(() => import('./components/widgets/Workflow
  * This enables code-splitting for application components.
  */
 const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType<any>>> = {
-  [AppID.chat]: lazy(() => import('./components/apps/ChatApp')),
-  [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp')),
-  [AppID.files]: lazy(() => import('./components/apps/FilesApp')),
-  [AppID.settings]: lazy(() => import('./components/apps/SettingsApp')),
-  [AppID.luna]: lazy(() => import('./components/apps/LunaApp')),
-  [AppID.karim]: lazy(() => import('./components/apps/KarimApp')),
-  [AppID.scout]: lazy(() => import('./components/apps/ScoutApp')),
-  [AppID.maya]: lazy(() => import('./components/apps/MayaApp')),
-  [AppID.jules]: lazy(() => import('./components/apps/JulesApp')),
-  [AppID.voice]: lazy(() => import('./components/apps/VoiceAssistantApp')),
-  [AppID.workflow]: lazy(() => import('./components/apps/WorkflowStudioApp')),
-  [AppID.travelAgent]: lazy(() => import('./components/apps/TravelAgentApp')),
-  [AppID.marketing]: lazy(() => import('./components/apps/MarketingApp')),
-  [AppID.travelPlanViewer]: lazy(() => import('./components/apps/TravelPlanViewerApp')),
-  [AppID.search]: lazy(() => import('./components/apps/SearchApp')),
-  [AppID.maps]: lazy(() => import('./components/apps/MapsApp')),
-  [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp')),
-  [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp')),
-  [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp')),
-  [AppID.audio]: lazy(() => import('./components/apps/AudioStudioApp')),
-  [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp')),
-  [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp')),
-  [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp')),
-  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')),
-  [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp')),
-  [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp')),
-  [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp')),
-  [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp')),
-  [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp')),
-  [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp')),
-  [AppID.avatarStudio]: lazy(() => import('./components/apps/AvatarStudioApp')),
-  [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.store]: lazy(() => import('./components/apps/StoreApp')),
-  [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp')),
-  [AppID.liveConversation]: lazy(() => import('./components/apps/LiveConversationApp')),
-  [AppID.imageAnalyzer]: lazy(() => import('./components/apps/ImageAnalyzerApp')),
-  [AppID.agora]: lazy(() => import('./components/apps/AgoraApp')),
-  [AppID.nexusChat]: lazy(() => import('./components/apps/NexusChatApp')),
-  [AppID.devConsole]: lazy(() => import('./components/apps/DevConsoleApp')),
-  [AppID.apiDocs]: lazy(() => import('./components/apps/ApiDocsApp')),
-  [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp')),
-  [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp')),
-  [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp')),
-  [AppID.geminiAiNews]: lazy(() => import('./components/apps/GeminiAiNewsApp')),
-  [AppID.controlPanel]: lazy(() => import('./components/apps/ControlPanelApp')),
-  [AppID.atlasFinance]: lazy(() => import('./components/apps/AtlasApp')),
-  [AppID.cognitiveCanvas]: lazy(() => import('./components/apps/CognitiveCanvasApp')),
-  [AppID.veridianId]: lazy(() => import('./components/apps/VeridianIdApp')),
-  [AppID.translateHub]: lazy(() => import('./components/apps/TranslateHubApp')),
-  [AppID.nexusGo]: lazy(() => import('./components/apps/NexusGoApp')),
-  [AppID.nexusFeed]: lazy(() => import('./components/apps/NexusFeedApp')),
-  [AppID.nexusProfile]: lazy(() => import('./components/apps/NexusProfileApp')),
-  [AppID.travelServices]: lazy(() => import('./components/apps/TravelServicesApp')),
+  [AppID.chat]: lazy(() => import('./components/apps/ChatApp.tsx')),
+  [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp.tsx')),
+  [AppID.files]: lazy(() => import('./components/apps/FilesApp.tsx')),
+  [AppID.settings]: lazy(() => import('./components/apps/SettingsApp.tsx')),
+  [AppID.luna]: lazy(() => import('./components/apps/LunaApp.tsx')),
+  [AppID.karim]: lazy(() => import('./components/apps/KarimApp.tsx')),
+  [AppID.scout]: lazy(() => import('./components/apps/ScoutApp.tsx')),
+  [AppID.maya]: lazy(() => import('./components/apps/MayaApp.tsx')),
+  [AppID.jules]: lazy(() => import('./components/apps/JulesApp.tsx')),
+  [AppID.voice]: lazy(() => import('./components/apps/VoiceAssistantApp.tsx')),
+  [AppID.workflow]: lazy(() => import('./components/apps/WorkflowStudioApp.tsx')),
+  [AppID.travelAgent]: lazy(() => import('./components/apps/TravelAgentApp.tsx')),
+  [AppID.marketing]: lazy(() => import('./components/apps/MarketingApp.tsx')),
+  [AppID.travelPlanViewer]: lazy(() => import('./components/apps/TravelPlanViewerApp.tsx')),
+  [AppID.search]: lazy(() => import('./components/apps/SearchApp.tsx')),
+  [AppID.maps]: lazy(() => import('./components/apps/MapsApp.tsx')),
+  [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp.tsx')),
+  [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp.tsx')),
+  [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp.tsx')),
+  [AppID.audio]: lazy(() => import('./components/apps/AudioStudioApp.tsx')),
+  [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp.tsx')),
+  [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp.tsx')),
+  [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp.tsx')),
+  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp.tsx')),
+  [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp.tsx')),
+  [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp.tsx')),
+  [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp.tsx')),
+  [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp.tsx')),
+  [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp.tsx')),
+  [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp.tsx')),
+  [AppID.avatarStudio]: lazy(() => import('./components/apps/AvatarStudioApp.tsx')),
+  [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.store]: lazy(() => import('./components/apps/StoreApp.tsx')),
+  [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp.tsx')),
+  [AppID.liveConversation]: lazy(() => import('./components/apps/LiveConversationApp.tsx')),
+  [AppID.imageAnalyzer]: lazy(() => import('./components/apps/ImageAnalyzerApp.tsx')),
+  [AppID.agora]: lazy(() => import('./components/apps/AgoraApp.tsx')),
+  [AppID.nexusChat]: lazy(() => import('./components/apps/NexusChatApp.tsx')),
+  [AppID.devConsole]: lazy(() => import('./components/apps/DevConsoleApp.tsx')),
+  [AppID.apiDocs]: lazy(() => import('./components/apps/ApiDocsApp.tsx')),
+  [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp.tsx')),
+  [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp.tsx')),
+  [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp.tsx')),
+  [AppID.geminiAiNews]: lazy(() => import('./components/apps/GeminiAiNewsApp.tsx')),
+  [AppID.controlPanel]: lazy(() => import('./components/apps/ControlPanelApp.tsx')),
+  [AppID.atlasFinance]: lazy(() => import('./components/apps/AtlasApp.tsx')),
+  [AppID.cognitiveCanvas]: lazy(() => import('./components/apps/CognitiveCanvasApp.tsx')),
+  [AppID.veridianId]: lazy(() => import('./components/apps/VeridianIdApp.tsx')),
+  [AppID.translateHub]: lazy(() => import('./components/apps/TranslateHubApp.tsx')),
+  [AppID.nexusGo]: lazy(() => import('./components/apps/NexusGoApp.tsx')),
+  [AppID.nexusFeed]: lazy(() => import('./components/apps/NexusFeedApp.tsx')),
+  [AppID.nexusProfile]: lazy(() => import('./components/apps/NexusProfileApp.tsx')),
+  [AppID.travelServices]: lazy(() => import('./components/apps/TravelServicesApp.tsx')),
   // Existing agents (AgentProfileApp is a generic viewer for them)
-  [AppID.atlas]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.cortex]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.orion]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.helios]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.leo]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.zara]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.rex]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.clio]: lazy(() => import('./components/apps/AgentProfileApp')),
-  [AppID.pricing]: lazy(() => import('./components/apps/SettingsApp')),
+  [AppID.atlas]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.cortex]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.orion]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.helios]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.leo]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.zara]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.rex]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.clio]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
+  [AppID.pricing]: lazy(() => import('./components/apps/SettingsApp.tsx')),
 };
 
 /**

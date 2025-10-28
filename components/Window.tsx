@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { WindowStyle } from '../types';
+import { WindowStyle } from '../types.ts';
 
 /**
  * A custom React hook to detect if the screen matches a given media query.

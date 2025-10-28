@@ -30,6 +30,10 @@ export const generateResponse = async (prompt: string, history: Content[]): Prom
         systemInstruction: "You are Maya, a helpful AI assistant for the Amrikyy AI OS, specializing in travel intelligence. Be friendly, helpful, and concise.",
       },
     });
+
+    if (!response.text) {
+        throw new Error("The AI returned an empty response. This could be due to content policy violations or an internal error. Please try rephrasing your message.");
+    }
     return response.text;
   } catch (error) {
     console.error("Error calling Gemini API:", error);
