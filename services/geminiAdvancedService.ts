@@ -62,7 +62,7 @@ export const groundedSearch = async (prompt: string, thinkingMode: boolean): Pro
         return { text: response.text, sources };
     } catch (error) {
         console.error("Error calling Gemini Search API:", error);
-        return { text: "An error occurred while searching.", sources: [] };
+        throw new Error("An error occurred during the AI search.");
     }
 };
 
@@ -101,7 +101,7 @@ export const mapsSearch = async (prompt: string, location: {latitude: number, lo
         return { text: response.text, sources };
     } catch (error) {
         console.error("Error calling Gemini Maps API:", error);
-        return { text: "An error occurred while searching maps.", sources: [] };
+        throw new Error("An error occurred during the AI maps search.");
     }
 };
 

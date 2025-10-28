@@ -39,15 +39,16 @@ const MapsApp: React.FC = () => {
         if (!input || isLoading || !location) return;
         setIsLoading(true);
         setResponse(null);
+        setError(null);
 
         try {
             const result = await mapsSearch(input, location);
             setResponse(result.text);
-        } catch (e) {
-            setError("Failed to get a response from the Maps AI.");
+        } catch (e: any) {
+            setError(e.message || "Failed to get a response from the Maps AI.");
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     return (
@@ -58,7 +59,7 @@ const MapsApp: React.FC = () => {
                 <h1 className="text-2xl font-bold font-display">AI Maps</h1>
                 <p className="text-text-muted">Ask for places, directions, or local info.</p>
                 {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
-                {location && <p className="text-sm text-green-400 mt-2">Location acquired.</p>}
+                {location && !error && <p className="text-sm text-green-400 mt-2">Location acquired.</p>}
             </div>
 
             <div className="w-full max-w-lg p-4 bg-black/20 border border-white/10 rounded-xl min-h-[100px] flex items-center justify-center">

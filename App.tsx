@@ -31,6 +31,7 @@ const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubW
 const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx'));
 const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx'));
 const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx'));
+const WorkflowDashboardWidget = lazy(() => import('./components/widgets/WorkflowDashboardWidget.tsx'));
 
 /**
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
@@ -422,7 +423,7 @@ const App: React.FC = () => {
         },
         (error) => {
           console.error('Geolocation failed:', error);
-          addNotification(`Could not get location: ${error.message}. Weather data may be inaccurate. Please check your browser's location permissions.`, 'error', 'System');
+          addNotification(`Could not get location: ${error.message}. Please check your browser's location permissions.`, 'error', 'System');
           // Provide default/fallback weather data on error
           setCurrentWeather({
             location: 'Unknown',
@@ -820,7 +821,7 @@ const App: React.FC = () => {
         return (
           <>
             <Suspense fallback={null}><ProactiveSuggestionsWidget onOpenApp={openWindow} /></Suspense>
-            
+            <Suspense fallback={null}><WorkflowDashboardWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><CryptoDashboardWidget /></Suspense>
           </>
         );
@@ -830,7 +831,7 @@ const App: React.FC = () => {
           <>
             <Suspense fallback={null}><QuickActionsWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><GeminiAiNewsWidget onOpenApp={openWindow} /></Suspense>
-            
+            <Suspense fallback={null}><WorkflowDashboardWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><NexusFeedWidget posts={nexusPosts} /></Suspense>
             <Suspense fallback={null}><CryptoDashboardWidget /></Suspense>
           </>

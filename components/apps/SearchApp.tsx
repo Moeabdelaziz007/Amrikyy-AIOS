@@ -38,11 +38,16 @@ const SearchApp: React.FC = () => {
 
         const currentInput = input;
         setInput('');
-        const { text, sources } = await groundedSearch(currentInput, thinkingMode);
-        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text, sources };
-        
-        setMessages(prev => [...prev, aiMessage]);
-        setIsLoading(false);
+        try {
+            const { text, sources } = await groundedSearch(currentInput, thinkingMode);
+            const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text, sources };
+            setMessages(prev => [...prev, aiMessage]);
+        } catch (error: any) {
+            const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, the search failed. ${error.message}` };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
     };
   
     return (
@@ -62,7 +67,11 @@ const SearchApp: React.FC = () => {
                     <SparklesIcon className="h-6 w-6 text-white" />
                 </div>
                 )}
-                <div className={`max-w-[80%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-primary-blue text-white' : 'bg-bg-secondary text-text-primary'}`}>
+                <div className={`max-w-[80%] p-3 rounded-2xl ${
+                    msg.sender === 'user' ? 'bg-primary-blue text-white' 
+                    : msg.sender === 'system' ? 'bg-red-500/20 text-red-300'
+                    : 'bg-bg-secondary text-text-primary'
+                }`}>
                     <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                     {msg.sources && msg.sources.length > 0 && (
                         <div className="mt-3 border-t border-white/10 pt-2">
