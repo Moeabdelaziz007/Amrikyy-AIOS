@@ -23,6 +23,6 @@
     // use relative paths and check for any lingering alias configurations in your setup.
     // Removed "paths" configuration as it conflicted with native browser module loading
   },
-  "include": ["src", "setupTests.ts", "vitest.config.ts"],
+  "include": ["src", "setupTests.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

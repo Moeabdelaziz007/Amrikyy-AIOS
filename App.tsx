@@ -31,7 +31,7 @@ const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubW
 const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx'));
 const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx'));
 const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx'));
-const WorkflowDashboardWidget = lazy(() => import('./components/widgets/WorkflowDashboardWidget.tsx'));
+const WorkflowDashboardWidget = lazy(() => import('./components/WorkflowDashboardWidget.tsx'));
 
 /**
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
@@ -57,7 +57,6 @@ const appComponents: Record<string, React.LazyExoticComponent<React.ComponentTyp
   [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp.tsx')),
   [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp.tsx')),
   [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp.tsx')),
-  [AppID.audio]: lazy(() => import('./components/apps/AudioStudioApp.tsx')),
   [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp.tsx')),
   [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp.tsx')),
   [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp.tsx')),
@@ -68,16 +67,9 @@ const appComponents: Record<string, React.LazyExoticComponent<React.ComponentTyp
   [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp.tsx')),
   [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp.tsx')),
   [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp.tsx')),
-  [AppID.avatarStudio]: lazy(() => import('./components/apps/AvatarStudioApp.tsx')),
   [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
   [AppID.store]: lazy(() => import('./components/apps/StoreApp.tsx')),
   [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp.tsx')),
-  [AppID.liveConversation]: lazy(() => import('./components/apps/LiveConversationApp.tsx')),
-  [AppID.imageAnalyzer]: lazy(() => import('./components/apps/ImageAnalyzerApp.tsx')),
-  [AppID.agora]: lazy(() => import('./components/apps/AgoraApp.tsx')),
-  [AppID.nexusChat]: lazy(() => import('./components/apps/NexusChatApp.tsx')),
-  [AppID.devConsole]: lazy(() => import('./components/apps/DevConsoleApp.tsx')),
-  [AppID.apiDocs]: lazy(() => import('./components/apps/ApiDocsApp.tsx')),
   [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp.tsx')),
   [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp.tsx')),
   [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp.tsx')),
