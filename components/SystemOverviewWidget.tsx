@@ -26,7 +26,9 @@ const SystemOverviewWidget: React.FC<SystemOverviewWidgetProps> = ({ userAccount
     const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false); // New state for modal
 
     useEffect(() => {
-        const timerId = setInterval(() => setTime(new Date()), 1000); // Update every second
+        // Optimize: Update every minute if only minutes are displayed, or every second if seconds are needed.
+        // As currently formatted, only minutes change, so updating once per minute is sufficient.
+        const timerId = setInterval(() => setTime(new Date()), 60000); // Update every minute
         return () => clearInterval(timerId);
     }, []);
 

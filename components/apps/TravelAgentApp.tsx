@@ -3,13 +3,27 @@ import { TravelPlan, FlightOption } from '../../types';
 import { SparklesIcon, SearchIcon, MapIcon, TripIcon, FlightsIcon } from '../Icons';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { searchFlights } from '../../services/geminiAdvancedService';
+import { TranslationKey } from '../../i18n'; // Import TranslationKey
 
+/**
+ * Defines the available tabs within the Travel Agent application.
+ */
 type Tab = 'plan' | 'explore' | 'deals' | 'flights' | 'my-plans';
 
+/**
+ * Props for the TravelAgentApp component.
+ */
 interface TravelAgentAppProps {
+    /** Callback function to start a travel planning workflow. */
     startTravelWorkflow: (details: { destination: string, startDate: string, endDate: string, budget: string }) => void;
 }
 
+/**
+ * The TravelAgentApp component provides an AI-powered interface for planning trips,
+ * exploring places, finding deals, searching flights, and managing saved plans.
+ * @param {TravelAgentAppProps} props - The component props.
+ * @returns {JSX.Element} The TravelAgentApp component.
+ */
 const TravelAgentApp: React.FC<TravelAgentAppProps> = ({ startTravelWorkflow }) => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState<Tab>('plan');
@@ -23,7 +37,7 @@ const TravelAgentApp: React.FC<TravelAgentAppProps> = ({ startTravelWorkflow }) 
                 </div>
                 <nav className="flex gap-2 bg-black/20 p-1 rounded-lg">
                     <TabButton id="plan" activeTab={activeTab} setActiveTab={setActiveTab} label="Plan Trip" />
-                    <TabButton id="flights" activeTab={activeTab} setActiveTab={setActiveTab} label={t('travel_agent.flights_tab')} />
+                    <TabButton id="flights" activeTab={activeTab} setActiveTab={setActiveTab} label={t('travel_agent.flights_tab' as TranslationKey)} />
                     <TabButton id="explore" activeTab={activeTab} setActiveTab={setActiveTab} label="Explore Places" />
                     <TabButton id="deals" activeTab={activeTab} setActiveTab={setActiveTab} label="Find Deals" />
                     <TabButton id="my-plans" activeTab={activeTab} setActiveTab={setActiveTab} label="My Plans" />
@@ -40,6 +54,15 @@ const TravelAgentApp: React.FC<TravelAgentAppProps> = ({ startTravelWorkflow }) 
     );
 };
 
+/**
+ * Reusable button component for switching between tabs.
+ * @param {object} props - The component props.
+ * @param {Tab} props.id - The unique ID of the tab.
+ * @param {Tab} props.activeTab - The currently active tab.
+ * @param {(tab: Tab) => void} props.setActiveTab - Callback to set the active tab.
+ * @param {string} props.label - The display label for the tab button.
+ * @returns {JSX.Element} The tab button component.
+ */
 const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => void, label: string}> = ({ id, activeTab, setActiveTab, label }) => (
     <button
         onClick={() => setActiveTab(id)}
@@ -49,12 +72,22 @@ const TabButton: React.FC<{id: Tab, activeTab: Tab, setActiveTab: (tab: Tab) => 
     </button>
 );
 
+/**
+ * The PlanTripView component provides a form for users to input trip details
+ * and initiate an AI-powered travel planning workflow.
+ * @param {object} props - The component props.
+ * @param {TravelAgentAppProps['startTravelWorkflow']} props.startTravelWorkflow - Callback to start the travel workflow.
+ * @returns {JSX.Element} The PlanTripView component.
+ */
 const PlanTripView: React.FC<{startTravelWorkflow: TravelAgentAppProps['startTravelWorkflow']}> = ({ startTravelWorkflow }) => {
     const [destination, setDestination] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [budget, setBudget] = useState('2500');
 
+    /**
+     * Handles the creation of a new trip by validating input and starting the workflow.
+     */
     const handleCreateTrip = () => {
         if (destination && startDate && endDate && budget) {
             startTravelWorkflow({ destination, startDate, endDate, budget });
@@ -84,6 +117,11 @@ const PlanTripView: React.FC<{startTravelWorkflow: TravelAgentAppProps['startTra
     )
 };
 
+/**
+ * The FlightsView component provides an interface for searching flight options.
+ * Users can input origin, destination, dates, and other criteria to find flights using AI.
+ * @returns {JSX.Element} The FlightsView component.
+ */
 const FlightsView: React.FC = () => {
     const { t } = useLanguage();
     const [origin, setOrigin] = useState('');
@@ -97,9 +135,13 @@ const FlightsView: React.FC = () => {
     const [flightResults, setFlightResults] = useState<FlightOption[] | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Handles the flight search process.
+     * Validates input, sets loading state, calls the AI service, and displays results or errors.
+     */
     const handleSearchFlights = async () => {
         if (!origin || !destination || !departureDate || (isRoundTrip && !returnDate) || isLoading) {
-            setError('Please fill all required flight details.');
+            setError(t('travel_agent.flight_input_error_fill_all' as TranslationKey)); // Ensure this translation key exists or use a default string.
             return;
         }
 
@@ -118,7 +160,7 @@ const FlightsView: React.FC = () => {
             });
             setFlightResults(results);
         } catch (err: any) {
-            setError(err.message || 'Failed to search for flights.');
+            setError(err.message || t('travel_agent.flight_search_failed' as TranslationKey)); // Ensure this translation key exists or use a default string.
         } finally {
             setIsLoading(false);
         }
@@ -129,7 +171,7 @@ const FlightsView: React.FC = () => {
             <div className="flex-grow w-full max-w-2xl mx-auto space-y-4">
                 <div className="text-center">
                     <FlightsIcon className="w-16 h-16 mx-auto mb-2 text-primary-cyan" />
-                    <h2 className="text-xl font-bold font-display">{t('travel_agent.flights_tab')}</h2>
+                    <h2 className="text-xl font-bold font-display">{t('travel_agent.flights_tab' as TranslationKey)}</h2>
                     <p className="text-text-muted">Find the best flight deals with AI.</p>
                     {error && <p className="text-sm text-red-400 mt-2" role="alert">{error}</p>}
                 </div>
@@ -140,23 +182,23 @@ const FlightsView: React.FC = () => {
                             onClick={() => setIsRoundTrip(true)}
                             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${isRoundTrip ? 'bg-primary-blue text-white' : 'bg-black/20 hover:bg-white/10'}`}
                         >
-                            {t('travel_agent.round_trip')}
+                            {t('travel_agent.round_trip' as TranslationKey)}
                         </button>
                         <button
                             onClick={() => setIsRoundTrip(false)}
                             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${!isRoundTrip ? 'bg-primary-blue text-white' : 'bg-black/20 hover:bg-white/10'}`}
                         >
-                            {t('travel_agent.one_way')}
+                            {t('travel_agent.one_way' as TranslationKey)}
                         </button>
                     </div>
 
                     <div>
                         <label htmlFor="origin-input" className="block text-sm font-medium text-text-secondary mb-1">Origin</label>
-                        <input type="text" id="origin-input" placeholder={t('travel_agent.flight_input_placeholder')} className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={origin} onChange={(e) => setOrigin(e.target.value)} required />
+                        <input type="text" id="origin-input" placeholder={t('travel_agent.flight_input_placeholder' as TranslationKey)} className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={origin} onChange={(e) => setOrigin(e.target.value)} required />
                     </div>
                     <div>
                         <label htmlFor="destination-input" className="block text-sm font-medium text-text-secondary mb-1">Destination</label>
-                        <input type="text" id="destination-input" placeholder={t('travel_agent.flight_input_placeholder')} className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={destination} onChange={(e) => setDestination(e.target.value)} required />
+                        <input type="text" id="destination-input" placeholder={t('travel_agent.flight_input_placeholder' as TranslationKey)} className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={destination} onChange={(e) => setDestination(e.target.value)} required />
                     </div>
                     <div className="flex space-x-4">
                         <div className="flex-1">
@@ -172,16 +214,16 @@ const FlightsView: React.FC = () => {
                     </div>
                     <div className="flex space-x-4">
                         <div className="flex-1">
-                            <label htmlFor="passengers-input" className="block text-sm font-medium text-text-secondary mb-1">{t('travel_agent.passengers')}</label>
+                            <label htmlFor="passengers-input" className="block text-sm font-medium text-text-secondary mb-1">{t('travel_agent.passengers' as TranslationKey)}</label>
                             <input type="number" id="passengers-input" min="1" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={passengers} onChange={(e) => setPassengers(parseInt(e.target.value))} />
                         </div>
                         <div className="flex-1">
-                            <label htmlFor="cabin-class-select" className="block text-sm font-medium text-text-secondary mb-1">{t('travel_agent.cabin_class')}</label>
+                            <label htmlFor="cabin-class-select" className="block text-sm font-medium text-text-secondary mb-1">{t('travel_agent.cabin_class' as TranslationKey)}</label>
                             <select id="cabin-class-select" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={cabinClass} onChange={(e) => setCabinClass(e.target.value as 'Economy' | 'Premium Economy' | 'Business' | 'First')}>
-                                <option value="Economy">{t('travel_agent.economy')}</option>
-                                <option value="Premium Economy">{t('travel_agent.premium_economy')}</option>
-                                <option value="Business">{t('travel_agent.business')}</option>
-                                <option value="First">{t('travel_agent.first_class')}</option>
+                                <option value="Economy">{t('travel_agent.economy' as TranslationKey)}</option>
+                                <option value="Premium Economy">{t('travel_agent.premium_economy' as TranslationKey)}</option>
+                                <option value="Business">{t('travel_agent.business' as TranslationKey)}</option>
+                                <option value="First">{t('travel_agent.first_class' as TranslationKey)}</option>
                             </select>
                         </div>
                     </div>
@@ -190,9 +232,9 @@ const FlightsView: React.FC = () => {
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 text-primary-cyan">
                         <SparklesIcon className="w-8 h-8 animate-pulse" role="status"><span className="sr-only">Loading...</span></SparklesIcon>
-                        <p>{t('travel_agent.loading_flights')}</p>
+                        <p>{t('travel_agent.loading_flights' as TranslationKey)}</p>
                     </div>
-                ) : flightResults ? (
+                ) : flightResults && flightResults.length > 0 ? (
                     <div className="mt-6 space-y-4" aria-live="polite">
                         <h3 className="font-display text-xl font-bold">Available Flights</h3>
                         {flightResults.map((flight, index) => (
@@ -214,7 +256,7 @@ const FlightsView: React.FC = () => {
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-text-muted mt-8">
                         <FlightsIcon className="w-20 h-20 mb-4 opacity-30" aria-hidden="true" />
-                        <p className="text-xl font-bold">{t('travel_agent.no_flights_results')}</p>
+                        <p className="text-xl font-bold">{t('travel_agent.no_flights_results' as TranslationKey)}</p>
                     </div>
                 )}
             </div>
@@ -225,33 +267,50 @@ const FlightsView: React.FC = () => {
                     disabled={isLoading || !origin || !destination || !departureDate || (isRoundTrip && !returnDate)}
                     className="w-full font-bold py-3 px-4 rounded-lg bg-gradient-to-r from-primary-cyan to-primary-blue hover:brightness-110 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {t('travel_agent.find_flights')}
+                    {t('travel_agent.find_flights' as TranslationKey)}
                 </button>
             </div>
         </div>
     );
 };
 
+/**
+ * The ExplorePlacesView component provides a placeholder for future AI-powered
+ * exploration of destinations.
+ * @returns {JSX.Element} The ExplorePlacesView component.
+ */
 const ExplorePlacesView = () => {
     const { t } = useLanguage();
     return (
         <div className="h-full w-full p-6 text-center flex flex-col items-center justify-center">
             <MapIcon className="w-20 h-20 mb-4 text-emerald-400" />
             <h2 className="text-2xl font-bold font-display">Explore Places</h2>
-            <p className="text-text-muted">{t('travel_agent.explore_desc') || "This feature is under construction. Soon you'll be able to search for locations and get AI-powered insights."}</p>
+            <p className="text-text-muted">{t('travel_agent.explore_desc' as TranslationKey) || "This feature is under construction. Soon you'll be able to search for locations and get AI-powered insights."}</p>
         </div>
     );
 };
+
+/**
+ * The FindDealsView component provides a placeholder for future AI-powered
+ * searching for travel deals.
+ * @returns {JSX.Element} The FindDealsView component.
+ */
 const FindDealsView = () => {
     const { t } = useLanguage();
     return (
         <div className="h-full w-full p-6 text-center flex flex-col items-center justify-center">
             <SearchIcon className="w-20 h-20 mb-4 text-sky-400" />
             <h2 className="text-2xl font-bold font-display">Find Deals</h2>
-            <p className="text-text-muted">{t('travel_agent.deals_desc') || "This feature is under construction. Get ready to find the best travel deals with the help of AI search."}</p>
+            <p className="text-text-muted">{t('travel_agent.deals_desc' as TranslationKey) || "This feature is under construction. Get ready to find the best travel deals with the help of AI search."}</p>
         </div>
     );
 };
+
+/**
+ * The MyPlansView component displays a list of mock travel plans.
+ * In a real application, this would show user-saved travel plans.
+ * @returns {JSX.Element} The MyPlansView component.
+ */
 const MyPlansView = () => {
     const mockPlans: Partial<TravelPlan>[] = [
         { tripTitle: 'Cyberpunk Adventure in Tokyo', destination: 'Tokyo, Japan', itinerary: [{day: 1, title: 'Shibuya Crossing & Neon Nights', activities:[]}] },

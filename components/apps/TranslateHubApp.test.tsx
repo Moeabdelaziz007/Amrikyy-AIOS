@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // FIX: Changed default import to named import.
-import { TranslateHubApp } from './TranslateHubApp';
+import TranslateHubApp from './TranslateHubApp';
 import { useLanguage } from '../../contexts/LanguageContext';
 import * as geminiAdvancedService from '../../services/geminiAdvancedService';
 import * as audioUtils from '../../utils/audioUtils';

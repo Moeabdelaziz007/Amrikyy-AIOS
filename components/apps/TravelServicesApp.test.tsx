@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 // FIX: Changed default import to named import.
-import { TravelServicesApp } from './TravelServicesApp';
+import TravelServicesApp from './TravelServicesApp';
 import { useLanguage } from '../../contexts/LanguageContext';
 import * as geminiAdvancedService from '../../services/geminiAdvancedService';
 import { UserAccount } from '../../types';

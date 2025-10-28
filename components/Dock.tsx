@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppID, WindowInstance, TaskbarTheme } from '../types';
-import { AnalyticsHubIcon, CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkspaceIcon, WorkflowIcon, SkillForgeIcon, SettingsIcon, AgentForgeIcon, StoreIcon, NotificationCenterIcon, AvatarStudioIcon, AudioStudioIcon, DevToolkitIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, TravelServicesIcon, MarketingIcon, FlightsIcon } from './Icons';
+import { AnalyticsHubIcon, CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkspaceIcon, WorkflowIcon, SkillForgeIcon, SettingsIcon, AgentForgeIcon, StoreIcon, NotificationCenterIcon, AvatarStudioIcon, AudioStudioIcon, DevToolkitIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, TravelServicesIcon, MarketingIcon, FlightsIcon, ImageIcon, VideoIcon, SearchIcon, MapIcon, MicrophoneIcon, VideoAnalyzeIcon, SmartWatchIcon, EventLogIcon, ChronoVaultIcon, LiveConversationIcon, ImageAnalyzerIcon, ControlPanelIcon, PricingIcon } from './Icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
 /**

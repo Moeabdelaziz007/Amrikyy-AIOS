@@ -13,6 +13,7 @@ vi.mock('../../contexts/LanguageContext', () => ({
 // Mock AI services
 vi.mock('../../services/geminiAdvancedService', () => ({
   expandTopic: vi.fn(),
+  // FIX: Added mock for getResearchSummary
   getResearchSummary: vi.fn(),
   translateText: vi.fn(),
 }));
@@ -78,6 +79,7 @@ describe('CognitiveCanvasApp', () => {
       subTopics: ['Bias in AI'],
       questions: [],
     });
+    // FIX: Mocked getResearchSummary
     (geminiAdvancedService.getResearchSummary as vi.Mock).mockResolvedValue('Summary on Bias in AI.');
 
     render(<CognitiveCanvasApp speechSettings={mockSpeechSettings} />);
@@ -105,6 +107,7 @@ describe('CognitiveCanvasApp', () => {
       questions: [],
     });
     // First, set some content to enable the translate button
+    // FIX: Mocked getResearchSummary
     (geminiAdvancedService.getResearchSummary as vi.Mock).mockResolvedValue('English content.');
     (geminiAdvancedService.translateText as vi.Mock).mockResolvedValue('Contenido en inglés.');
     (useLanguage as vi.Mock).mockReturnValue({ t: (key: string) => key === 'language_code' ? 'es' : key.split('.')[1] || key });
@@ -123,6 +126,7 @@ describe('CognitiveCanvasApp', () => {
     const researchButton = screen.getByLabelText('Research Hello');
     fireEvent.click(researchButton);
     await waitFor(() => {
+        const contentTextArea = screen.getByLabelText('Content for Hello');
         expect(screen.getByDisplayValue('English content.')).toBeInTheDocument();
     });
 

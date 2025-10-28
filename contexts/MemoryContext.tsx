@@ -16,7 +16,7 @@ interface MemoryContextType {
   /** Indicates if the AI is currently synthesizing a new memory. */
   isSynthesizing: boolean;
   /** Function to add a new Engram to the memory system. */
-  addEngram: (engram: Omit<Engram, 'id' | 'timestamp'>) => void;
+  addEngram: (engramData: Omit<Engram, 'id' | 'timestamp'>) => void;
   /** Function to add new connections between Engrams. */
   addConnections: (newConnections: EngramConnection[]) => void;
   /** Function to trigger the AI to synthesize a new memory based on a prompt. */
@@ -63,6 +63,9 @@ export const MemoryProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ...engramData,
       id: `engram-${Date.now()}`,
       timestamp: Date.now(), // Ensure timestamp is set here
+      potentiality: engramData.potentiality !== undefined ? engramData.potentiality : 1, // Default to 1 if not provided
+      color: engramData.color || '#60A5FA', // Default color if not provided
+      authorAgentId: engramData.authorAgentId || 'echo', // Default to 'echo' if not provided
     };
     setEngrams(prev => [...prev, newEngram]);
   }, []);
@@ -107,6 +110,8 @@ export const MemoryProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ...newEngramData,
         id: `engram-${Date.now()}`,
         timestamp: Date.now(),
+        potentiality: newEngramData.potentiality || 0, // Ensure potentiality is set, default to 0 for new insights
+        authorAgentId: newEngramData.authorAgentId || 'echo', // Default to 'echo' if not provided
       };
       setEngrams(prev => [...prev, newEngram]);
     } finally {
@@ -137,8 +142,10 @@ export const MemoryProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 /**
  * Custom hook to access the memory context.
- * Throws an error if used outside of a `MemoryProvider`.
- * @returns {MemoryContextType} The current memory context.
+ * This hook provides a way for components to interact with the application's memory system,
+ * including accessing Engrams, managing connections, and triggering AI-driven memory operations.
+ * @returns {MemoryContextType} The current memory context, including Engrams, connections,
+ *   reasoning paths, synthesis status, and functions to modify memory.
  * @throws {Error} If `useMemory` is not used within a `MemoryProvider`.
  */
 export const useMemory = (): MemoryContextType => {

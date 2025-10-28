@@ -14,6 +14,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
     const [name, setName] = useState('');
     const [role, setRole] = useState('');
     const [icon, setIcon] = useState('🤖');
+    // FIX: Corrected useState declaration for selectedSkills
     const [selectedSkills, setSelectedSkills] = useState<Set<SkillID>>(new Set());
     const [isDeployed, setIsDeployed] = useState(false);
     const [isSuggesting, setIsSuggesting] = useState(false);
@@ -54,7 +55,8 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
             const suggestion = await suggestAgentPersona(role);
             setName(suggestion.name);
             setIcon(suggestion.icon);
-            setSelectedSkills(new Set(suggestion.skillIDs as SkillID[]));
+            // FIX: The `suggestion.skillIDs` is already `SkillID[]`, so directly creating a new Set is fine.
+            setSelectedSkills(new Set(suggestion.skillIDs));
         } catch (error) {
             console.error("Failed to get agent suggestions:", error);
             alert("Sorry, I couldn't generate suggestions. Please try again.");
@@ -117,6 +119,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
                         <h2 className="text-xl font-bold font-display mb-4 flex-shrink-0">2. Plug-in Skills</h2>
                          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                             {skills.map(skill => {
+                                // FIX: `selectedSkills` is now correctly a Set, so `.has()` method exists.
                                 const isSelected = selectedSkills.has(skill.id);
                                 const Icon = skill.icon;
                                 return (

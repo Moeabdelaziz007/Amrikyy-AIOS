@@ -80,21 +80,15 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ content, onClose, onS
         <div 
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center animate-fade-in"
             onClick={onClose}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="create-post-title"
         >
             <div 
                 className="w-full max-w-2xl bg-bg-secondary rounded-2xl border border-border-color shadow-2xl flex flex-col animate-slide-up"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex flex-col md:flex-row">
-                    <div id="shareable-content" className="p-6 md:p-8 bg-gradient-to-br from-[#1E1B4B] to-[#0C0A1D] text-white rounded-t-2xl md:rounded-t-none md:rounded-l-2xl flex flex-col flex-1" aria-label="Shareable Content Preview">
-                        {content.imageUrl && (
-                            <img src={content.imageUrl} alt={content.title} className="w-full max-h-48 object-cover rounded-lg mb-4" role="img" />
-                        )}
+                    <div id="shareable-content" className="p-6 md:p-8 bg-gradient-to-br from-[#1E1B4B] to-[#0C0A1D] text-white rounded-t-2xl md:rounded-t-none md:rounded-l-2xl flex flex-col flex-1">
                         <p className="font-semibold text-cyan-400 mb-2">{content.cta}</p>
-                        <h2 id="create-post-title" className="text-2xl md:text-3xl font-bold font-display mb-3">{content.title}</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold font-display mb-3">{content.title}</h2>
                         <p className="text-base md:text-lg text-white/80 flex-grow">{content.subtitle}</p>
                         <div className="mt-8 flex justify-between items-center border-t border-white/10 pt-4">
                             <span className="font-display font-bold text-xl">Amrikyy AI OS</span>
@@ -104,28 +98,22 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ content, onClose, onS
 
                     <div className="w-full md:w-64 bg-bg-tertiary p-4 flex flex-col gap-4 rounded-b-2xl md:rounded-b-none md:rounded-r-2xl border-t md:border-t-0 md:border-l border-border-color">
                          <h3 className="font-bold text-sm">{t('share_preview.ai_post')}</h3>
-                         <label htmlFor="caption-textarea" className="sr-only">AI-generated caption</label>
                          <textarea 
-                            id="caption-textarea"
                             value={socialPost.caption}
                             onChange={(e) => setSocialPost(prev => ({...prev, caption: e.target.value}))}
                             rows={4}
                             placeholder="AI-generated caption..."
                             className="w-full bg-black/20 border border-white/10 rounded-md p-2 text-xs font-mono resize-none focus:outline-none focus:ring-1 focus:ring-accent"
-                            aria-label="AI-generated social media caption"
                          />
-                         <label htmlFor="hashtags-input" className="sr-only">Hashtags</label>
                          <input
-                            id="hashtags-input"
                             type="text"
                             value={socialPost.hashtags.join(' ')}
-                            onChange={(e) => setSocialPost(prev => ({...prev, hashtags: e.target.value.split(' ').filter(tag => tag.startsWith('#'))}))}
+                            onChange={(e) => setSocialPost(prev => ({...prev, hashtags: e.target.value.split(' ')}))}
                             placeholder="#hashtags"
                             className="w-full bg-black/20 border border-white/10 rounded-md p-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-accent"
-                            aria-label="Hashtags for social media post"
                          />
                          <button onClick={handleGeneratePost} disabled={isGenerating} className="w-full flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg bg-accent/20 text-accent hover:bg-accent/40 transition-colors disabled:opacity-50">
-                            {isGenerating ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" role="status" aria-label="Generating post"><span className="sr-only">Loading...</span></div> : <SparklesIcon className="w-4 h-4" aria-hidden="true"/>}
+                            {isGenerating ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div> : <SparklesIcon className="w-4 h-4"/>}
                             {t('share_preview.generate_post')}
                          </button>
                     </div>
@@ -135,14 +123,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ content, onClose, onS
                      <button 
                         onClick={handleDownload}
                         className="px-4 py-2 text-sm font-semibold rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-                        aria-label="Download image"
                     >
                         {t('share_preview.download')}
                     </button>
                     <button 
                         onClick={handlePostToFeed}
                         className="px-6 py-2 font-bold rounded-lg bg-primary-blue text-white hover:bg-primary-blue/80 transition-colors"
-                        aria-label="Post to Nexus Feed"
                     >
                         {t('share_preview.post_to_feed')}
                     </button>
