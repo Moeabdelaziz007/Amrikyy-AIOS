@@ -24,6 +24,27 @@ const escapeSSML = (text: string) => {
 };
 
 /**
+ * Synthesizes a memory engram from a given thought or experience.
+ * This is a placeholder function.
+ * @param {string} thought - The thought or experience to synthesize.
+ * @returns {Promise<Engram>} A promise that resolves to a new Engram.
+ */
+export const synthesizeMemory = async (thought: string): Promise<Engram> => {
+    console.log("Synthesizing memory for:", thought);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return {
+        id: `engram-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        content: thought,
+        type: 'thought',
+        mood: 'neutral',
+        keywords: thought.split(' '),
+        relatedEngrams: [],
+    };
+};
+
+
+/**
  * Performs a grounded search using Google Search for up-to-date information.
  * Uses 'gemini-2.5-flash' for general queries and 'gemini-2.5-pro' with thinking mode for complex queries.
  * @param {string} prompt - The user's input prompt.
@@ -61,7 +82,10 @@ export const groundedSearch = async (prompt: string, thinkingMode: boolean): Pro
         return { text: response.text, sources };
     } catch (error) {
         console.error("Error calling Gemini Search API:", error);
-        return { text: "An error occurred while searching.", sources: [] };
+        if (error instanceof Error) {
+            throw new Error(`Error during grounded search: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during grounded search.");
     }
 };
 
@@ -101,7 +125,10 @@ export const mapsSearch = async (prompt: string, location: {latitude: number, lo
         return { text: response.text, sources };
     } catch (error) {
         console.error("Error calling Gemini Maps API:", error);
-        return { text: "An error occurred while searching maps.", sources: [] };
+        if (error instanceof Error) {
+            throw new Error(`Error during maps search: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during maps search.");
     }
 };
 
@@ -339,7 +366,10 @@ export const generateSpeech = async (text: string, voiceName: SystemVoice = 'Kor
         return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || '';
     } catch (error) {
         console.error("Error generating speech:", error);
-        return '';
+        if (error instanceof Error) {
+            throw new Error(`Failed to generate speech: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during speech generation.");
     }
 };
 
@@ -373,7 +403,10 @@ export const translateText = async (text: string, targetLanguageCode: string, so
         return response.text;
     } catch (error) {
         console.error("Error translating text:", error);
-        return "Failed to translate text.";
+        if (error instanceof Error) {
+            throw new Error(`Failed to translate text: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during translation.");
     }
 };
 
@@ -427,7 +460,10 @@ export const transcribeAudio = async (audioBase64: string, mimeType: string): Pr
         return response.text;
     } catch (error) {
         console.error("Error transcribing audio:", error);
-        return "Failed to transcribe audio.";
+        if (error instanceof Error) {
+            throw new Error(`Failed to transcribe audio: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during transcription.");
     }
 };
 
@@ -628,7 +664,7 @@ export const editImage = async (prompt: string, base64ImageData: string, mimeTyp
     if (!API_KEY) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         // Return a slightly different mock image to simulate editing
-        return 'https://images.unsplash.com/photo-1582769923234-9279184589d8?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+        return 'https://images.unsplash.com/photo-1582769923234-9279184589d8?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG9otby1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
     }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     try {
@@ -861,7 +897,10 @@ export const summarizeText = async (text: string): Promise<string> => {
         return response.text;
     } catch (error) {
         console.error("Error summarizing text:", error);
-        return "Failed to summarize text.";
+        if (error instanceof Error) {
+            throw new Error(`Failed to summarize text: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during summarization.");
     }
 };
 
@@ -1409,7 +1448,7 @@ export const findCleaningServices = async (query: string, location: {latitude: n
             aiSummary: "Mock AI Cleaning Summary: Based on your request, here are highly-rated cleaning services available in your area.",
             services: [
                 { name: 'Sparkle & Shine', type: 'Deep Clean', priceRange: '$150-300', rating: 4.8, availability: 'Next Day', contact: 'tel:+1234567890', imageUrl: 'https://images.unsplash.com/photo-1581578731548-adabda61320a?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Offers eco-friendly deep cleaning with excellent reviews.' },
-                { name: 'Swift Cleaners', type: 'Standard Clean', priceRange: '$100-200', rating: 4.5, availability: 'Same Week', contact: 'https://swiftcleaners.com', imageUrl: 'https://images.unsplash.com/photo-1521749842100-d8f8a8b19a16?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Fast and efficient service for regular home maintenance.' },
+                { name: 'Swift Cleaners', type: 'Standard Clean', priceRange: '$100-200', rating: 4.5, availability: 'Same Week', contact: 'https://swiftcleaners.com', imageUrl: 'https://images.unsplash.com/photo-1521749842100-d8f8a8b19a16?q=80&w=2940&auto=format&fit=crop&ixlib-rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Fast and efficient service for regular home maintenance.' },
             ]
         };
     }
@@ -1463,8 +1502,8 @@ export const findNightlifeEvents = async (query: string, location: {latitude: nu
         return {
             aiSummary: "Mock AI Nightlife Summary: Here are some exciting nightlife options near you, tailored to your search for live music.",
             events: [
-                { name: 'The Blue Note', type: 'Jazz Club', description: 'Legendary jazz venue with nightly live performances.', location: 'Greenwich Village', date: 'Tonight', time: '8:00 PM', ticketsUrl: '#', imageUrl: 'https://images.unsplash.com/photo-1543880572-cfc3d79031d2?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Iconic club with a rich history and top-tier musicians.' },
-                { name: 'Electric Groove', type: 'Nightclub', description: 'High-energy club with electronic dance music.', location: 'Meatpacking District', date: 'Fri & Sat', time: '10:00 PM', vipOptions: true, imageUrl: 'https://images.unsplash.com/photo-1594191632007-84687d603a11?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Best place for dancing with renowned DJs and a vibrant atmosphere.' },
+                { name: 'The Blue Note', type: 'Jazz Club', description: 'Legendary jazz venue with nightly live performances.', location: 'Greenwich Village', date: 'Tonight', time: '8:00 PM', ticketsUrl: '#', imageUrl: 'https://images.unsplash.com/photo-1543880572-cfc3d79031d2?q=80&w=2940&auto=format&fit=crop&ixlib-rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Iconic club with a rich history and top-tier musicians.' },
+                { name: 'Electric Groove', type: 'Nightclub', description: 'High-energy club with electronic dance music.', location: 'Meatpacking District', date: 'Fri & Sat', time: '10:00 PM', vipOptions: true, imageUrl: 'https://images.unsplash.com/photo-1594191632007-84687d603a11?q=80&w=2940&auto=format&fit=crop&ixlib-rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', reason: 'Best place for dancing with renowned DJs and a vibrant atmosphere.' },
             ]
         };
     }

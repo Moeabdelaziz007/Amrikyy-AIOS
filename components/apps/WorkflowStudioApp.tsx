@@ -72,4 +72,5 @@ const NodeComponent: React.FC<{ node: Node; onDrag: (id: string, x: number, y: n
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, handleMouseMove
+    }, [isDragging, handleMouseMove]);
+}

@@ -1,6 +1,6 @@
 import React from 'react';
-import { WorkflowIcon } from './Icons';
-import { AppID } from '../types';
+import { WorkflowIcon } from '../Icons';
+import { AppID } from '../../types';
 
 /**
  * Props for the WorkflowDashboardWidget component.
@@ -22,7 +22,7 @@ interface WorkflowDashboardWidgetProps {
  */
 const WorkflowDashboardWidget: React.FC<WorkflowDashboardWidgetProps> = ({ onOpenApp }) => {
     return (
-        <div>
+        <div role="region" aria-label="Active Workflows">
             <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
                 <div className="flex items-center gap-2">
                     <WorkflowIcon className="text-neon-cyan text-lg" />

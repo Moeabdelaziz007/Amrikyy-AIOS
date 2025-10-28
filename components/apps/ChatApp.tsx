@@ -87,11 +87,21 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
     
     const currentInput = input;
     setInput('');
-    const aiResponseText = await generateResponse(currentInput, chatHistory);
-    const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
-    
-    setMessages(prev => [...prev, aiMessage]);
-    setIsLoading(false);
+    try {
+        const aiResponseText = await generateResponse(currentInput, chatHistory);
+        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
+        setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+        const errorMessage: Message = {
+            id: `error-${Date.now()}`,
+            sender: 'ai',
+            text: error instanceof Error ? error.message : "An unexpected error occurred.",
+            isError: true
+        };
+        setMessages(prev => [...prev, errorMessage]);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   /**
@@ -145,9 +155,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
                   <SparklesIcon className="h-6 w-6 text-white" />
               </div>
             )}
-            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' : 'bg-bg-secondary text-text-primary rounded-bl-none'}`}>
+            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' : msg.isError ? 'bg-red-500/20 text-red-300 rounded-bl-none' : 'bg-bg-secondary text-text-primary rounded-bl-none'}`}>
               <p className="text-sm">{msg.text}</p>
-              {msg.sender === 'ai' && (
+              {msg.sender === 'ai' && !msg.isError && (
                 <button 
                   onClick={() => handlePlayAudio(msg)}
                   disabled={audioState[msg.id] === 'loading' || audioState[msg.id] === 'playing'}

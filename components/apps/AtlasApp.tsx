@@ -81,6 +81,7 @@ const DashboardView: React.FC = () => {
                 setNews(fetchedNews);
             } catch (error) {
                 console.error(error);
+                // In a real app, you might set an error state to show in the UI
                 setNews([]); // Clear news on error
             } finally {
                 setIsLoadingNews(false);
@@ -243,13 +244,23 @@ const AIChatView: React.FC = () => {
         const history: Content[] = messages.map(msg => ({
             role: msg.sender === 'user' ? 'user' : 'model',
             parts: [{ text: msg.text }]
-        })); 
-        const responseText = await generateResponse(input, history);
-        
-        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: `${responseText}\n\n*Disclaimer: I am an AI assistant and not a financial advisor. All information is for educational purposes only.*` };
-        setMessages(prev => [...prev, aiMessage]);
-        setInput('');
-        setIsLoading(false);
+        }));
+        try {
+            const responseText = await generateResponse(input, history);
+            const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: `${responseText}\n\n*Disclaimer: I am an AI assistant and not a financial advisor. All information is for educational purposes only.*` };
+            setMessages(prev => [...prev, aiMessage]);
+        } catch (error) {
+            const errorMessage: Message = {
+                id: `error-${Date.now()}`,
+                sender: 'ai',
+                text: error instanceof Error ? error.message : "An unexpected error occurred.",
+                isError: true
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setInput('');
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -258,7 +269,7 @@ const AIChatView: React.FC = () => {
                 {messages.map((msg) => (
                    <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                        {msg.sender === 'ai' && <div className="flex-shrink-0 h-10 w-10 rounded-full bg-stone-600 flex items-center justify-center text-2xl"><FinanceIcon /></div>}
-                       <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-accent text-white' : 'bg-bg-tertiary'}`}>
+                       <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-accent text-white' : msg.isError ? 'bg-red-500/20 text-red-300' : 'bg-bg-tertiary'}`}>
                            <p className="text-sm">{msg.text}</p>
                        </div>
                    </div>

@@ -21,7 +21,6 @@ export const generateResponse = async (prompt: string, history: Content[]): Prom
     return "This is a simulated response. To connect to Gemini, please provide an API key. I am Maya, ready to assist with your travel intelligence needs.";
   }
 
-  // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   try {
@@ -38,8 +37,8 @@ export const generateResponse = async (prompt: string, history: Content[]): Prom
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     if (error instanceof Error) {
-        return `An error occurred while contacting the AI: ${error.message}`;
+        throw new Error(`An error occurred while contacting the AI: ${error.message}`);
     }
-    return "An unknown error occurred while contacting the AI.";
+    throw new Error("An unknown error occurred while contacting the AI.");
   }
 };

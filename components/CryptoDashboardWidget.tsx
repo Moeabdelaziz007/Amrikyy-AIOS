@@ -90,7 +90,7 @@ const CryptoDashboardWidget: React.FC = () => {
     }, []);
 
     return (
-        <div className="glass-effect rounded-xl">
+        <div className="glass-effect rounded-xl" role="region" aria-label="Crypto Dashboard">
              <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-amber-400 text-lg">monitoring</span>

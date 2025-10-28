@@ -3,35 +3,35 @@ import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automatio
 import Dock from './components/Dock';
 import AppLauncher from './components/AppLauncher';
 import PoweredByGemini from './components/PoweredByGemini';
-import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget'; // FIX: Ensure explicit relative import to resolve module specifier issues.
+import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget.tsx';
 import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService';
 import { createCalendarEventFromPlan } from './services/geminiAdvancedService';
 import DesktopAppsGrid from './components/DesktopAppsGrid';
 import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons';
 import { useLanguage } from './contexts/LanguageContext';
 import AnimatedBackground from './components/AnimatedBackground';
-import SystemOverviewWidget from './components/widgets/SystemOverviewWidget'; // Explicit relative import
+import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
 import { NotificationCenter } from './components/NotificationCenter';
 import { useNotification } from './contexts/NotificationContext';
-import CryptoDashboardWidget from './components/widgets/CryptoDashboardWidget'; // Explicit relative import
+import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx';
 import { useUserBehavior } from './contexts/UserBehaviorContext';
 import GlobalVoiceControl from './components/GlobalVoiceControl';
 import { useGoogleAuth } from './contexts/GoogleAuthContext';
-import ProjectsWidget from './components/widgets/ProjectsWidget'; // Explicit relative import
-import TasksWidget from './components/widgets/TasksWidget'; // Explicit relative import
+import ProjectsWidget from './components/widgets/ProjectsWidget.tsx';
+import TasksWidget from './components/widgets/TasksWidget.tsx';
 import CreatePostModal from './components/CreatePostModal';
 import { bounties as mockBounties } from './data/bounties';
-import LoadingScreen from './components/LoadingScreen'; // Re-added LoadingScreen import
-import { initialNexusPosts as mockNexusPosts } from './data/nexus'; // Import initial mock Nexus posts
+import LoadingScreen from './components/LoadingScreen';
+import { initialNexusPosts as mockNexusPosts } from './data/nexus';
 import { TranslationKey } from './i18n';
 
 // Lazy load all application components for code-splitting and performance
-const Window = lazy(() => import('./components/Window'));
-const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget')); // Explicit relative import
-const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget')); // Explicit relative import
-const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget')); // Explicit relative import // Replaced ViralFeedWidget
-const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget')); // Explicit relative import
-const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget')); // Explicit relative import
+const Window = lazy(() => import('./components/Window.tsx'));
+const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget.tsx'));
+const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget.tsx'));
+const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx'));
+const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx'));
+const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx'));
 
 /**
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
@@ -57,27 +57,19 @@ const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType
   [AppID.transcriber]: lazy(() => import('./components/apps/TranscriberApp')),
   [AppID.videoAnalyzer]: lazy(() => import('./components/apps/VideoAnalyzerApp')),
   [AppID.image]: lazy(() => import('./components/apps/ImageGeneratorApp')),
-  [AppID.audio]: lazy(() => import('./components/apps/AudioStudioApp')),
   [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp')),
   [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp')),
   [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp')),
-  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')), // Corrected import path
+  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')),
   [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp')),
   [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp')),
   [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp')),
   [AppID.cognitoBrowser]: lazy(() => import('./components/apps/CognitoBrowserApp')),
   [AppID.analyticsHub]: lazy(() => import('./components/apps/AnalyticsHubApp')),
   [AppID.agentForge]: lazy(() => import('./components/apps/AgentForgeApp')),
-  [AppID.avatarStudio]: lazy(() => import('./components/apps/AvatarStudioApp')),
   [AppID.agentProfile]: lazy(() => import('./components/apps/AgentProfileApp')),
   [AppID.store]: lazy(() => import('./components/apps/StoreApp')),
   [AppID.notificationCenter]: lazy(() => import('./components/apps/NotificationCenterApp')),
-  [AppID.liveConversation]: lazy(() => import('./components/apps/LiveConversationApp')),
-  [AppID.imageAnalyzer]: lazy(() => import('./components/apps/ImageAnalyzerApp')),
-  [AppID.agora]: lazy(() => import('./components/apps/AgoraApp')),
-  [AppID.nexusChat]: lazy(() => import('./components/apps/NexusChatApp')),
-  [AppID.devConsole]: lazy(() => import('./components/apps/DevConsoleApp')),
-  [AppID.apiDocs]: lazy(() => import('./components/apps/ApiDocsApp')),
   [AppID.devToolkit]: lazy(() => import('./components/apps/DevToolkitApp')),
   [AppID.growthHub]: lazy(() => import('./components/apps/GrowthHubApp')),
   [AppID.resourceHub]: lazy(() => import('./components/apps/ResourceHubApp')),
@@ -417,15 +409,8 @@ const App: React.FC = () => {
           });
         },
         (error) => {
-          console.warn('Geolocation failed:', error);
-          setCurrentWeather({
-            location: 'Unknown',
-            temp: 20,
-            condition: 'Clear',
-            icon: 'sunny',
-            high: 25,
-            low: 15,
-          });
+            addNotification(`Geolocation failed: ${error.message}. Weather will be unavailable.`, 'warning');
+            setCurrentWeather(null);
         }
       );
     };

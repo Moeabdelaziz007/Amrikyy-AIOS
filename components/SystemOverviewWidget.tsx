@@ -43,7 +43,7 @@ const SystemOverviewWidget: React.FC<SystemOverviewWidgetProps> = ({ userAccount
     };
 
     return (
-        <div className="w-full max-w-4xl glass-effect rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-slide-up">
+        <div className="w-full max-w-4xl glass-effect rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-slide-up" role="region" aria-label="System Overview">
             <div className="flex items-center gap-4">
                  <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 hidden sm:flex items-center justify-center text-3xl bg-black/20">
                     {userAccount.avatar || '👩‍🚀'}
