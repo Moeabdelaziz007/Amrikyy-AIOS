@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { WorkflowIcon } from './Icons';
-import { AppID } from '../types';
+import { WorkflowIcon } from '../Icons';
+import { AppID } from '../../types';
 
 /**
  * Props for the WorkflowDashboardWidget component.
@@ -23,23 +22,19 @@ interface WorkflowDashboardWidgetProps {
  */
 const WorkflowDashboardWidget: React.FC<WorkflowDashboardWidgetProps> = ({ onOpenApp }) => {
     return (
-        <div className="workflow-dashboard-widget" aria-label="Active Workflows Dashboard">
+        <div role="region" aria-label="Active Workflows">
             <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                    <WorkflowIcon className="text-neon-cyan text-lg" aria-hidden="true" />
+                    <WorkflowIcon className="text-neon-cyan text-lg" />
                     <h2 className="font-medium text-sm">Active Workflows</h2>
                 </div>
-                <button 
-                    onClick={() => onOpenApp(AppID.workflow)} 
-                    className="text-xs bg-neon-cyan/80 hover:bg-neon-cyan text-black font-semibold px-2 py-1 rounded transition-colors"
-                    aria-label="Create new workflow"
-                >
+                <button onClick={() => onOpenApp('workflow')} className="text-xs bg-neon-cyan/80 hover:bg-neon-cyan text-black font-semibold px-2 py-1 rounded transition-colors">
                     New +
                 </button>
             </div>
             <div className="space-y-3 p-4">
                 {/* Mock Active Workflow */}
-                <div role="status" aria-label="Workflow: Generating Travel Plan for Tokyo, 75% complete. Agent Karim optimizing budget.">
+                <div>
                     <div className="flex justify-between items-center mb-1">
                         <p className="text-sm font-semibold">Generating Travel Plan: Tokyo</p>
                         <p className="text-xs font-mono text-neon-cyan">75%</p>

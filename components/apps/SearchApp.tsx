@@ -42,8 +42,13 @@ const SearchApp: React.FC = () => {
             const { text, sources } = await groundedSearch(currentInput, thinkingMode);
             const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text, sources };
             setMessages(prev => [...prev, aiMessage]);
-        } catch (error: any) {
-            const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, the search failed. ${error.message}` };
+        } catch (error) {
+            const errorMessage: Message = {
+                id: `error-${Date.now()}`,
+                sender: 'ai',
+                text: error instanceof Error ? error.message : "An unexpected error occurred.",
+                isError: true
+            };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
@@ -67,11 +72,7 @@ const SearchApp: React.FC = () => {
                     <SparklesIcon className="h-6 w-6 text-white" />
                 </div>
                 )}
-                <div className={`max-w-[80%] p-3 rounded-2xl ${
-                    msg.sender === 'user' ? 'bg-primary-blue text-white' 
-                    : msg.sender === 'system' ? 'bg-red-500/20 text-red-300'
-                    : 'bg-bg-secondary text-text-primary'
-                }`}>
+                <div className={`max-w-[80%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-primary-blue text-white' : msg.isError ? 'bg-red-500/20 text-red-300' : 'bg-bg-secondary text-text-primary'}`}>
                     <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                     {msg.sources && msg.sources.length > 0 && (
                         <div className="mt-3 border-t border-white/10 pt-2">

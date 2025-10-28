@@ -26,6 +26,7 @@ export const bounties: CreatorBounty[] = [
         creditReward: 50,
         action: {
             type: 'open_app',
+            // FIX: Use AppID enum member directly
             appId: AppID.resourceHub
         }
     },
@@ -36,6 +37,7 @@ export const bounties: CreatorBounty[] = [
         creditReward: 150,
         action: {
             type: 'open_app',
+            // FIX: Corrected AppID from non-existent 'promptWeaver' to 'workflow' which matches the description.
             appId: AppID.workflow
         }
     },

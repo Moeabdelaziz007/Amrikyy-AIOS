@@ -51,10 +51,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 /**
  * Custom hook to access the language context.
- * This hook simplifies consuming the current language settings and translation function
- * from any component nested within the `LanguageProvider`.
- * @returns {LanguageContextType} The current language context, including the active language,
- *   a function to set the language, and the translator function `t`.
+ * Throws an error if used outside of a `LanguageProvider`.
+ * @returns {LanguageContextType} The current language context.
  * @throws {Error} If `useLanguage` is not used within a `LanguageProvider`.
  */
 export const useLanguage = (): LanguageContextType => {

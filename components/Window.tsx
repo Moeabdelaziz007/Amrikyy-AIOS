@@ -1,10 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { WindowStyle } from '../types.ts';
+import { WindowStyle } from '../types';
 
 /**
  * A custom React hook to detect if the screen matches a given media query.
- * It provides a reactive way to determine if the current viewport dimensions
- * satisfy a CSS media query, updating the component when the match status changes.
  * @param {string} query - The media query string (e.g., '(max-width: 768px)').
  * @returns {boolean} True if the media query matches, false otherwise.
  */

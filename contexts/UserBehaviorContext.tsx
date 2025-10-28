@@ -88,10 +88,8 @@ export const UserBehaviorProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 /**
  * Custom hook to access the user behavior context.
- * This hook allows components to log user actions and retrieve insights into application usage patterns,
- * such as frequently used applications. It should be used within a `UserBehaviorProvider`.
- * @returns {UserBehaviorContextType} The current user behavior context, including recent actions,
- *   a function to log actions, and a function to get frequent apps.
+ * Throws an error if used outside of a `UserBehaviorProvider`.
+ * @returns {UserBehaviorContextType} The current user behavior context.
  * @throws {Error} If `useUserBehavior` is not used within a `UserBehaviorProvider`.
  */
 export const useUserBehavior = (): UserBehaviorContextType => {

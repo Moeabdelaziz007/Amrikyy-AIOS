@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Message, SystemVoice } from '../../types.ts';
-import { generateResponse } from '../../services/geminiService.ts';
-import { generateSpeech } from '../../services/geminiAdvancedService.ts';
-import { playDecodedAudio, decode } from '../../utils/audioUtils.ts';
-import { SendIcon, SparklesIcon, SpeakerIcon } from '../Icons.tsx';
+import { Message, SystemVoice } from '../../types';
+import { generateResponse } from '../../services/geminiService';
+import { generateSpeech } from '../../services/geminiAdvancedService';
+import { playDecodedAudio, decode } from '../../utils/audioUtils';
+import { SendIcon, SparklesIcon, SpeakerIcon } from '../Icons';
 import { Content } from '@google/genai';
 
 /**
@@ -71,7 +71,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
 
   /**
    * Handles sending a user message to the AI and displaying the response.
-   * Includes error handling for API failures.
    */
   const handleSend = async () => {
     if (input.trim() === '' || isLoading) return;
@@ -80,21 +79,25 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
     setMessages(prev => [...prev, userMessage]);
     
     setIsLoading(true);
+
+    const chatHistory: Content[] = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+    }));
+
     const currentInput = input;
     setInput('');
-
     try {
-        const chatHistory: Content[] = messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-        }));
-        
         const aiResponseText = await generateResponse(currentInput, chatHistory);
         const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
-        
         setMessages(prev => [...prev, aiMessage]);
-    } catch (error: any) {
-        const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, I couldn't get a response. ${error.message}` };
+    } catch (error) {
+        const errorMessage: Message = {
+            id: `error-${Date.now()}`,
+            sender: 'ai',
+            text: error instanceof Error ? error.message : "An unexpected error occurred.",
+            isError: true
+        };
         setMessages(prev => [...prev, errorMessage]);
     } finally {
         setIsLoading(false);
@@ -120,7 +123,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
         }
     } catch (error) {
         console.error("Failed to play audio", error);
-        // Optionally add a notification here
     } finally {
         if (isMounted.current) {
             setAudioState(prev => ({ ...prev, [msg.id]: 'idle' }));
@@ -153,13 +155,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
                   <SparklesIcon className="h-6 w-6 text-white" />
               </div>
             )}
-            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${
-                msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' 
-                : msg.sender === 'system' ? 'bg-red-500/20 text-red-300 rounded-bl-none'
-                : 'bg-bg-secondary text-text-primary rounded-bl-none'
-            }`}>
+            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' : msg.isError ? 'bg-red-500/20 text-red-300 rounded-bl-none' : 'bg-bg-secondary text-text-primary rounded-bl-none'}`}>
               <p className="text-sm">{msg.text}</p>
-              {msg.sender === 'ai' && (
+              {msg.sender === 'ai' && !msg.isError && (
                 <button 
                   onClick={() => handlePlayAudio(msg)}
                   disabled={audioState[msg.id] === 'loading' || audioState[msg.id] === 'playing'}

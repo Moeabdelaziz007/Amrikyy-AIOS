@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
-import { LanguageProvider } from './contexts/LanguageContext.tsx';
-import { MemoryProvider } from './contexts/MemoryContext.tsx';
-import { NotificationProvider } from './contexts/NotificationContext.tsx';
-import { UserBehaviorProvider } from './contexts/UserBehaviorContext.tsx';
-import { GoogleAuthProvider } from './contexts/GoogleAuthContext.tsx';
+import App from './App';
+import { LanguageProvider } from './contexts/LanguageContext';
+import { MemoryProvider } from './contexts/MemoryContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { UserBehaviorProvider } from './contexts/UserBehaviorContext';
+import { GoogleAuthProvider } from './contexts/GoogleAuthContext';
 
 /**
  * The main entry point of the React application.

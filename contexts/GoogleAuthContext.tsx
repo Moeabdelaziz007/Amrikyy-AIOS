@@ -77,11 +77,8 @@ export const GoogleAuthProvider: React.FC<{ children: ReactNode }> = ({ children
 
 /**
  * Custom hook to access the Google authentication context.
- * This hook provides components with access to the user's Google sign-in status,
- * profile information, and functions to initiate sign-in/sign-out.
- * It should be used within a `GoogleAuthProvider`.
- * @returns {GoogleAuthContextType} The current Google authentication context, including
- *   sign-in status, user profile, and authentication functions.
+ * Throws an error if used outside of a `GoogleAuthProvider`.
+ * @returns {GoogleAuthContextType} The current Google authentication context.
  * @throws {Error} If `useGoogleAuth` is not used within a `GoogleAuthProvider`.
  */
 export const useGoogleAuth = (): GoogleAuthContextType => {

@@ -48,7 +48,6 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
     // Checks if an API key has been selected on component mount.
     useEffect(() => {
         const checkKey = async () => {
-            // @ts-ignore
             const hasKey = await window.aistudio.hasSelectedApiKey();
             setIsKeySelected(hasKey);
         };
@@ -79,7 +78,6 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
      * Opens the API key selection dialog and updates the `isKeySelected` state.
      */
     const handleSelectKey = async () => {
-        // @ts-ignore
         await window.aistudio.openSelectKey();
         setIsKeySelected(true); // Assume success to improve UX
     };
@@ -119,7 +117,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
                     setStatus('error');
                     setMessage(result.message);
                      setUserAccount(prev => ({ ...prev, aiCredits: prev.aiCredits + VIDEO_GENERATION_COST })); // Refund credits on error
-                    if (result.message.includes('API key is invalid') || result.message.includes('Requested entity was not found')) {
+                    if (result.message.includes('API key is invalid')) {
                         setIsKeySelected(false); // Reset key state on invalid key error
                     }
                 }
