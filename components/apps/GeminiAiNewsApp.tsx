@@ -78,7 +78,6 @@ const NewsCard: React.FC<{ item: AiNewsArticle }> = ({ item }) => (
 );
 
 const MarketWatchSection: React.FC = () => {
-    // FIX: Call useLanguage hook to get the translation function 't'.
     const { t } = useLanguage();
     return (
     <div className="mb-6">

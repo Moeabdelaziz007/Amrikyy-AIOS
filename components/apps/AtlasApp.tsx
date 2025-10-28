@@ -3,7 +3,6 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { FinanceIcon, SparklesIcon, SendIcon } from '../Icons';
 import { marketIndices, defaultWatchlist, MarketIndex, WatchlistItem } from '../../data/finance';
 import { getFinancialNews, getFinancialAnalysis } from '../../services/geminiAdvancedService';
-// FIX: Imported FinancialNews and FinancialAnalysis
 import { Message, FinancialNews, FinancialAnalysis } from '../../types';
 import { Content } from '@google/genai';
 import { generateResponse } from '../../services/geminiService';

@@ -4,10 +4,10 @@ import { SearchIcon, SparklesIcon } from '../Icons';
 import { AppID } from '../../types';
 
 interface CognitoBrowserAppProps {
-    onOpenWindow: (appId: AppID, props: any) => void;
+    onOpenApp: (appId: AppID, props: any) => void;
 }
 
-const CognitoBrowserApp: React.FC<CognitoBrowserAppProps> = ({ onOpenWindow }) => {
+const CognitoBrowserApp: React.FC<CognitoBrowserAppProps> = ({ onOpenApp }) => {
     const [input, setInput] = useState('https://google.com');
     const [history, setHistory] = useState(['https://google.com']);
     const [historyIndex, setHistoryIndex] = useState(0);
@@ -57,10 +57,10 @@ const CognitoBrowserApp: React.FC<CognitoBrowserAppProps> = ({ onOpenWindow }) =
             // We will simulate by summarizing the search result if available.
             const textToSummarize = searchResult?.text || "The current page content is not accessible for summarization in this demo.";
             const summary = await summarizeText(textToSummarize);
-            onOpenWindow('chat', { initialMessage: `Here's a summary:\n\n${summary}` });
+            onOpenApp(AppID.chat, { initialMessage: `Here's a summary:\n\n${summary}` });
 
         } catch (error) {
-             onOpenWindow('chat', { initialMessage: "Sorry, I couldn't summarize the content." });
+             onOpenApp(AppID.chat, { initialMessage: "Sorry, I couldn't summarize the content." });
         } finally {
             setIsSummarizing(false);
         }

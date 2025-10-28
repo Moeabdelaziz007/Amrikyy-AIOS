@@ -1,39 +1,36 @@
-
-
 import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
 import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types';
-import Dock from './components/Dock.tsx'; // Explicit .tsx extension for troubleshooting module resolution
+import Dock from './components/Dock.tsx';
 import AppLauncher from './components/AppLauncher';
 import PoweredByGemini from './components/PoweredByGemini';
-import WorkflowDashboardWidget from './components/widgets/WorkflowDashboardWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
 import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService';
 import { createCalendarEventFromPlan } from './services/geminiAdvancedService';
 import DesktopAppsGrid from './components/DesktopAppsGrid';
 import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon } from './components/Icons';
 import { useLanguage } from './contexts/LanguageContext';
 import AnimatedBackground from './components/AnimatedBackground';
-import SystemOverviewWidget from './components/SystemOverviewWidget.tsx'; // FIX: Corrected import path
+import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
 import { NotificationCenter } from './components/NotificationCenter';
 import { useNotification } from './contexts/NotificationContext';
-import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx'; // FIX: Corrected import path
+import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx';
 import { useUserBehavior } from './contexts/UserBehaviorContext';
 import GlobalVoiceControl from './components/GlobalVoiceControl';
 import { useGoogleAuth } from './contexts/GoogleAuthContext';
-import ProjectsWidget from './components/widgets/ProjectsWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
-import TasksWidget from './components/widgets/TasksWidget.tsx'; // Explicit .tsx extension for troubleshooting module resolution
+import ProjectsWidget from './components/widgets/ProjectsWidget.tsx';
+import TasksWidget from './components/widgets/TasksWidget.tsx';
 import CreatePostModal from './components/CreatePostModal';
 import { bounties as mockBounties } from './data/bounties';
-import LoadingScreen from './components/LoadingScreen'; // Re-added LoadingScreen import
-import { initialNexusPosts as mockNexusPosts } from './data/nexus'; // Import initial mock Nexus posts
+import LoadingScreen from './components/LoadingScreen';
+import { initialNexusPosts as mockNexusPosts } from './data/nexus';
 import { TranslationKey } from './i18n';
 
 // Lazy load all application components for code-splitting and performance
 const Window = lazy(() => import('./components/Window'));
-const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
-const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
-const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution // Replaced ViralFeedWidget
-const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
-const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx')); // Explicit .tsx extension for troubleshooting module resolution
+const ProactiveSuggestionsWidget = lazy(() => import('./components/widgets/ProactiveSuggestionsWidget.tsx'));
+const WorkspaceHubWidget = lazy(() => import('./components/widgets/WorkspaceHubWidget.tsx'));
+const NexusFeedWidget = lazy(() => import('./components/widgets/NexusFeedWidget.tsx'));
+const QuickActionsWidget = lazy(() => import('./components/widgets/QuickActionsWidget.tsx'));
+const GeminiAiNewsWidget = lazy(() => import('./components/widgets/GeminiAiNewsWidget.tsx'));
 
 /**
  * A mapping of AppIDs to their corresponding lazy-loaded React components.
@@ -63,7 +60,7 @@ const appComponents: Record<AppID, React.LazyExoticComponent<React.ComponentType
   [AppID.video]: lazy(() => import('./components/apps/VideoGeneratorApp')),
   [AppID.smartwatch]: lazy(() => import('./components/apps/SmartWatchApp')),
   [AppID.workspace]: lazy(() => import('./components/apps/WorkspaceApp')),
-  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')), // Corrected import path
+  [AppID.eventLog]: lazy(() => import('./components/apps/EventLogApp')),
   [AppID.skillForge]: lazy(() => import('./components/apps/SkillForgeApp')),
   [AppID.chronoVault]: lazy(() => import('./components/apps/ChronoVaultApp')),
   [AppID.creatorStudio]: lazy(() => import('./components/apps/CreatorStudioApp')),
@@ -187,8 +184,8 @@ const App: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [driveFiles, setDriveFiles] = useState<DriveFile[]>([]);
   const [gmailMessages, setGmailMessages] = useState<GmailMessage[]>([]);
-  const [isLoadingWorkspaceData, setIsLoadingWorkspaceData] = useState(false); // New loading state for Workspace
-  const [isLoadingCurrentWeather, setIsLoadingCurrentWeather] = useState(false); // New loading state for Weather
+  const [isLoadingWorkspaceData, setIsLoadingWorkspaceData] = useState(false);
+  const [isLoadingCurrentWeather, setIsLoadingCurrentWeather] = useState(false);
 
   /**
    * Handles a credit transaction, updating the user's AI credits and transaction history.
@@ -424,8 +421,8 @@ const App: React.FC = () => {
           setIsLoadingCurrentWeather(false);
         },
         (error) => {
-          console.warn('Geolocation failed:', error);
-          addNotification(`Could not get location: ${error.message}. Weather data may be inaccurate.`, 'error', 'System');
+          console.error('Geolocation failed:', error);
+          addNotification(`Could not get location: ${error.message}. Weather data may be inaccurate. Please check your browser's location permissions.`, 'error', 'System');
           // Provide default/fallback weather data on error
           setCurrentWeather({
             location: 'Unknown',
@@ -525,7 +522,6 @@ const App: React.FC = () => {
     [AppID.travelServices]: t('app_titles.travelServices'),
     [AppID.pricing]: t('app_titles.pricing'),
     // Agent aliases pointing to AgentProfileApp
-    // FIX: Cast string literals to TranslationKey to fix TypeScript type errors.
     [AppID.atlas]: t('app_titles.atlas' as TranslationKey),
     [AppID.cortex]: t('app_titles.cortex' as TranslationKey),
     [AppID.orion]: t('app_titles.orion' as TranslationKey),
@@ -796,7 +792,7 @@ const App: React.FC = () => {
     { id: AppID.growthHub, name: t('app_launcher.growthHub'), icon: GrowthHubIcon },
     { id: AppID.resourceHub, name: t('app_launcher.resourceHub'), icon: ResourceHubIcon },
     { id: AppID.geminiAiNews, name: t('app_launcher.geminiAiNews'), icon: NewsIcon },
-    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), icon: ControlPanelIcon }, // Removed duplicate controlPanel
+    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), icon: ControlPanelIcon },
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
@@ -814,7 +810,7 @@ const App: React.FC = () => {
       case 'work':
         return (
           <>
-            <Suspense fallback={null}><WorkspaceHubWidget isConnected={isSignedIn} events={calendarEvents} files={driveFiles} messages={gmailMessages} isLoading={isLoadingWorkspaceData} /></Suspense>
+            <Suspense fallback={null}><WorkspaceHubWidget isConnected={isSignedIn} events={calendarEvents} files={driveFiles} messages={gmailMessages} /></Suspense>
             <Suspense fallback={null}><ProactiveSuggestionsWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><ProjectsWidget projects={projects} /></Suspense>
             <Suspense fallback={null}><TasksWidget tasks={tasks.filter(t => !t.completed)} /></Suspense>
@@ -824,7 +820,7 @@ const App: React.FC = () => {
         return (
           <>
             <Suspense fallback={null}><ProactiveSuggestionsWidget onOpenApp={openWindow} /></Suspense>
-            <WorkflowDashboardWidget onOpenApp={openWindow} />
+            
             <Suspense fallback={null}><CryptoDashboardWidget /></Suspense>
           </>
         );
@@ -834,7 +830,7 @@ const App: React.FC = () => {
           <>
             <Suspense fallback={null}><QuickActionsWidget onOpenApp={openWindow} /></Suspense>
             <Suspense fallback={null}><GeminiAiNewsWidget onOpenApp={openWindow} /></Suspense>
-            <WorkflowDashboardWidget onOpenApp={openWindow} />
+            
             <Suspense fallback={null}><NexusFeedWidget posts={nexusPosts} /></Suspense>
             <Suspense fallback={null}><CryptoDashboardWidget /></Suspense>
           </>
@@ -901,7 +897,7 @@ const App: React.FC = () => {
 
       <div className="relative w-full h-full flex flex-col items-center p-4 @container">
         <header className="w-full flex-shrink-0 z-10">
-            <SystemOverviewWidget userAccount={userAccount} currentWeather={currentWeather} isLoadingWeather={isLoadingCurrentWeather} />
+            <SystemOverviewWidget userAccount={userAccount} currentWeather={currentWeather} />
         </header>
 
         <section className="flex-grow grid grid-cols-1 @[60rem]:grid-cols-3 gap-8 w-full mt-8">
@@ -990,9 +986,9 @@ const App: React.FC = () => {
                               props.onPurchase = handlePurchase;
                           } else if (window.appId === AppID.creatorStudio) {
                                 props.projects = projects;
-                                props.tasks = tasks; // Ensure tasks are passed to CreatorStudio
+                                props.tasks = tasks;
                                 props.onAddProject = (p: Project) => { setProjects(prev => [p, ...prev]); logAction(AppID.creatorStudio, { event: 'project_created', projectName: p.name }); };
-                                props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]); // Ensure onAddTask is passed
+                                props.onAddTask = (t: Task) => setTasks(prev => [t, ...prev]);
                                 props.onShare = setShareContent;
                                 props.onOpenApp = openWindow;
                           } else if (window.appId === AppID.growthHub) {
@@ -1014,10 +1010,10 @@ const App: React.FC = () => {
                                 props.onLikePost = handleLikePost;
                                 props.onAddComment = handleAddComment;
                                 props.onBoostPost = handleBoostPost;
-                                props.onCreatePost = setShareContent; // Open CreatePostModal
+                                props.onCreatePost = setShareContent;
                           } else if (window.appId === AppID.nexusProfile) {
                                 props.userAccount = userAccount;
-                                props.nexusPosts = nexusPosts.filter(p => p.osId === userAccount.osId); // Filter for user's posts
+                                props.nexusPosts = nexusPosts.filter(p => p.osId === userAccount.osId);
                                 props.onOpenApp = openWindow;
                                 props.creditTransactions = creditTransactions;
                           } else if (window.appId === AppID.travelServices) {
@@ -1030,9 +1026,11 @@ const App: React.FC = () => {
                                     rate: settings.speechRate,
                                     pitch: settings.speechPitch,
                                 };
+                          } else if (window.appId === AppID.cognitoBrowser) {
+                                props.onOpenApp = openWindow;
                           }
                           
-                          return <AppComponent {...props} onOpenApp={openWindow} />;
+                          return <AppComponent {...props} />;
                       })()
                     }
                   </Suspense>

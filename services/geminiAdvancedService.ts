@@ -1,5 +1,3 @@
-
-
 import { GoogleGenAI, GenerateContentResponse, Content, Type, Modality, FunctionDeclaration } from "@google/genai";
 import { TravelPlan, Workflow, SystemVoice, WorkflowNode, WorkflowConnection, ExecutionLogEntry, SkillID, Engram, UserAction, DashboardLayout, AppID, SocialPost, SharedContent, RideOption, WeatherData, FastFoodRestaurant, CleaningService, NightlifeEvent, CurrentWeather, ForecastDay, FinancialNews, FinancialAnalysis, FlightOption, FlightSearchDetails, TrendingItem, CustomAgent } from "../types";
 import { skills } from '../data/skills';
@@ -39,7 +37,6 @@ export const groundedSearch = async (prompt: string, thinkingMode: boolean): Pro
         return { text: "This is a simulated search response. To connect to Gemini, please provide an API key.", sources: [] };
     }
     
-    // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
     const modelName = thinkingMode ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
@@ -83,7 +80,6 @@ export const mapsSearch = async (prompt: string, location: {latitude: number, lo
         return { text: "Simulated maps response: La Trattoria is a great Italian restaurant nearby.", sources: [] };
     }
     
-    // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     try {
         const response: GenerateContentResponse = await ai.models.generateContent({
@@ -156,7 +152,6 @@ export const searchFlights = async (details: FlightSearchDetails): Promise<Fligh
         return mockFlights.filter(f => f.price <= 500 || details.cabinClass === 'Business' || details.cabinClass === 'First'); // Simple mock filtering
     }
 
-    // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
     const ai = new GoogleGenAI({ apiKey: API_KEY });
 
     // Define a function declaration for the model to call a hypothetical flight search tool
@@ -180,8 +175,6 @@ export const searchFlights = async (details: FlightSearchDetails): Promise<Fligh
     try {
         const prompt = `Find flights from ${details.origin} to ${details.destination} departing on ${details.departureDate} ${details.returnDate ? `and returning on ${details.returnDate}` : ''} for ${details.passengers} passengers in ${details.cabinClass} class.`;
 
-        // FIX: Corrected function calling logic.
-        // Step 1: Ask Gemini if it needs to use the findFlights tool. Do not use responseMimeType/responseSchema with tools.
         const response: GenerateContentResponse = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -190,14 +183,9 @@ export const searchFlights = async (details: FlightSearchDetails): Promise<Fligh
             },
         });
 
-        // Step 2: Check if Gemini has made a function call
         if (response.functionCalls && response.functionCalls.length > 0) {
             const flightCall = response.functionCalls.find(fc => fc.name === 'findFlights');
             if (flightCall) {
-                // Step 3: Simulate execution of the 'findFlights' tool
-                // In a real application, you would call an actual external flight API here
-                // using the arguments from flightCall.args.
-                // For this demo, we'll use the existing mock logic to provide dummy flights.
                 const mockFlights: FlightOption[] = [
                     {
                         carrier: 'MockAir', price: 350, currency: 'USD', departureTime: '08:00', arrivalTime: '14:30', duration: '6h 30m', stops: 1, url: 'https://mockair.com/book/1',
@@ -209,18 +197,14 @@ export const searchFlights = async (details: FlightSearchDetails): Promise<Fligh
                         carrier: 'LuxuryJets', price: 1200, currency: 'USD', departureTime: '09:00', arrivalTime: '14:00', duration: '5h 00m', stops: 0, url: 'https://luxuryjets.com/book/3',
                     },
                 ];
-                // Apply a simple filter based on details, similar to the mock for !API_KEY
                 return mockFlights.filter(f => f.price <= 500 || details.cabinClass === 'Business' || details.cabinClass === 'First');
             }
         }
         
-        // If Gemini did not call the expected tool, or if response.functionCalls was empty.
-        // For this specific function, if no flight tool call, it's an error as its purpose is to find flights.
         throw new Error("AI did not determine a flight search was needed or failed to provide a valid function call.");
 
     } catch (error) {
         console.error("Error searching flights:", error);
-        // If it's a SyntaxError from trying to parse empty text, specifically capture it or rethrow.
         if (error instanceof SyntaxError) {
              throw new Error(`Invalid AI response format: ${error.message}. This might indicate a configuration issue or that the AI did not return a function call as expected.`);
         }
@@ -255,7 +239,6 @@ export const generateTravelPlan = async (tripDetails: { destination: string, sta
             dealsAndLinks: [ { title: `Best Hotels in ${tripDetails.destination}`, url: 'https://example.com' }, { title: 'Local City Guide', url: 'https://example.com' } ]
         };
     }
-    // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     try {
         const prompt = `Create a detailed travel plan for a trip to ${tripDetails.destination} from ${tripDetails.startDate} to ${tripDetails.endDate} with a budget of $${tripDetails.budget}. The plan should include a creative trip title, a day-by-day itinerary with specific activities, a detailed budget breakdown into categories, and a list of useful web links and potential deals.`;
@@ -294,7 +277,6 @@ export const generateTravelPlan = async (tripDetails: { destination: string, sta
 export const createCalendarEventFromPlan = async (plan: TravelPlan): Promise<{title: string, start: string, end: string}[]> => {
     if (!API_KEY) return [{ title: "Mock Event: Museum Visit", start: new Date().toISOString(), end: new Date().toISOString() }];
     
-    // FIX: Initialize the GoogleGenAI client inside the function to ensure the API key is available.
     const ai = new GoogleGenAI({ apiKey: API_KEY });
     const systemInstruction = `You are a scheduling assistant. Given a travel plan, extract key activities and convert them into a list of calendar events. Each event needs a title, a start time, and an end time. Assume a reasonable duration for each activity. The output must be a valid JSON array.`;
     
@@ -336,7 +318,6 @@ export const createCalendarEventFromPlan = async (plan: TravelPlan): Promise<{ti
  * @param {number} [pitch=0.0] - The speech pitch (e.g., 0.0 is normal).
  * @returns {Promise<string>} A promise that resolves to the base64 encoded audio string.
  */
-// FIX: Added missing function generateSpeech
 export const generateSpeech = async (text: string, voiceName: SystemVoice = 'Kore', rate = 1.0, pitch = 0.0): Promise<string> => {
     if (!API_KEY) {
         return ''; // Return empty string for mock
@@ -369,7 +350,6 @@ export const generateSpeech = async (text: string, voiceName: SystemVoice = 'Kor
     }
 };
 
-// FIX: Added missing function suggestDashboardLayout
 export const suggestDashboardLayout = async (prompt: string): Promise<DashboardLayout> => {
     if (!API_KEY) {
         return 'default';
@@ -401,7 +381,6 @@ export const suggestDashboardLayout = async (prompt: string): Promise<DashboardL
     }
 };
 
-// FIX: Added missing function generateImage
 export const generateImage = async (prompt: string): Promise<string> => {
     if (!API_KEY) {
         return 'https://storage.googleapis.com/gweb-aip.appspot.com/experiments/mediapipe/cat_and_dog.jpg';
@@ -425,7 +404,6 @@ export const generateImage = async (prompt: string): Promise<string> => {
     }
 };
 
-// FIX: Added missing function editImage
 export const editImage = async (prompt: string, base64ImageData: string, mimeType: string): Promise<string> => {
     if (!API_KEY) {
         return `data:image/png;base64,${base64ImageData}`;
@@ -457,7 +435,6 @@ export const editImage = async (prompt: string, base64ImageData: string, mimeTyp
     }
 };
 
-// FIX: Added missing function generateVideoFromImage
 export async function* generateVideoFromImage(prompt: string, imageBytes: string, mimeType: string, aspectRatio: '16:9' | '9:16'): AsyncGenerator<{ status: 'processing' | 'completed' | 'error'; progress: number; message: string; url?: string }> {
     if (!API_KEY) {
         yield { status: 'processing', progress: 50, message: 'Simulating video generation...' };
@@ -512,7 +489,6 @@ export async function* generateVideoFromImage(prompt: string, imageBytes: string
     }
 }
 
-// FIX: Added missing function executeDynamicWorkflow
 export const executeDynamicWorkflow = async (initialPrompt: string): Promise<ExecutionLogEntry[]> => {
     await new Promise(resolve => setTimeout(resolve, 3000));
     return [
@@ -522,7 +498,6 @@ export const executeDynamicWorkflow = async (initialPrompt: string): Promise<Exe
     ];
 };
 
-// FIX: Added missing function transcribeAudio
 export const transcribeAudio = async (base64Audio: string, mimeType: string): Promise<string> => {
     if (!API_KEY) {
         return "This is a mock transcription.";
@@ -545,7 +520,6 @@ export const transcribeAudio = async (base64Audio: string, mimeType: string): Pr
     }
 };
 
-// FIX: Added missing function analyzeVideo
 export const analyzeVideo = async (base64Video: string, mimeType: string, prompt: string): Promise<string> => {
     if (!API_KEY) {
         return "This is a mock video analysis. The video shows a cat playing with a toy.";
@@ -568,7 +542,6 @@ export const analyzeVideo = async (base64Video: string, mimeType: string, prompt
     }
 };
 
-// FIX: Added missing function generateWorkflowFromPrompt
 export const generateWorkflowFromPrompt = async (prompt: string): Promise<Workflow> => {
     if (!API_KEY) {
         return { title: `Workflow for "${prompt}"`, nodes: [{id: '1', agentId: 'luna', description: 'Step 1'}], connections: [] };
@@ -597,7 +570,6 @@ export const generateWorkflowFromPrompt = async (prompt: string): Promise<Workfl
     }
 };
 
-// FIX: Added missing function generateSeoIdeas
 export const generateSeoIdeas = async (url: string, topic: string): Promise<{ keywords: string[], blogOutline: { title: string, points: string[] }, adCopy: string[] }> => {
     if (!API_KEY) {
         return { keywords: ['mock', 'seo'], blogOutline: { title: 'Mock Blog', points: ['Point 1'] }, adCopy: ['Mock Ad'] };
@@ -627,7 +599,6 @@ export const generateSeoIdeas = async (url: string, topic: string): Promise<{ ke
     }
 };
 
-// FIX: Added missing function createAdCopy
 export const createAdCopy = async (productDescription: string, targetAudience: string): Promise<{ headline: string, body: string, cta: string }> => {
     if (!API_KEY) {
         return { headline: 'Mock Headline', body: 'Mock body text.', cta: 'Click Here' };
@@ -657,7 +628,6 @@ export const createAdCopy = async (productDescription: string, targetAudience: s
     }
 };
 
-// FIX: Added missing function summarizeText
 export const summarizeText = async (text: string): Promise<string> => {
     if (!API_KEY) {
         return "This is a mock summary of the text.";
@@ -675,7 +645,6 @@ export const summarizeText = async (text: string): Promise<string> => {
     }
 };
 
-// FIX: Added missing function suggestAgentPersona
 export const suggestAgentPersona = async (role: string): Promise<Pick<CustomAgent, 'name' | 'icon' | 'skillIDs'>> => {
     if (!API_KEY) {
         return { name: 'Suggested Agent', icon: '💡', skillIDs: ['gemini-pro-text'] };
@@ -706,7 +675,6 @@ export const suggestAgentPersona = async (role: string): Promise<Pick<CustomAgen
     }
 };
 
-// FIX: Added missing function synthesizeMemory
 export const synthesizeMemory = async (prompt: string, engrams: Engram[]): Promise<Omit<Engram, 'id' | 'timestamp'>> => {
     if (!API_KEY) {
         return { label: 'New Insight', type: 'synthesized_insight', content: 'This is a mock synthesized memory.', potentiality: 0, color: '#FFFFFF' };
@@ -738,10 +706,8 @@ export const synthesizeMemory = async (prompt: string, engrams: Engram[]): Promi
     }
 };
 
-// FIX: Added missing function interpretVoiceCommand
 export const interpretVoiceCommand = async (transcript: string): Promise<{ action: 'open' | 'close', target: AppID | 'all' }> => {
     if (!API_KEY) {
-// FIX: Use AppID enum member instead of string literal.
         if (transcript.toLowerCase().includes('open chat')) return { action: 'open', target: AppID.chat };
         return { action: 'open', target: AppID.chat };
     }
@@ -769,10 +735,8 @@ export const interpretVoiceCommand = async (transcript: string): Promise<{ actio
     }
 };
 
-// FIX: Added missing function generateProactiveSuggestion
 export const generateProactiveSuggestion = async (actions: UserAction[]): Promise<{ title: string, suggestions: { text: string, actionAppId?: AppID }[] }> => {
     if (!API_KEY) {
-// FIX: Use AppID enum member instead of string literal.
         return { title: 'Mock Suggestions', suggestions: [{ text: 'Open the travel planner?', actionAppId: AppID.travelAgent }] };
     }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
@@ -799,7 +763,6 @@ export const generateProactiveSuggestion = async (actions: UserAction[]): Promis
     }
 };
 
-// FIX: Added missing function generateSocialMediaPost
 export const generateSocialMediaPost = async (content: SharedContent): Promise<SocialPost> => {
     if (!API_KEY) {
         return { caption: `Check out this mock ${content.type}!`, hashtags: ['#mock', '#ai'] };
@@ -828,7 +791,6 @@ export const generateSocialMediaPost = async (content: SharedContent): Promise<S
     }
 };
 
-// FIX: Added missing function testSystemPrompt
 export const testSystemPrompt = async (systemInstruction: string, userPrompt: string): Promise<string> => {
     if (!API_KEY) {
         return `This is a mock response based on the system prompt: "${systemInstruction}"`;
@@ -847,7 +809,6 @@ export const testSystemPrompt = async (systemInstruction: string, userPrompt: st
     }
 };
 
-// FIX: Added missing function getFinancialNews
 export const getFinancialNews = async (): Promise<FinancialNews[]> => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     return [
@@ -856,7 +817,6 @@ export const getFinancialNews = async (): Promise<FinancialNews[]> => {
     ];
 };
 
-// FIX: Added missing function getFinancialAnalysis
 export const getFinancialAnalysis = async (ticker: string): Promise<FinancialAnalysis> => {
     if (!API_KEY) {
         return { summary: `Mock analysis for ${ticker}.`, bullCase: 'It could go up.', bearCase: 'It could go down.', keyMetrics: [{name: 'P/E', value: 'N/A'}], recentNews: 'No recent news.' };
@@ -888,7 +848,6 @@ export const getFinancialAnalysis = async (ticker: string): Promise<FinancialAna
     }
 };
 
-// FIX: Added missing function expandTopic
 export const expandTopic = async (topic: string): Promise<{ mainIdea: string, subTopics: string[], questions: string[] }> => {
     if (!API_KEY) {
         return { mainIdea: topic, subTopics: ['Sub-topic 1', 'Sub-topic 2'], questions: ['Question 1?', 'Question 2?'] };
@@ -917,13 +876,11 @@ export const expandTopic = async (topic: string): Promise<{ mainIdea: string, su
     }
 };
 
-// FIX: Added missing function getResearchSummary
 export const getResearchSummary = async (topic: string): Promise<string> => {
     const { text } = await groundedSearch(`Provide a concise summary of ${topic}.`, false);
     return text;
 };
 
-// FIX: Added missing function translateText
 export const translateText = async (text: string, targetLanguage: string, sourceLanguage?: string): Promise<string> => {
     if (!API_KEY) {
         return `(Mock translation of "${text}" to ${targetLanguage})`;
@@ -942,7 +899,6 @@ export const translateText = async (text: string, targetLanguage: string, source
     }
 };
 
-// FIX: Added missing function getAiWeatherReport
 export const getAiWeatherReport = async (weatherData: WeatherData): Promise<string> => {
     if (!API_KEY) {
         return `Mock AI summary: It looks ${weatherData.current.condition.toLowerCase()} today, with a high of ${weatherData.current.high} degrees. The rest of the week looks mixed.`;
@@ -961,7 +917,6 @@ export const getAiWeatherReport = async (weatherData: WeatherData): Promise<stri
     }
 };
 
-// FIX: Added missing function findDeliveryOptions
 export const findDeliveryOptions = async (query: string, location: { latitude: number, longitude: number }): Promise<{ aiSummary: string, options: FastFoodRestaurant[] }> => {
     if (!API_KEY) {
         return { aiSummary: 'Mock summary', options: [] };
@@ -973,8 +928,6 @@ export const findDeliveryOptions = async (query: string, location: { latitude: n
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                tools: [{ googleMaps: {} }],
-                toolConfig: { retrievalConfig: { latLng: location } },
                 responseMimeType: 'application/json',
                 responseSchema: {
                     type: Type.OBJECT, properties: {
@@ -997,7 +950,6 @@ export const findDeliveryOptions = async (query: string, location: { latitude: n
     }
 };
 
-// FIX: Added missing function getRideOptions
 export const getRideOptions = async (destination: string, location: { latitude: number, longitude: number }): Promise<{ aiSummary: string, options: RideOption[] }> => {
     if (!API_KEY) {
         return { aiSummary: 'Mock summary', options: [] };
@@ -1009,8 +961,6 @@ export const getRideOptions = async (destination: string, location: { latitude: 
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                tools: [{ googleMaps: {} }],
-                toolConfig: { retrievalConfig: { latLng: location } },
                 responseMimeType: 'application/json',
                 responseSchema: {
                     type: Type.OBJECT, properties: {
@@ -1033,7 +983,6 @@ export const getRideOptions = async (destination: string, location: { latitude: 
     }
 };
 
-// FIX: Added missing function findCleaningServices
 export const findCleaningServices = async (query: string, location: { latitude: number, longitude: number }): Promise<{ aiSummary: string, services: CleaningService[] }> => {
     if (!API_KEY) { return { aiSummary: 'Mock summary', services: [] }; }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
@@ -1043,7 +992,6 @@ export const findCleaningServices = async (query: string, location: { latitude: 
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                tools: [{ googleMaps: {} }], toolConfig: { retrievalConfig: { latLng: location } },
                 responseMimeType: 'application/json',
                 responseSchema: {
                     type: Type.OBJECT, properties: {
@@ -1057,7 +1005,6 @@ export const findCleaningServices = async (query: string, location: { latitude: 
     } catch (e) { console.error("Error finding cleaning services:", e); throw new Error("Failed to find cleaning services."); }
 };
 
-// FIX: Added missing function findNightlifeEvents
 export const findNightlifeEvents = async (query: string, location: { latitude: number, longitude: number }): Promise<{ aiSummary: string, events: NightlifeEvent[] }> => {
     if (!API_KEY) { return { aiSummary: 'Mock summary', events: [] }; }
     const ai = new GoogleGenAI({ apiKey: API_KEY });
@@ -1066,7 +1013,6 @@ export const findNightlifeEvents = async (query: string, location: { latitude: n
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash', contents: prompt,
             config: {
-                tools: [{ googleMaps: {} }], toolConfig: { retrievalConfig: { latLng: location } },
                 responseMimeType: 'application/json',
                 responseSchema: {
                     type: Type.OBJECT, properties: {
