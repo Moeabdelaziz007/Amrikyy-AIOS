@@ -48,7 +48,7 @@ const VoiceAssistantApp: React.FC<VoiceAssistantAppProps> = ({ onExecuteWorkflow
         if (audioChunksRef.current.length === 0) {
             setVoiceState('idle');
             return;
-        };
+        }
 
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const audioFile = new File([audioBlob], "recording.webm", { type: audioBlob.type });

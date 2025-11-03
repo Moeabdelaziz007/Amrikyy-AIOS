@@ -30,7 +30,7 @@ describe('TravelPlanViewerApp', () => {
   });
 
   it('renders "No travel plan available" if no plan is provided', () => {
-    // @ts-ignore - Intentionally passing null for test case
+    // @ts-expect-error – Intentionally passing null to test the component's null handling.
     render(<TravelPlanViewerApp plan={null} onShare={mockOnShare} />);
     expect(screen.getByText('No travel plan available.')).toBeInTheDocument();
   });

@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@auraos/core/*": ["../core/src/*"],
+      "@auraos/ai": ["../ai/src/index.ts"],
+      "@auraos/common": ["../common/src/index.ts"],
+      "@auraos/firebase": ["../firebase/src/index.ts"],
+      "@auraos/hooks": ["../hooks/src/index.ts"]
+    },
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src/**/*", "src/**/*.tsx", "src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx"]
+}
