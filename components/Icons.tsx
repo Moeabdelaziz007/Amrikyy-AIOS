@@ -175,3 +175,11 @@ export const MarketingIcon: React.FC<{className?: string}> = ({className}) => (<
 export const LiveConversationIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>record_voice_over</MaterialIcon>);
 /** Image search icon, used for Image Analyzer. */
 export const ImageAnalyzerIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>image_search</MaterialIcon>);
+/** Check/checkmark icon. */
+export const CheckIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>check</MaterialIcon>);
+/** Close/X icon. */
+export const CloseIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>close</MaterialIcon>);
+/** Menu icon. */
+export const MenuIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>menu</MaterialIcon>);
+/** Trending up icon. */
+export const TrendingUpIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>trending_up</MaterialIcon>);

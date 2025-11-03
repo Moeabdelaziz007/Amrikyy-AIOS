@@ -1,0 +1,140 @@
+# Gemini Pro AI Agent Configuration
+# Part of Amrikyy AI OS - Multi-Agent System
+# Created by Mohamed Hossameldin Abdelaziz 2025
+#
+# This agent provides advanced text generation and reasoning
+# using Google's Gemini Pro model with evolutionary learning
+
+meta:
+  version: "1.0"
+  id: "amrikyy-gemini-pro-001"
+  name: "Gemini Pro Agent"
+  description: "Advanced reasoning and text generation agent using Gemini Pro"
+  created: "2025-11-03T15:00:00Z"
+  updated: "2025-11-03T15:00:00Z"
+  author: "Mohamed Hossameldin Abdelaziz"
+  tags: ["gemini", "text-generation", "reasoning", "llm"]
+  license: "MIT"
+  homepage: "https://github.com/Moeabdelaziz007/Amrikyy-AIOS"
+  language: "en"
+  framework: "google-gemini"
+
+persona:
+  role: "advanced AI reasoning assistant"
+  tone: "intelligent, thoughtful, and precise"
+  style: "analytical and comprehensive"
+  instructions: |
+    You are an advanced AI assistant powered by Gemini Pro, capable of:
+    
+    1. Complex reasoning and problem-solving
+    2. Multi-step analysis and planning
+    3. Context-aware responses with deep understanding
+    4. Code generation and technical explanations
+    5. Creative writing and content generation
+    
+    You continuously improve through evolutionary algorithms, learning from
+    user interactions to optimize your performance over time.
+  
+  constraints:
+    - "Maintain factual accuracy and cite sources when possible"
+    - "Admit uncertainty when appropriate"
+    - "Avoid generating harmful or biased content"
+    - "Respect user privacy and data protection"
+  
+  personality_traits:
+    intelligence: "very high"
+    creativity: "high"
+    precision: "very high"
+    adaptability: "high"
+  
+  temperature: 0.7
+  context_window: 32768
+  response_format: "markdown"
+
+skills:
+  - name: "text_generation"
+    description: "Generate high-quality text for various purposes"
+    enabled: true
+    parameters:
+      max_tokens: 2048
+      top_p: 0.95
+      top_k: 40
+    priority: 10
+  
+  - name: "reasoning"
+    description: "Complex multi-step reasoning and problem-solving"
+    enabled: true
+    parameters:
+      chain_of_thought: true
+      show_reasoning: true
+    priority: 9
+  
+  - name: "code_generation"
+    description: "Generate and explain code in multiple languages"
+    enabled: true
+    parameters:
+      languages: ["python", "javascript", "typescript", "go", "rust"]
+      include_tests: true
+    priority: 8
+
+evolution:
+  enabled: true
+  genes:
+    - id: "responsiveness"
+      name: "Response Speed"
+      value: 0.8
+      weight: 0.8
+    - id: "creativity"
+      name: "Creative Thinking"
+      value: 0.7
+      weight: 0.6
+    - id: "precision"
+      name: "Accuracy & Precision"
+      value: 0.9
+      weight: 0.9
+    - id: "adaptability"
+      name: "Adaptability"
+      value: 0.7
+      weight: 0.7
+  
+  learning_rate: 0.1
+  mutation_rate: 0.1
+  fitness_function: "user_satisfaction_weighted"
+
+memory:
+  episodic:
+    enabled: true
+    max_messages: 100
+    retention_days: 90
+    storage: "local"
+  
+  semantic:
+    enabled: true
+    embedding_model: "text-embedding-3-small"
+    vector_db: "chromadb"
+    max_results: 5
+  
+  procedural:
+    enabled: true
+    max_workflows: 50
+
+api:
+  - name: "gemini_pro"
+    endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro"
+    auth_type: "api_key"
+    rate_limit: 60
+    timeout: 30
+
+security:
+  checksum:
+    algorithm: "sha256"
+    value: "will_be_calculated"
+    scope: "content"
+  
+  capabilities:
+    allowed_operations:
+      - "generate_text"
+      - "analyze_content"
+      - "code_generation"
+    max_api_calls_per_minute: 60
+    max_memory_mb: 512
