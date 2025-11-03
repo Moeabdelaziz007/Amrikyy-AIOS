@@ -14,13 +14,10 @@
     "prepare": "husky"
   },
   "dependencies": {
- copilot/fix-200681198-1084474298-419673e8-adf9-458e-97cd-deb07c9d6f2d
-    "@supabase/supabase-js": "^2.78.0"
-=======
     "@google/genai": "^1.28.0",
+    "@supabase/supabase-js": "^2.78.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
- main
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.6",
