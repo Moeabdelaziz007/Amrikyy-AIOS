@@ -17,6 +17,15 @@
 
 ---
 
+## 👨‍💻 About the Creator
+
+**Created by**: Mohamed Hossameldin Abdelaziz
+**GitHub**: [@Moeabdelaziz007](https://github.com/Moeabdelaziz007)
+**Email**: [Amrikyy@gmail.com](mailto:Amrikyy@gmail.com)
+**LinkedIn**: [linkedin.com/in/amrikyy](https://www.linkedin.com/in/amrikyy)
+
+---
+
 ## 📖 Table of Contents
 
 - [Overview](#overview)
@@ -1142,62 +1151,59 @@ Vote on features in [GitHub Discussions](https://github.com/Moeabdelaziz007/Amri
 
 ---
 
-## 📄 License
+## 📞 Contact & Support
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+### **Author & Maintainer**
+**Mohamed Hossameldin Abdelaziz**
 
-### Third-Party Licenses
+### **Get in Touch**
+- 📧 **Email**: [Amrikyy@gmail.com](mailto:Amrikyy@gmail.com)
+- 📧 **Academic**: [mabdela1@students.kennesaw.edu](mailto:mabdela1@students.kennesaw.edu)
+- 📱 **Phone**: [+201094228044](tel:+201094228044)
+- 💬 **WhatsApp**: [+17706160211](https://wa.me/17706160211)
+- 💼 **GitHub**: [@Moeabdelaziz007](https://github.com/Moeabdelaziz007)
+- 🔗 **LinkedIn**: [linkedin.com/in/amrikyy](https://www.linkedin.com/in/amrikyy)
 
-- React: MIT License
-- TypeScript: Apache License 2.0
-- Vite: MIT License
-- Tailwind CSS: MIT License
-- Google Gemini API: Google Terms of Service
+### **For Support**
+- 🐛 **Technical Issues**: [GitHub Issues](https://github.com/Moeabdelaziz007/Amrikyy-AIOS/issues)
+- 💼 **Business Inquiries**: Amrikyy@gmail.com
+- 🎓 **Academic Collaboration**: mabdela1@students.kennesaw.edu
+
+### **Response Time**
+- Email: Within 24-48 hours
+- WhatsApp: Within 12-24 hours
+- GitHub Issues: Within 48-72 hours
+
+---
+
+## 📄 Copyright & License
+
+**Copyright © 2025 Mohamed Hossameldin Abdelaziz. All rights reserved.**
+
+This project is licensed under the **MIT License**.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
 ## 🙏 Acknowledgments
 
-### Created By
+**Amrikyy AI OS** is built with cutting-edge technologies:
 
-**Mohamed Hossameldin Abdelaziz**
-- GitHub: [@Moeabdelaziz007](https://github.com/Moeabdelaziz007)
-- Project: Amrikyy AI OS
+- **Google Gemini** - Powering the AI intelligence
+- **React Team** - For the amazing framework
+- **Vite Team** - For lightning-fast development
+- **Open Source Community** - For continuous inspiration and support
 
-### Special Thanks
-
-- **Google** - For providing the incredible Gemini API and AI models
-- **React Team** - For the amazing React framework
-- **Vite Team** - For the blazing-fast build tool
-- **Open Source Community** - For countless libraries and tools
-- **Beta Testers** - For valuable feedback and bug reports
-- **Contributors** - Everyone who has contributed code, ideas, or feedback
-
-### Powered By
-
-- [Google Gemini AI](https://deepmind.google/technologies/gemini/)
-- [React](https://react.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Vite](https://vitejs.dev/)
-- [Tailwind CSS](https://tailwindcss.com/)
+**Special Thanks** to all contributors, testers, and early adopters who believe in the vision of an AI-native operating system.
 
 ---
 
-## 📞 Contact & Support
-
-- **GitHub Repository**: [Amrikyy-AIOS](https://github.com/Moeabdelaziz007/Amrikyy-AIOS)
-- **Issues**: [Report a Bug](https://github.com/Moeabdelaziz007/Amrikyy-AIOS/issues)
-- **Discussions**: [Join the Community](https://github.com/Moeabdelaziz007/Amrikyy-AIOS/discussions)
-- **Documentation**: [Full Docs](https://github.com/Moeabdelaziz007/Amrikyy-AIOS/wiki)
+**Built with ❤️ by Mohamed Hossameldin Abdelaziz**
+**Powered by 🤖 Google Gemini AI**
 
 ---
-
-<div align="center">
-
-**⭐ Star this repository if you find it helpful!**
-
-Made with ❤️ by Mohamed Hossameldin Abdelaziz
-
-*Pioneering the future of AI-integrated operating systems*
-
-</div>
