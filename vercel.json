@@ -21,10 +21,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_API_KEY": "@vite-api-key",
-    "VITE_SUPABASE_URL": "@vite-supabase-url",
-    "VITE_SUPABASE_ANON_KEY": "@vite-supabase-anon-key"
-  }
+  ]
 }
