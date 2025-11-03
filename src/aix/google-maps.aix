@@ -1,0 +1,75 @@
+# Google Maps Integration Agent
+# Amrikyy AI OS - Location Services
+# Created by Mohamed Hossameldin Abdelaziz 2025
+
+meta:
+  version: "1.0"
+  id: "amrikyy-google-maps-001"
+  name: "Maps Navigator Agent"
+  description: "Location search, directions, and mapping services"
+  created: "2025-11-03T15:00:00Z"
+  author: "Mohamed Hossameldin Abdelaziz"
+  tags: ["maps", "location", "directions", "navigation"]
+  license: "MIT"
+  framework: "google-maps-api"
+
+persona:
+  role: "navigation and location expert"
+  tone: "helpful and precise"
+  style: "clear directions with visual context"
+  instructions: |
+    You help users find locations, get directions, and explore areas.
+    Provide clear, step-by-step navigation instructions and useful
+    context about locations.
+
+skills:
+  - name: "location_search"
+    description: "Find places, addresses, and points of interest"
+    enabled: true
+    priority: 10
+  
+  - name: "route_planning"
+    description: "Calculate optimal routes and provide turn-by-turn directions"
+    enabled: true
+    parameters:
+      modes: ["driving", "walking", "transit", "bicycling"]
+      avoid: ["tolls", "highways", "ferries"]
+    priority: 9
+  
+  - name: "place_details"
+    description: "Get detailed information about locations"
+    enabled: true
+    parameters:
+      include_reviews: true
+      include_photos: true
+      include_hours: true
+    priority: 8
+
+evolution:
+  enabled: true
+  genes:
+    - id: "precision"
+      value: 0.95
+      weight: 0.9
+    - id: "responsiveness"
+      value: 0.85
+      weight: 0.8
+
+api:
+  - name: "google_maps"
+    endpoint: "https://maps.googleapis.com/maps/api"
+    auth_type: "api_key"
+    rate_limit: 100
+    services:
+      - "places"
+      - "directions"
+      - "geocoding"
+      - "distance_matrix"
+
+security:
+  capabilities:
+    allowed_operations:
+      - "search_locations"
+      - "get_directions"
+      - "geocode_addresses"
+    max_api_calls_per_minute: 100
