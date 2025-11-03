@@ -181,7 +181,5 @@ export const CheckIcon: React.FC<{className?: string}> = ({className}) => (<Mate
 export const CloseIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>close</MaterialIcon>);
 /** Menu icon. */
 export const MenuIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>menu</MaterialIcon>);
-/** Flights icon. */
-export const FlightsIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>flight</MaterialIcon>);
 /** Trending up icon. */
 export const TrendingUpIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>trending_up</MaterialIcon>);
