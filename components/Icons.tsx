@@ -183,3 +183,7 @@ export const CloseIcon: React.FC<{className?: string}> = ({className}) => (<Mate
 export const MenuIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>menu</MaterialIcon>);
 /** Trending up icon. */
 export const TrendingUpIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>trending_up</MaterialIcon>);
+/** Thumbs up icon. */
+export const ThumbsUpIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>thumb_up</MaterialIcon>);
+/** Thumbs down icon. */
+export const ThumbsDownIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>thumb_down</MaterialIcon>);

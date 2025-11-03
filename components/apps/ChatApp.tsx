@@ -3,8 +3,9 @@ import { Message, SystemVoice } from '../../types.ts';
 import { generateResponse } from '../../services/geminiService.ts';
 import { generateSpeech } from '../../services/geminiAdvancedService.ts';
 import { playDecodedAudio, decode } from '../../utils/audioUtils.ts';
-import { SendIcon, SparklesIcon, SpeakerIcon } from '../Icons.tsx';
+import { SendIcon, SparklesIcon, SpeakerIcon, ThumbsUpIcon, ThumbsDownIcon } from '../Icons.tsx';
 import { Content } from '@google/genai';
+import { recordPositiveFeedback, recordNegativeFeedback } from '../../services/agentEvolutionService.ts';
 
 /**
  * Type definition for the audio playback state.
@@ -39,6 +40,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isMounted = useRef(true);
+  const agentId = 'maya'; // Hardcoded for now
 
   useEffect(() => {
     isMounted.current = true;
@@ -47,17 +49,17 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
       audioContextRef.current?.close();
     };
   }, []);
-  
+
   /**
    * Initializes or resumes the Web Audio API context.
    */
   const initAudioContext = () => {
-       if (!audioContextRef.current) {
-          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-       }
-       if (audioContextRef.current.state === 'suspended') {
-           audioContextRef.current.resume();
-       }
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
   }
 
   /**
@@ -78,26 +80,26 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
 
     const userMessage: Message = { id: `user-${Date.now()}`, sender: 'user', text: input };
     setMessages(prev => [...prev, userMessage]);
-    
+
     setIsLoading(true);
     const currentInput = input;
     setInput('');
 
     try {
-        const chatHistory: Content[] = messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-        }));
-        
-        const aiResponseText = await generateResponse(currentInput, chatHistory);
-        const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
-        
-        setMessages(prev => [...prev, aiMessage]);
+      const chatHistory: Content[] = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      }));
+
+      const aiResponseText = await generateResponse(agentId, currentInput, chatHistory);
+      const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
+
+      setMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
-        const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, I couldn't get a response. ${error.message}` };
-        setMessages(prev => [...prev, errorMessage]);
+      const errorMessage: Message = { id: `error-${Date.now()}`, sender: 'system', text: `Sorry, I couldn't get a response. ${error.message}` };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -112,20 +114,27 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
 
     setAudioState(prev => ({ ...prev, [msg.id]: 'loading' }));
     try {
-        const { voice, rate, pitch } = speechSettings;
-        const base64Audio = await generateSpeech(msg.text, voice, rate, pitch);
-        if (base64Audio && isMounted.current && audioContextRef.current) {
-            setAudioState(prev => ({ ...prev, [msg.id]: 'playing' }));
-            await playDecodedAudio(decode(base64Audio), audioContextRef.current);
-        }
+      const { voice, rate, pitch } = speechSettings;
+      const base64Audio = await generateSpeech(msg.text, voice, rate, pitch);
+      if (base64Audio && isMounted.current && audioContextRef.current) {
+        setAudioState(prev => ({ ...prev, [msg.id]: 'playing' }));
+        await playDecodedAudio(decode(base64Audio), audioContextRef.current);
+      }
     } catch (error) {
-        console.error("Failed to play audio", error);
-        // Optionally add a notification here
+      console.error("Failed to play audio", error);
     } finally {
-        if (isMounted.current) {
-            setAudioState(prev => ({ ...prev, [msg.id]: 'idle' }));
-        }
+      if (isMounted.current) {
+        setAudioState(prev => ({ ...prev, [msg.id]: 'idle' }));
+      }
     }
+  };
+
+  const handlePositiveFeedback = (message: Message) => {
+    recordPositiveFeedback(agentId, 'chat-response', { message: message.text });
+  };
+
+  const handleNegativeFeedback = (message: Message) => {
+    recordNegativeFeedback(agentId, 'chat-response', { message: message.text });
   };
 
   /**
@@ -140,7 +149,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
 
   return (
     <div className="h-full w-full flex flex-col bg-bg-tertiary rounded-b-md">
-      <div 
+      <div
         role="log"
         aria-live="polite"
         aria-busy={isLoading}
@@ -150,42 +159,49 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
           <div key={msg.id} className={`flex items-end gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.sender === 'ai' && (
               <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary-blue to-primary-purple flex items-center justify-center">
-                  <SparklesIcon className="h-6 w-6 text-white" />
+                <SparklesIcon className="h-6 w-6 text-white" />
               </div>
             )}
-            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${
-                msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none' 
-                : msg.sender === 'system' ? 'bg-red-500/20 text-red-300 rounded-bl-none'
+            <div className={`group relative max-w-[70%] p-3 rounded-2xl ${msg.sender === 'user' ? 'bg-gradient-to-r from-primary-blue to-primary-purple text-white rounded-br-none'
+              : msg.sender === 'system' ? 'bg-red-500/20 text-red-300 rounded-bl-none'
                 : 'bg-bg-secondary text-text-primary rounded-bl-none'
-            }`}>
+              }`}>
               <p className="text-sm">{msg.text}</p>
               {msg.sender === 'ai' && (
-                <button 
-                  onClick={() => handlePlayAudio(msg)}
-                  disabled={audioState[msg.id] === 'loading' || audioState[msg.id] === 'playing'}
-                  className="absolute -bottom-2 -right-2 h-6 w-6 bg-bg-tertiary rounded-full border border-border-color flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Read message aloud"
-                >
+                <div className="absolute -bottom-2 -right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handlePlayAudio(msg)}
+                    disabled={audioState[msg.id] === 'loading' || audioState[msg.id] === 'playing'}
+                    className="h-6 w-6 bg-bg-tertiary rounded-full border border-border-color flex items-center justify-center"
+                    aria-label="Read message aloud"
+                  >
                     {audioState[msg.id] === 'loading' ? (
-                        <div className="w-3 h-3 border-2 border-text-muted border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-3 h-3 border-2 border-text-muted border-t-transparent rounded-full animate-spin"></div>
                     ) : (
-                        <SpeakerIcon className={`h-4 w-4 ${audioState[msg.id] === 'playing' ? 'text-accent' : 'text-text-muted'}`} />
+                      <SpeakerIcon className={`h-4 w-4 ${audioState[msg.id] === 'playing' ? 'text-accent' : 'text-text-muted'}`} />
                     )}
-                </button>
+                  </button>
+                  <button onClick={() => handlePositiveFeedback(msg)} className="h-6 w-6 bg-bg-tertiary rounded-full border border-border-color flex items-center justify-center">
+                    <ThumbsUpIcon className="h-4 w-4 text-text-muted" />
+                  </button>
+                  <button onClick={() => handleNegativeFeedback(msg)} className="h-6 w-6 bg-bg-tertiary rounded-full border border-border-color flex items-center justify-center">
+                    <ThumbsDownIcon className="h-4 w-4 text-text-muted" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex items-end gap-3 justify-start">
-             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary-blue to-primary-purple flex items-center justify-center animate-pulse">
-                  <SparklesIcon className="h-6 w-6 text-white" />
-              </div>
+            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary-blue to-primary-purple flex items-center justify-center animate-pulse">
+              <SparklesIcon className="h-6 w-6 text-white" />
+            </div>
             <div className="max-w-[70%] p-3 rounded-2xl bg-bg-secondary rounded-bl-none">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
               </div>
             </div>
           </div>
