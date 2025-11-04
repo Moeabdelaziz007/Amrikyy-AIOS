@@ -8,6 +8,7 @@ import { createCalendarEventFromPlan } from './services/geminiAdvancedService.ts
 import DesktopAppsGrid from './components/DesktopAppsGrid.tsx';
 import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon, DocsIcon } from './components/Icons.tsx';
 import { useLanguage } from './contexts/LanguageContext.tsx';
+import { AuthProvider } from './contexts/AuthContext.tsx';
 import AnimatedBackground from './components/AnimatedBackground.tsx';
 import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
 import { NotificationCenter } from './components/NotificationCenter.tsx';
@@ -878,10 +879,11 @@ const App: React.FC = () => {
   }, [userAccount.aiCredits, addNotification, t, handleCreditTransaction, nexusPosts]);
 
   return (
-    <main className="w-screen h-screen overflow-hidden bg-black font-sans">
-      <div className="animated-bg-container fixed inset-0 -z-10">
-          <AnimatedBackground weatherCondition={currentWeather?.condition} />
-      </div>
+    <AuthProvider>
+      <main className="w-screen h-screen overflow-hidden bg-black font-sans">
+        <div className="animated-bg-container fixed inset-0 -z-10">
+            <AnimatedBackground weatherCondition={currentWeather?.condition} />
+        </div>
       <PoweredByGemini />
       <NotificationCenter />
       <GlobalVoiceControl onCommand={executeCommand} />
@@ -1045,6 +1047,7 @@ const App: React.FC = () => {
          />
       </div>
     </main>
+    </AuthProvider>
   );
 };
 

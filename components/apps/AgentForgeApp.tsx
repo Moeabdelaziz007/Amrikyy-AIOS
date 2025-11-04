@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CustomAgent, SkillID } from '../../types';
 import { skills } from '../../data/skills';
-import { AgentForgeIcon, SparklesIcon } from '../Icons';
+import { AgentForgeIcon, SparklesIcon, Trash2Icon } from '../Icons';
 import { suggestAgentPersona } from '../../services/geminiAdvancedService';
 import ConfirmationDialog from '../ConfirmationDialog';
+import { supabase } from '../../services/supabaseClient';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AgentForgeAppProps {
-    onAddAgent: (agent: CustomAgent) => void;
     onClose: () => void;
 }
 
-const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) => {
+const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
+    const { user } = useAuth();
+    const [agents, setAgents] = useState<CustomAgent[]>([]);
     const [name, setName] = useState('');
     const [role, setRole] = useState('');
     const [icon, setIcon] = useState('🤖');
@@ -18,6 +21,26 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
     const [isDeployed, setIsDeployed] = useState(false);
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [isConfirmingDeploy, setIsConfirmingDeploy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const listAgents = useCallback(async () => {
+        if (!user) return;
+        try {
+            const { data, error } = await supabase
+                .from('agents')
+                .select('config')
+                .eq('user_id', user.id);
+
+            if (error) throw error;
+            setAgents(data.map((d: any) => d.config) || []);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        listAgents();
+    }, [listAgents]);
 
     const handleSkillToggle = (skillId: SkillID) => {
         setSelectedSkills(prev => {
@@ -31,8 +54,8 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
         });
     };
 
-    const handleDeploy = () => {
-        if (!name || !role) {
+    const saveAgent = async () => {
+        if (!name || !role || !user) {
             alert("Please provide a name and a role for your agent.");
             return;
         }
@@ -43,8 +66,27 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
             icon,
             skillIDs: Array.from(selectedSkills),
         };
-        onAddAgent(newAgent);
-        setIsDeployed(true);
+
+        try {
+            const { error } = await supabase.from('agents').insert([
+                { user_id: user.id, name: newAgent.name, config: newAgent }
+            ]);
+            if (error) throw error;
+            setAgents([...agents, newAgent]);
+            setIsDeployed(true);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const deleteAgent = async (agentId: string) => {
+        try {
+            const { error } = await supabase.from('agents').delete().eq('config->>id', agentId);
+            if (error) throw error;
+            setAgents(agents.filter(a => a.id !== agentId));
+        } catch (err: any) {
+            setError(err.message);
+        }
     };
 
     const handleSuggestPersona = async () => {
@@ -76,7 +118,10 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
                  <p className="text-text-secondary max-w-sm mt-2">
                      Your new agent, <span className="font-bold text-white">{name}</span>, is now active and available across the OS.
                  </p>
-                 <button onClick={onClose} className="mt-6 px-6 py-3 font-bold rounded-lg bg-gradient-to-r from-primary-blue to-primary-purple hover:brightness-110 transition-all">
+                 <button onClick={() => setIsDeployed(false)} className="mt-6 px-6 py-3 font-bold rounded-lg bg-primary-blue hover:brightness-110 transition-all">
+                    Forge Another Agent
+                </button>
+                 <button onClick={onClose} className="mt-2 px-6 py-2 text-sm rounded-lg hover:bg-white/10 transition-all">
                     Close
                 </button>
             </div>
@@ -134,7 +179,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
                 </main>
                 
                 {/* Sidebar: Preview & Deploy */}
-                <aside className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-6">
+                <aside className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6">
                     <div className="space-y-4 p-4 bg-black/20 rounded-lg border border-border-color">
                         <h2 className="text-xl font-bold font-display">Live Preview</h2>
                         <div className="flex flex-col items-center text-center gap-2 p-3 rounded-lg bg-white/5">
@@ -142,6 +187,24 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
                                 <span className="text-3xl">{icon}</span>
                             </div>
                             <p className="text-sm font-bold text-white/90">{name || "Agent Name"}</p>
+                        </div>
+                    </div>
+                     <div className="space-y-4 p-4 bg-black/20 rounded-lg border border-border-color flex-grow">
+                        <h2 className="text-xl font-bold font-display">My Agents</h2>
+                        {error && <p className="text-sm text-red-500">{error}</p>}
+                        <div className="space-y-2">
+                            {agents.map(agent => (
+                                <div key={agent.id} className="flex items-center justify-between p-2 bg-white/5 rounded-md">
+                                    <div className="flex items-center gap-2">
+                                        <span>{agent.icon}</span>
+                                        <span className="text-sm">{agent.name}</span>
+                                    </div>
+                                    <button onClick={() => deleteAgent(agent.id)} className="text-red-500 hover:text-red-400">
+                                        <Trash2Icon size={16}/>
+                                    </button>
+                                </div>
+                            ))}
+                            {agents.length === 0 && <p className="text-sm text-text-secondary">No agents deployed yet.</p>}
                         </div>
                     </div>
                     <div className="mt-auto">
@@ -154,7 +217,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onAddAgent, onClose }) =>
             <ConfirmationDialog
                 isOpen={isConfirmingDeploy}
                 onClose={() => setIsConfirmingDeploy(false)}
-                onConfirm={handleDeploy}
+                onConfirm={saveAgent}
                 title="Confirm Agent Deployment"
                 message={`Are you sure you want to deploy agent "${name}"? It will become available across the OS.`}
                 confirmText="Deploy"

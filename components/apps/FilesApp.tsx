@@ -1,70 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { supabase } from '../../services/supabaseClient';
+import { useAuth } from '../../contexts/AuthContext';
 
-interface FileSystemNode {
-  id: string;
-  name: string;
-  type: 'file' | 'folder';
-  content?: string;
-  children?: FileSystemNode[];
+interface FileMetadata {
+    id: string;
+    user_id: string;
+    path: string;
+    name: string;
+    size: number;
+    mime_type: string;
+    created_at: string;
 }
 
-const initialFileSystem: FileSystemNode = {
-  id: 'root',
-  name: 'Home',
-  type: 'folder',
-  children: [
-    {
-      id: 'docs',
-      name: 'Documents',
-      type: 'folder',
-      children: [
-        { id: 'resume', name: 'Resume.pdf', type: 'file' },
-        { id: 'notes', name: 'Meeting Notes.txt', type: 'file', content: '- Discuss Q3 roadmap\n- AI agent integration' },
-      ],
-    },
-    {
-      id: 'pics',
-      name: 'Pictures',
-      type: 'folder',
-      children: [
-        { id: 'vacation', name: 'Vacation.jpg', type: 'file' },
-        { id: 'logo', name: 'Logo.png', type: 'file' },
-      ],
-    },
-    { id: 'readme', name: 'README.md', type: 'file', content: '# Welcome to your file system!' },
-  ],
-};
-
-const findNode = (node: FileSystemNode, id: string): FileSystemNode | null => {
-  if (node.id === id) return node;
-  if (node.children) {
-    for (const child of node.children) {
-      const found = findNode(child, id);
-      if (found) return found;
-    }
-  }
-  return null;
-};
-
-const addNodeToTree = (node: FileSystemNode, parentId: string, newNode: FileSystemNode): FileSystemNode => {
-    if (node.id === parentId) {
-        return { ...node, children: [...(node.children || []), newNode] };
-    }
-    if (node.children) {
-        return { ...node, children: node.children.map(child => addNodeToTree(child, parentId, newNode)) };
-    }
-    return node;
-};
-
-const deleteNodeFromTree = (node: FileSystemNode, nodeId: string): FileSystemNode => {
-    if (node.children) {
-        const newChildren = node.children
-            .filter(child => child.id !== nodeId)
-            .map(child => deleteNodeFromTree(child, nodeId));
-        return { ...node, children: newChildren };
-    }
-    return node;
-};
+const BUCKET_NAME = 'user_files';
 
 const FileIcon: React.FC<{ type: 'folder' | 'file'; name: string }> = ({ type, name }) => {
   let iconName = 'draft';
@@ -82,120 +30,172 @@ const FileIcon: React.FC<{ type: 'folder' | 'file'; name: string }> = ({ type, n
   return <span className={`material-symbols-outlined ${type === 'folder' ? 'text-amber-400' : 'text-gray-400'}`}>{iconName}</span>;
 };
 
-const TreeNode: React.FC<{
-  node: FileSystemNode;
-  selectedFolderId: string;
-  onSelectFolder: (id: string) => void;
-  openFolders: Set<string>;
-  onToggleFolder: (id: string) => void;
-}> = ({ node, selectedFolderId, onSelectFolder, openFolders, onToggleFolder }) => {
-  if (node.type !== 'folder') return null;
-
-  const isOpen = openFolders.has(node.id);
-  const isSelected = selectedFolderId === node.id;
-
-  return (
-    <div className="text-sm">
-      <div 
-        onClick={() => onSelectFolder(node.id)}
-        className={`flex items-center gap-2 p-1.5 rounded-md cursor-pointer ${isSelected ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}
-      >
-        <span onClick={(e) => { e.stopPropagation(); onToggleFolder(node.id); }} className="w-4 h-4 flex items-center justify-center">
-            {node.children && node.children.length > 0 && (
-                <span className={`material-symbols-outlined text-base transition-transform ${isOpen ? 'rotate-90' : ''}`}>chevron_right</span>
-            )}
-        </span>
-        <FileIcon type="folder" name={node.name} />
-        <span>{node.name}</span>
-      </div>
-      {isOpen && node.children && (
-        <div className="pl-4 border-l border-white/10 ml-3">
-          {node.children.map(child => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              selectedFolderId={selectedFolderId}
-              onSelectFolder={onSelectFolder}
-              openFolders={openFolders}
-              onToggleFolder={onToggleFolder}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
 const FilesApp: React.FC = () => {
-    const [fileSystem, setFileSystem] = useState<FileSystemNode>(initialFileSystem);
-    const [selectedFolderId, setSelectedFolderId] = useState<string>('root');
-    const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(['root']));
+    const { user } = useAuth();
+    const [files, setFiles] = useState<FileMetadata[]>([]);
+    const [currentPath, setCurrentPath] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const selectedFolder = useMemo(() => findNode(fileSystem, selectedFolderId), [fileSystem, selectedFolderId]);
+    const listFiles = useCallback(async (path: string) => {
+        if (!user) return;
+        setIsLoading(true);
+        setError(null);
+        try {
+            const { data, error } = await supabase
+                .from('file_metadata')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('path', path);
+            if (error) throw error;
+            setFiles(data || []);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [user]);
 
-    const handleToggleFolder = (id: string) => {
-        setOpenFolders(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-                newSet.delete(id);
-            } else {
-                newSet.add(id);
+    useEffect(() => {
+        listFiles(currentPath);
+
+        const channel = supabase.channel('files-changes');
+        channel
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'file_metadata', filter: `user_id=eq.${user?.id}` },
+                () => listFiles(currentPath)
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [currentPath, listFiles, user]);
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !user) return;
+
+        const filePath = `${currentPath ? currentPath + '/' : ''}${file.name}`;
+
+        try {
+            // Upload file to storage
+            const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
+            if (uploadError) throw uploadError;
+
+            // Add metadata to database
+            const { error: metadataError } = await supabase.from('file_metadata').insert({
+                user_id: user.id,
+                path: currentPath,
+                name: file.name,
+                size: file.size,
+                mime_type: file.type,
+            });
+            if (metadataError) throw metadataError;
+
+            listFiles(currentPath);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleDeleteFile = async (file: FileMetadata) => {
+        if (!user) return;
+        if (!confirm(`Are you sure you want to delete "${file.name}"?`)) return;
+
+        const filePath = `${file.path ? file.path + '/' : ''}${file.name}`;
+
+        try {
+            // Delete from storage
+            const { error: storageError } = await supabase.storage.from(BUCKET_NAME).remove([filePath]);
+            if (storageError) throw storageError;
+
+            // Delete metadata
+            const { error: metadataError } = await supabase.from('file_metadata').delete().eq('id', file.id);
+            if (metadataError) throw metadataError;
+
+            setFiles(files.filter(f => f.id !== file.id));
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleDownloadFile = async (file: FileMetadata) => {
+        const filePath = `${file.path ? file.path + '/' : ''}${file.name}`;
+        try {
+            const { data, error } = await supabase.storage.from(BUCKET_NAME).download(filePath);
+            if (error) throw error;
+            const blob = new Blob([data], { type: file.mime_type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const formatSize = (size: number) => {
+        if (size < 1024) return `${size} B`;
+        if (size < 1048576) return `${(size / 1024).toFixed(1)} KB`;
+        return `${(size / 1048576).toFixed(1)} MB`;
+    }
+
+    // This is a simplified folder navigation. A real app would need a more robust tree structure.
+    const folders = useMemo(() => {
+        const folderSet = new Set<string>();
+        files.forEach(file => {
+            const parts = file.path.split('/');
+            if (parts.length > 1) {
+                folderSet.add(parts[0]);
             }
-            return newSet;
         });
-    };
-    
-    const handleCreate = (type: 'file' | 'folder') => {
-        const name = prompt(`Enter name for new ${type}:`);
-        if (name) {
-            const newNode: FileSystemNode = {
-                id: `${type}-${Date.now()}`,
-                name,
-                type,
-                children: type === 'folder' ? [] : undefined,
-            };
-            setFileSystem(prev => addNodeToTree(prev, selectedFolderId, newNode));
-        }
-    };
+        return Array.from(folderSet);
+    }, [files]);
 
-    const handleDelete = (nodeId: string, nodeName: string) => {
-        if (confirm(`Are you sure you want to delete "${nodeName}"?`)) {
-            setFileSystem(prev => deleteNodeFromTree(prev, nodeId));
-        }
-    };
 
     return (
         <div className="h-full w-full flex bg-bg-secondary rounded-b-md text-white">
             <aside className="w-64 border-r border-border-color p-3 space-y-1 overflow-y-auto">
-                <TreeNode
-                    node={fileSystem}
-                    selectedFolderId={selectedFolderId}
-                    onSelectFolder={setSelectedFolderId}
-                    openFolders={openFolders}
-                    onToggleFolder={handleToggleFolder}
-                />
+                <div onClick={() => setCurrentPath('')} className={`p-1.5 rounded-md cursor-pointer ${currentPath === '' ? 'bg-accent/20' : ''}`}>Home</div>
+                {folders.map(folder => (
+                    <div key={folder} onClick={() => setCurrentPath(folder)} className={`p-1.5 rounded-md cursor-pointer ${currentPath === folder ? 'bg-accent/20' : ''}`}>{folder}</div>
+                ))}
             </aside>
             <main className="flex-1 flex flex-col">
                 <header className="flex-shrink-0 p-3 border-b border-border-color flex justify-between items-center">
-                    <h2 className="font-semibold">{selectedFolder?.name || '...'}</h2>
+                    <h2 className="font-semibold">/{currentPath}</h2>
                     <div className="flex items-center gap-2">
-                        <button onClick={() => handleCreate('file')} className="px-2 py-1 text-xs font-semibold rounded-md bg-white/5 hover:bg-white/10 flex items-center gap-1"><span className="material-symbols-outlined text-base">add</span> New File</button>
-                        <button onClick={() => handleCreate('folder')} className="px-2 py-1 text-xs font-semibold rounded-md bg-white/5 hover:bg-white/10 flex items-center gap-1"><span className="material-symbols-outlined text-base">create_new_folder</span> New Folder</button>
+                        <label className="px-2 py-1 text-xs font-semibold rounded-md bg-white/5 hover:bg-white/10 flex items-center gap-1 cursor-pointer">
+                            <span className="material-symbols-outlined text-base">add</span> Upload File
+                            <input type="file" className="hidden" onChange={handleFileUpload} />
+                        </label>
                     </div>
                 </header>
                 <div className="flex-grow p-4 overflow-y-auto">
+                    {isLoading && <p>Loading...</p>}
+                    {error && <p className="text-red-500">{error}</p>}
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
-                        {selectedFolder?.children?.map(item => (
+                        {files.map(item => (
                             <div key={item.id} className="group relative p-3 flex flex-col items-center justify-center text-center gap-2 rounded-lg hover:bg-white/5 cursor-pointer">
-                                <FileIcon type={item.type} name={item.name} />
+                                <FileIcon type='file' name={item.name} />
                                 <p className="text-xs break-all">{item.name}</p>
-                                <button onClick={() => handleDelete(item.id, item.name)} className="absolute top-1 right-1 p-1 rounded-full bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="material-symbols-outlined text-sm">close</span>
-                                </button>
+                                <p className="text-xs text-text-secondary">{formatSize(item.size)}</p>
+                                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleDownloadFile(item)} className="p-1 rounded-full bg-blue-500/80 text-white">
+                                        <span className="material-symbols-outlined text-sm">download</span>
+                                    </button>
+                                    <button onClick={() => handleDeleteFile(item)} className="p-1 rounded-full bg-red-500/80 text-white">
+                                        <span className="material-symbols-outlined text-sm">close</span>
+                                    </button>
+                                </div>
                             </div>
                         ))}
-                        {(!selectedFolder?.children || selectedFolder.children.length === 0) && (
+                        {!isLoading && files.length === 0 && (
                             <p className="text-sm text-text-muted col-span-full text-center mt-8">This folder is empty.</p>
                         )}
                     </div>
