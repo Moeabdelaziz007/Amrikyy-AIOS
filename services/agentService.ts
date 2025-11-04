@@ -35,6 +35,16 @@ export const getAgents = async (): Promise<AIXAgent[]> => {
     }
 };
 
+export const updateAgent = async (agentId: string, agentData: Partial<Omit<AIXAgent, 'id'>>): Promise<AIXAgent> => {
+    try {
+        const response = await axios.put(`${AGENTS_API_URL}/${agentId}`, agentData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating agent:', error);
+        throw error;
+    }
+};
+
 export const createAgent = async (agentData: Omit<AIXAgent, 'id'>): Promise<AIXAgent> => {
     try {
         const response = await axios.post(AGENTS_API_URL, agentData);
