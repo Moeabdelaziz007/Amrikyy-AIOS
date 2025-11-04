@@ -1,8 +1,30 @@
 import { Router, Request, Response } from 'express';
-import { generateContent } from '../services/gemini.js';
+import { generateContent, generateImage } from '../services/gemini.js';
 import { googleSearchService } from '../services/googleSearchService.js';
 
 const router = Router();
+
+/**
+* POST /api/ai/generate-image
+* Generate an image using Gemini AI
+*
+* Body:
+* {
+*   "prompt": "A futuristic cityscape"
+* }
+*/
+router.post('/generate-image', async (req: Request, res: Response) => {
+    try {
+        const { prompt } = req.body;
+        if (!prompt) {
+            return res.status(400).json({ error: 'Prompt is required' });
+        }
+        const imageUrl = await generateImage(prompt);
+        res.json({ imageUrl });
+    } catch (error: any) {
+        res.status(500).json({ error: 'Failed to generate image', message: error.message });
+    }
+});
 
 /**
 * POST /api/ai/chat

@@ -438,57 +438,21 @@ export const suggestDashboardLayout = async (prompt: string): Promise<DashboardL
 };
 
 export const generateImage = async (prompt: string): Promise<string> => {
-    if (!API_KEY) {
-        return 'https://storage.googleapis.com/gweb-aip.appspot.com/experiments/mediapipe/cat_and_dog.jpg';
-    }
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    try {
-        const response = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
-            prompt: prompt,
-            config: {
-                numberOfImages: 1,
-                outputMimeType: 'image/png',
-                aspectRatio: '1:1',
-            },
-        });
-        const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
-        return `data:image/png;base64,${base64ImageBytes}`;
-    } catch (error) {
-        console.error("Error generating image:", error);
-        throw new Error("Failed to generate image.");
-    }
-};
+    const response = await fetch('/api/ai/generate-image', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+    });
 
-export const editImage = async (prompt: string, base64ImageData: string, mimeType: string): Promise<string> => {
-    if (!API_KEY) {
-        return `data:image/png;base64,${base64ImageData}`;
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate image');
     }
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image',
-            contents: {
-                parts: [
-                    { inlineData: { data: base64ImageData, mimeType: mimeType } },
-                    { text: prompt },
-                ],
-            },
-            config: {
-                responseModalities: [Modality.IMAGE],
-            },
-        });
-        for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData) {
-                const base64ImageBytes: string = part.inlineData.data;
-                return `data:image/png;base64,${base64ImageBytes}`;
-            }
-        }
-        throw new Error("No image data in response.");
-    } catch (error) {
-        console.error("Error editing image:", error);
-        throw new Error("Failed to edit image.");
-    }
+
+    const { imageUrl } = await response.json();
+    return imageUrl;
 };
 
 export async function* generateVideoFromImage(prompt: string, imageBytes: string, mimeType: string, aspectRatio: '16:9' | '9:16'): AsyncGenerator<{ status: 'processing' | 'completed' | 'error'; progress: number; message: string; url?: string }> {
