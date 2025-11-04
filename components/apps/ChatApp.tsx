@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Message, SystemVoice } from '../../types.ts';
-import { generateResponse } from '../../services/geminiService.ts';
+import { geminiService, Content } from '../../packages/ai/src/index.ts';
 import { generateSpeech } from '../../services/geminiAdvancedService.ts';
 import { playDecodedAudio, decode } from '../../utils/audioUtils.ts';
 import { SendIcon, SparklesIcon, SpeakerIcon, ThumbsUpIcon, ThumbsDownIcon } from '../Icons.tsx';
-import { Content } from '@google/genai';
 import { recordPositiveFeedback, recordNegativeFeedback } from '../../services/agentEvolutionService.ts';
 
 /**
@@ -40,7 +39,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isMounted = useRef(true);
-  const agentId = 'maya'; // Hardcoded for now
 
   useEffect(() => {
     isMounted.current = true;
@@ -91,7 +89,12 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
         parts: [{ text: msg.text }]
       }));
 
-      const aiResponseText = await generateResponse(agentId, currentInput, chatHistory);
+      const aiResponseText = await geminiService.generateText(
+        currentInput,
+        chatHistory,
+        {},
+        "You are Maya, a helpful AI assistant for the Amrikyy AI OS, specializing in travel intelligence. Be friendly, helpful, and concise."
+      );
       const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
 
       setMessages(prev => [...prev, aiMessage]);
