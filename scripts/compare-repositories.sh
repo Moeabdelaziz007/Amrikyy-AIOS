@@ -12,7 +12,8 @@ echo ""
 
 # Configuration
 TEMP_DIR="/tmp/repo-analysis"
-CURRENT_REPO="/home/runner/work/Amrikyy-AIOS/Amrikyy-AIOS"
+# Auto-detect current repository path
+CURRENT_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Repositories to analyze
 REPOS=(
@@ -45,7 +46,12 @@ for i in "${!REPOS[@]}"; do
     echo "✓ $REPO_NAME already cloned (skipping)"
   else
     echo "Cloning $REPO_NAME..."
-    git clone --depth 1 "$REPO_URL" "$TEMP_DIR/$REPO_NAME" 2>&1 | grep -v "^remote:" | head -5
+    # Clone with error handling, suppressing only progress messages
+    if git clone --depth 1 --quiet "$REPO_URL" "$TEMP_DIR/$REPO_NAME" 2>&1; then
+      echo "  ✓ Cloned successfully"
+    else
+      echo "  ✗ Clone failed - continuing with other repos"
+    fi
   fi
 done
 
@@ -142,12 +148,26 @@ HEADER
 echo "| Repository | React | React-DOM | TypeScript |" >> "$PACKAGES_REPORT"
 echo "|-----------|-------|----------|-----------|" >> "$PACKAGES_REPORT"
 
+# Function to extract package version using jq if available, fallback to grep
+get_package_version() {
+  local pkg_file=$1
+  local package_name=$2
+  
+  if command -v jq &> /dev/null; then
+    # Use jq for robust JSON parsing
+    jq -r ".dependencies[\"$package_name\"] // .devDependencies[\"$package_name\"] // \"N/A\"" "$pkg_file" 2>/dev/null
+  else
+    # Fallback to grep
+    grep -o "\"$package_name\": \"[^\"]*\"" "$pkg_file" | cut -d'"' -f4 || echo "N/A"
+  fi
+}
+
 for REPO in "${REPOS[@]}"; do
   PKG_FILE="$TEMP_DIR/$REPO/package.json"
   if [ -f "$PKG_FILE" ]; then
-    REACT_VER=$(grep -o '"react": "[^"]*"' "$PKG_FILE" | cut -d'"' -f4 || echo "N/A")
-    REACT_DOM=$(grep -o '"react-dom": "[^"]*"' "$PKG_FILE" | cut -d'"' -f4 || echo "N/A")
-    TS_VER=$(grep -o '"typescript": "[^"]*"' "$PKG_FILE" | cut -d'"' -f4 || echo "N/A")
+    REACT_VER=$(get_package_version "$PKG_FILE" "react")
+    REACT_DOM=$(get_package_version "$PKG_FILE" "react-dom")
+    TS_VER=$(get_package_version "$PKG_FILE" "typescript")
     echo "| $REPO | $REACT_VER | $REACT_DOM | $TS_VER |" >> "$PACKAGES_REPORT"
   fi
 done
@@ -155,9 +175,9 @@ done
 # Current repo
 PKG_FILE="$CURRENT_REPO/package.json"
 if [ -f "$PKG_FILE" ]; then
-  REACT_VER=$(grep -o '"react": "[^"]*"' "$PKG_FILE" | cut -d'"' -f4 || echo "N/A")
-  REACT_DOM=$(grep -o '"react-dom": "[^"]*"' "$PKG_FILE" | cut -d'"' -f4 || echo "N/A")
-  TS_VER=$(grep -o '"typescript": "[^"]*"' "$PKG_FILE" | cut -d'"' -f4 || echo "N/A")
+  REACT_VER=$(get_package_version "$PKG_FILE" "react")
+  REACT_DOM=$(get_package_version "$PKG_FILE" "react-dom")
+  TS_VER=$(get_package_version "$PKG_FILE" "typescript")
   echo "| **Amrikyy-AIOS (Current)** | **$REACT_VER** | **$REACT_DOM** | **$TS_VER** |" >> "$PACKAGES_REPORT"
 fi
 
