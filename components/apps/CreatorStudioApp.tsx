@@ -1,21 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Project, Message, SharedContent } from '../../types';
 import { CreatorStudioIcon, SendIcon } from '../Icons';
 import { geminiService, Content } from '../../packages/ai/src/index';
 import { agents } from '../../data/agents';
+import * as projectService from '../../services/creatorStudioService';
 
 type Tab = 'dashboard' | 'ai_assistant' | 'new_project';
 
 const atlasAgent = agents.find(a => a.id === 'atlas');
 
 interface CreatorStudioAppProps {
-    projects: Project[];
-    onAddProject: (project: Project) => void;
     onShare: (content: SharedContent) => void;
 }
 
-const CreatorStudioApp: React.FC<CreatorStudioAppProps> = ({ projects, onAddProject, onShare }) => {
+const CreatorStudioApp: React.FC<CreatorStudioAppProps> = ({ onShare }) => {
     const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchProjects = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            const fetchedProjects = await projectService.getProjects();
+            setProjects(fetchedProjects);
+            setError(null);
+        } catch (err) {
+            setError('Failed to load projects.');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
+
+    const handleAddProject = (project: Project) => {
+        setProjects(prev => [project, ...prev]);
+    };
 
     return (
         <div className="h-full w-full flex flex-col bg-bg-tertiary rounded-b-md text-white overflow-hidden">
@@ -31,9 +55,15 @@ const CreatorStudioApp: React.FC<CreatorStudioAppProps> = ({ projects, onAddProj
                 </nav>
             </header>
             <main className="flex-grow overflow-y-auto p-4 sm:p-6">
-                {activeTab === 'dashboard' && <DashboardView projects={projects} onShare={onShare} />}
-                {activeTab === 'ai_assistant' && <AIAssistantView />}
-                {activeTab === 'new_project' && <NewProjectView onAddProject={onAddProject} setActiveTab={setActiveTab} />}
+                {isLoading && <div>Loading...</div>}
+                {error && <div className="text-red-500">{error}</div>}
+                {!isLoading && !error && (
+                    <>
+                        {activeTab === 'dashboard' && <DashboardView projects={projects} onShare={onShare} />}
+                        {activeTab === 'ai_assistant' && <AIAssistantView />}
+                        {activeTab === 'new_project' && <NewProjectView onAddProject={handleAddProject} setActiveTab={setActiveTab} />}
+                    </>
+                )}
             </main>
         </div>
     );
@@ -187,20 +217,25 @@ const AIAssistantView: React.FC = () => {
 const NewProjectView: React.FC<{ onAddProject: (p: Project) => void, setActiveTab: (tab: Tab) => void }> = ({ onAddProject, setActiveTab }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if(!name || !description) return;
+        if(!name || !description || isSubmitting) return;
 
-        const newProject: Project = {
-            id: `proj-${Date.now()}`,
-            name,
-            description,
-            status: 'Active',
-            earnings: 0,
-        };
-        onAddProject(newProject);
-        setActiveTab('dashboard');
+        setIsSubmitting(true);
+        setError(null);
+        try {
+            const newProject = await projectService.createProject({ name, description });
+            onAddProject(newProject);
+            setActiveTab('dashboard');
+        } catch (err) {
+            setError('Failed to create project. Please try again.');
+            console.error(err);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -215,7 +250,10 @@ const NewProjectView: React.FC<{ onAddProject: (p: Project) => void, setActiveTa
                     <label htmlFor="proj-desc" className="block text-sm font-medium text-text-secondary mb-1">Brief Description</label>
                     <textarea id="proj-desc" value={description} onChange={e => setDescription(e.target.value)} required rows={3} className="w-full bg-black/20 border border-white/10 rounded-md p-2 focus:ring-1 focus:ring-accent focus:outline-none resize-none"/>
                 </div>
-                <button type="submit" className="w-full py-2 font-bold rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 active:scale-95 transition-all">Create Project</button>
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                <button type="submit" disabled={isSubmitting} className="w-full py-2 font-bold rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    {isSubmitting ? 'Creating...' : 'Create Project'}
+                </button>
              </form>
         </div>
     );
