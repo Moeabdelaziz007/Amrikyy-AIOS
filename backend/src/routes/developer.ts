@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { verifyAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { supabase } from '../services/supabase.js';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 const router = Router();
 router.use(verifyAuth);
