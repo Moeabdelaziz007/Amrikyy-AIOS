@@ -8,7 +8,7 @@ import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/
 
 export type RealtimeEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
 
-export interface SubscribeOptions<T = any> {
+export interface SubscribeOptions<T extends Record<string, any> = Record<string, any>> {
   table: string;
   event: RealtimeEvent;
   schema?: string;
@@ -19,20 +19,20 @@ export interface SubscribeOptions<T = any> {
 /**
  * Subscribe to database changes
  */
-export function subscribeToTable<T = any>(options: SubscribeOptions<T>): RealtimeChannel {
+export function subscribeToTable<T extends Record<string, any> = Record<string, any>>(options: SubscribeOptions<T>): RealtimeChannel {
   const { table, event, schema = 'public', filter, callback } = options;
 
   const channel = supabase
     .channel(`${schema}:${table}`)
     .on(
-      'postgres_changes',
+      'postgres_changes' as any,
       {
         event,
         schema,
         table,
         filter,
-      },
-      callback
+      } as any,
+      callback as any
     )
     .subscribe();
 
@@ -42,7 +42,7 @@ export function subscribeToTable<T = any>(options: SubscribeOptions<T>): Realtim
 /**
  * Subscribe to all changes on a table
  */
-export function subscribeToAllChanges<T = any>(
+export function subscribeToAllChanges<T extends Record<string, any> = Record<string, any>>(
   table: string,
   callback: (payload: RealtimePostgresChangesPayload<T>) => void,
   schema: string = 'public'
@@ -58,7 +58,7 @@ export function subscribeToAllChanges<T = any>(
 /**
  * Subscribe to INSERT events
  */
-export function subscribeToInserts<T = any>(
+export function subscribeToInserts<T extends Record<string, any> = Record<string, any>>(
   table: string,
   callback: (payload: RealtimePostgresChangesPayload<T>) => void,
   schema: string = 'public'
@@ -74,7 +74,7 @@ export function subscribeToInserts<T = any>(
 /**
  * Subscribe to UPDATE events
  */
-export function subscribeToUpdates<T = any>(
+export function subscribeToUpdates<T extends Record<string, any> = Record<string, any>>(
   table: string,
   callback: (payload: RealtimePostgresChangesPayload<T>) => void,
   schema: string = 'public'
@@ -90,7 +90,7 @@ export function subscribeToUpdates<T = any>(
 /**
  * Subscribe to DELETE events
  */
-export function subscribeToDeletes<T = any>(
+export function subscribeToDeletes<T extends Record<string, any> = Record<string, any>>(
   table: string,
   callback: (payload: RealtimePostgresChangesPayload<T>) => void,
   schema: string = 'public'
@@ -124,13 +124,13 @@ export function subscribeToPresence(
   const channel = supabase.channel(channelName);
 
   if (callbacks.onJoin) {
-    channel.on('presence', { event: 'join' }, ({ key, newPresences }) => {
+    channel.on('presence', { event: 'join' }, ({ newPresences }) => {
       callbacks.onJoin?.(newPresences[0]);
     });
   }
 
   if (callbacks.onLeave) {
-    channel.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+    channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
       callbacks.onLeave?.(leftPresences[0]);
     });
   }

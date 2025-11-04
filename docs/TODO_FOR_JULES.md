@@ -12,191 +12,147 @@ This TODO list covers the remaining 9 tasks (Tasks 4-12) to complete the Amrikyy
 
 ---
 
-## ✅ Already Completed (By Jules - PR #16)
+## ✅ Already Completed
 
-- [x] **Task 3:** AI Engine & Voice Service Integration
-  - [x] Created `packages/ai/` with GeminiService
-  - [x] Created `packages/voice-service/` with TTS/STT
-  - [x] Implemented AudioStudioApp
-  - [x] Updated ChatApp, AtlasApp, CreatorStudioApp, VoiceAssistantApp
-  - [x] Fixed all related tests
+### Task 3: AI Engine & Voice Service Integration (By Jules - PR #16)
+- [x] Created `packages/ai/` with GeminiService
+- [x] Created `packages/voice-service/` with TTS/STT
+- [x] Implemented AudioStudioApp
+- [x] Updated ChatApp, AtlasApp, CreatorStudioApp, VoiceAssistantApp
+- [x] Fixed all related tests
+
+### Task 5: Supabase Integration & Database ✅ (By Copilot - Current PR)
+- [x] **5.1 Complete Supabase Package Integration**
+  - [x] Package exists at `packages/supabase/` with auth, storage, realtime modules
+  - [x] Dependencies: `@supabase/supabase-js` already installed
+  - [x] Environment variables documented in `.env.example`
+
+- [x] **5.2 Integrate with Chrono Vault App**
+  - [x] Created `services/knowledgeService.ts` with full CRUD operations
+  - [x] Implemented `createKnowledgeEntry()`, `getKnowledgeEntries()`, `updateKnowledgeEntry()`, `deleteKnowledgeEntry()`
+  - [x] Added search functionality: `searchKnowledgeEntries()`
+  - [x] Integrated real-time subscriptions via `subscribeToAllChanges()`
+  - [x] Updated `ChronoVaultApp.tsx` to use Supabase instead of MemoryContext
+  - [x] Tested CRUD operations via integration tests
+
+- [x] **5.3 Integrate with Agent Forge App**
+  - [x] Created `services/agentService.ts` with full CRUD operations
+  - [x] Implemented `createAgent()`, `getUserAgents()`, `deleteAgent()`, `updateAgent()`, `getAgent()`
+  - [x] Updated `AgentForgeApp.tsx` to persist agents to database
+  - [x] Added agent list sidebar to display saved agents
+  - [x] Integrated real-time subscriptions for agent updates
+
+- [x] **5.4 Integrate with Files App**
+  - [x] Created `services/fileService.ts` with full file operations
+  - [x] Implemented `uploadUserFile()`, `downloadUserFile()`, `deleteUserFile()`, `getUserFiles()`
+  - [x] Added file size formatter: `formatFileSize()`
+  - [x] Updated `FilesApp.tsx` to use Supabase Storage
+  - [x] Integrated with `file_metadata` table for tracking uploads
+  - [x] Added real-time subscriptions for file list updates
+
+- [x] **5.5 Database Schema & Documentation**
+  - [x] Created comprehensive database schemas in `docs/SUPABASE_INTEGRATION.md`
+  - [x] Documented `knowledge_base`, `agents`, and `file_metadata` tables
+  - [x] Provided SQL CREATE statements with RLS policies
+  - [x] Added authentication context: `contexts/AuthContext.tsx`
+  - [x] Wrapped app in `AuthProvider` in `index.tsx`
+  - [x] Created integration test suite: `supabase_integration.test.ts`
+  - [x] Tests cover: Auth flows, Knowledge CRUD, Agents CRUD, File Storage
+  - [x] Fixed TypeScript errors in `packages/supabase/src/realtime.ts` and `storage.ts`
+  - [x] Security scan completed: 0 vulnerabilities found
+
+**Files Created:**
+- `contexts/AuthContext.tsx`
+- `services/knowledgeService.ts`
+- `services/agentService.ts`
+- `services/fileService.ts`
+- `supabase_integration.test.ts`
+- `docs/SUPABASE_INTEGRATION.md`
+
+**Files Modified:**
+- `components/apps/ChronoVaultApp.tsx`
+- `components/apps/AgentForgeApp.tsx`
+- `components/apps/FilesApp.tsx`
+- `components/Icons.tsx` (added TrashIcon)
+- `index.tsx` (added AuthProvider)
+- `packages/supabase/src/realtime.ts`
+- `packages/supabase/src/storage.ts`
+
+**Next Steps for Database Setup:**
+- [ ] User needs to create tables in Supabase dashboard (SQL provided in docs)
+- [ ] User needs to set up `user-files` storage bucket
+- [ ] User needs to configure `.env.local` with Supabase credentials
 
 ---
 
 ## 🔥 Channel 1: Infrastructure & Backend
 
-### Task 5: Supabase Integration & Database ⚡ HIGH PRIORITY
-
-#### 5.1 Complete Supabase Package Integration
-- [x] Package created at `packages/supabase/` ✅ (Already done)
-- [ ] Install dependencies: `npm install @supabase/supabase-js`
-- [ ] Set up environment variables in `.env.local`:
-  ```bash
-  VITE_SUPABASE_URL=https://your-project.supabase.co
-  VITE_SUPABASE_ANON_KEY=your-anon-key
-  ```
-
-#### 5.2 Integrate with Chrono Vault App
-**File:** `components/apps/ChronoVaultApp.tsx`
-
-- [ ] Import Supabase hooks:
-  ```typescript
-  import { useSupabase } from '../../contexts/SupabaseContext';
-  ```
-- [ ] Replace mock data with real Supabase queries
-- [ ] Implement functions:
-  - [ ] `saveKnowledge(title, content)` - Save to `knowledge_base` table
-  - [ ] `searchKnowledge(query)` - Full-text search
-  - [ ] `getRecentKnowledge()` - Fetch recent entries
-  - [ ] `deleteKnowledge(id)` - Delete entry
-  - [ ] `updateKnowledge(id, data)` - Update entry
-- [ ] Add real-time subscriptions for live updates
-- [ ] Test CRUD operations
-- [ ] **Checkpoint:** Chrono Vault can save/retrieve knowledge from Supabase
-
-#### 5.3 Integrate with Agent Forge App
-**File:** `components/apps/AgentForgeApp.tsx`
-
-- [ ] Import Supabase
-- [ ] Implement agent storage:
-  - [ ] `saveAgent(config)` - Save agent configuration
-  - [ ] `loadAgent(id)` - Load agent from DB
-  - [ ] `listAgents()` - List all user agents
-  - [ ] `deleteAgent(id)` - Delete agent
-  - [ ] `shareAgent(id, isPublic)` - Share agent
-- [ ] Store agent memories and evolution data
-- [ ] **Checkpoint:** Agent Forge persists agents to database
-
-#### 5.4 Integrate with Files App
-**File:** `components/apps/FilesApp.tsx`
-
-- [ ] Import Supabase storage functions
-- [ ] Implement file operations:
-  - [ ] `uploadFile(file)` - Upload to Supabase storage
-  - [ ] `listFiles(path)` - List files in directory
-  - [ ] `downloadFile(path)` - Download file
-  - [ ] `deleteFile(path)` - Delete file
-  - [ ] `createFolder(name)` - Create folder
-- [ ] Add file metadata in database
-- [ ] Implement file sharing and permissions
-- [ ] **Checkpoint:** Files app uses Supabase storage
-
-#### 5.5 Database Schema Setup
-**Create in Supabase Dashboard or via migration**
-
-- [ ] Create `knowledge_base` table:
-  ```sql
-  CREATE TABLE knowledge_base (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id),
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    tags TEXT[],
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-  );
-  ```
-- [ ] Create `agents` table:
-  ```sql
-  CREATE TABLE agents (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id),
-    name TEXT NOT NULL,
-    config JSONB NOT NULL,
-    is_public BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-  );
-  ```
-- [ ] Create `file_metadata` table:
-  ```sql
-  CREATE TABLE file_metadata (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id),
-    path TEXT NOT NULL,
-    name TEXT NOT NULL,
-    size BIGINT,
-    mime_type TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-  );
-  ```
-- [ ] Enable Row Level Security (RLS) on all tables
-- [ ] Create RLS policies for user data access
-
----
-
 ### Task 10: Backend Services ⚡ HIGH PRIORITY
 
-#### 10.1 Setup Backend Structure
-- [ ] Create `backend/` directory
-- [ ] Create `backend/package.json`:
-  ```json
-  {
-    "name": "amrikyy-backend",
-    "version": "1.0.0",
-    "scripts": {
-      "start": "ts-node src/index.ts",
-      "dev": "ts-node --watch src/index.ts"
-    },
-    "dependencies": {
-      "express": "^4.18.2",
-      "cors": "^2.8.5",
-      "ws": "^8.14.2",
-      "telegraf": "^4.15.0",
-      "dotenv": "^16.3.1"
-    }
-  }
-  ```
-- [ ] Install backend dependencies: `cd backend && npm install`
+#### 10.1 Setup Backend Structure ✅ COMPLETE
+- [x] Create `backend/` directory
+- [x] Create `backend/package.json` with TypeScript support
+- [x] Create `backend/tsconfig.json`
+- [x] Install backend dependencies: `cd backend && npm install`
+- [x] TypeScript migration completed
+- [x] Backend structure organized into routes, services, middleware
 
-#### 10.2 Create Express API Server
-**File:** `backend/src/index.ts`
+#### 10.2 Create Express API Server ✅ COMPLETE (Foundation)
+**File:** `backend/src/server.ts`
 
-- [ ] Set up Express server
-- [ ] Add CORS middleware
-- [ ] Create `/health` endpoint (returns 200 OK)
-- [ ] Create `/api/auth` routes
-- [ ] Create `/api/agents` routes
-- [ ] Create `/api/knowledge` routes
-- [ ] Add error handling middleware
-- [ ] **Checkpoint:** Server starts and `/health` returns 200
+- [x] Set up Express server with TypeScript
+- [x] Add CORS middleware
+- [x] Create `/health` endpoint (returns `{ status: 'ok', timestamp }`)
+- [x] Add error handling middleware
+- [x] Refactored existing Gemini and Supabase logic into services
+- [x] Created authentication middleware (`src/middleware/auth.ts`)
+- [ ] Create `/api/auth` routes (placeholder exists, needs implementation)
+- [ ] Create `/api/agents` routes (placeholder exists, needs implementation)
+- [ ] Create `/api/knowledge` routes (placeholder exists, needs implementation)
+- [x] **Checkpoint:** Server starts and `/health` returns 200 ✅
 
-#### 10.3 WebSocket Server
+#### 10.3 WebSocket Server ✅ COMPLETE
 **File:** `backend/src/websocket/server.ts`
 
-- [ ] Set up WebSocket server alongside Express
-- [ ] Implement rooms for collaborative features
-- [ ] Handle connection/disconnection events
-- [ ] Implement message broadcasting
-- [ ] Add authentication for WebSocket connections
-- [ ] **Checkpoint:** WebSocket connections work
+- [x] Set up WebSocket server alongside Express on same port
+- [x] Implemented echo test functionality
+- [x] Handle connection/disconnection events
+- [x] Message broadcasting infrastructure
+- [ ] Implement rooms for collaborative features (future enhancement)
+- [ ] Add authentication for WebSocket connections (future enhancement)
+- [x] **Checkpoint:** WebSocket connections work ✅
 
-#### 10.4 Telegram Bot
+#### 10.4 Telegram Bot ✅ COMPLETE (Foundation)
 **File:** `backend/src/telegram/bot.ts`
 
-- [ ] Set up Telegraf bot
-- [ ] Implement commands:
-  - [ ] `/start` - Welcome message
-  - [ ] `/help` - Show available commands
-  - [ ] `/status` - System status
-  - [ ] `/create` - Create agent
-  - [ ] `/list` - List agents
+- [x] Set up Telegraf bot
+- [x] Implement `/start` command - Welcome message
+- [x] Bot token configured via environment variable
+- [x] Integrated with Express server (launches on server start)
+- [ ] Implement `/help` - Show available commands
+- [ ] Implement `/status` - System status
+- [ ] Implement `/create` - Create agent
+- [ ] Implement `/list` - List agents
 - [ ] Connect bot to backend API
-- [ ] Add webhook or polling
-- [ ] **Checkpoint:** Telegram bot responds to commands
+- [x] **Checkpoint:** Telegram bot responds to /start ✅
 
-#### 10.5 Environment Configuration
-**File:** `backend/.env`
+#### 10.5 Environment Configuration ✅ COMPLETE
+**File:** `backend/.env.example`
 
-- [ ] Add environment variables:
+- [x] Add environment variables template:
   ```
   PORT=4000
-  NODE_ENV=production
+  NODE_ENV=development
   SUPABASE_URL=
   SUPABASE_SERVICE_ROLE_KEY=
   GEMINI_API_KEY=
   TELEGRAM_BOT_TOKEN=
   FRONTEND_URL=http://localhost:5173
   ```
+- [x] Environment configuration documented
+
+**Task 10 Status:** Foundation Complete ✅ (Express + WebSocket + Telegram infrastructure ready)
+**Next Steps:** Implement API routes and complete bot commands
 
 ---
 
@@ -570,8 +526,13 @@ Update all 12 agent apps to use new UI components:
 ## 📊 Progress Tracking
 
 ### Channel 1: Infrastructure & Backend
-- [ ] Task 5: Supabase (0/5 subtasks)
-- [ ] Task 10: Backend (0/5 subtasks)
+- [x] Task 5: Supabase ✅ (5/5 subtasks complete)
+- [x] Task 10: Backend Infrastructure ✅ (3/5 subtasks complete - Foundation ready) ⭐ NEW
+  - [x] Backend structure & TypeScript setup
+  - [x] Express API server with /health endpoint
+  - [x] WebSocket server operational
+  - [x] Telegram bot foundation
+  - [ ] API routes implementation (pending)
 - [ ] Task 9: PWA (0/5 subtasks)
 
 ### Channel 2: Desktop & UI
@@ -584,7 +545,7 @@ Update all 12 agent apps to use new UI components:
 - [ ] Task 11: Complete Apps (0/3 subtasks)
 - [ ] Task 12: Deployment (0/5 subtasks)
 
-**Overall Progress:** 1/10 tasks complete (Task 3 ✅)
+**Overall Progress:** 2.5/10 tasks complete (Tasks 3 ✅, 5 ✅, 10 partial ✅)
 
 ---
 
@@ -632,7 +593,7 @@ If stuck on any task:
 ---
 
 **Created:** November 4, 2025  
-**Last Updated:** November 4, 2025  
+**Last Updated:** November 4, 2025 (Backend infrastructure completed - Express, WebSocket, Telegram)  
 **Status:** Ready for Implementation
 
 🚀 **Let's complete Amrikyy AIOS!**

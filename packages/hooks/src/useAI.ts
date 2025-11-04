@@ -60,7 +60,7 @@ export function useAI() {
     setError(null);
 
     const startTime = Date.now();
-    let fullResponse = '';
+    const fullResponse = '';
 
     try {
       // await aiService.chatStream(messages, options || {}, (chunk) => {

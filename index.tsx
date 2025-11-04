@@ -6,6 +6,7 @@ import { MemoryProvider } from './contexts/MemoryContext.tsx';
 import { NotificationProvider } from './contexts/NotificationContext.tsx';
 import { UserBehaviorProvider } from './contexts/UserBehaviorContext.tsx';
 import { GoogleAuthProvider } from './contexts/GoogleAuthContext.tsx';
+import { AuthProvider } from './contexts/AuthContext.tsx';
 
 /**
  * The main entry point of the React application.
@@ -19,16 +20,18 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <LanguageProvider>
-      <MemoryProvider>
-        <NotificationProvider>
-          <UserBehaviorProvider>
-            <GoogleAuthProvider>
-              <App />
-            </GoogleAuthProvider>
-          </UserBehaviorProvider>
-        </NotificationProvider>
-      </MemoryProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <MemoryProvider>
+          <NotificationProvider>
+            <UserBehaviorProvider>
+              <GoogleAuthProvider>
+                <App />
+              </GoogleAuthProvider>
+            </UserBehaviorProvider>
+          </NotificationProvider>
+        </MemoryProvider>
+      </LanguageProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

@@ -3,6 +3,14 @@ import { CustomAgent, SkillID } from '../../types';
 import { skills } from '../../data/skills';
 import { AgentForgeIcon, SparklesIcon, Trash2Icon } from '../Icons';
 import { suggestAgentPersona } from '../../services/geminiAdvancedService';
+import { useAuth } from '../../contexts/AuthContext';
+import { subscribeToAllChanges } from '../../packages/supabase/src';
+import { 
+  AgentConfig, 
+  getUserAgents, 
+  createAgent, 
+  deleteAgent 
+} from '../../services/agentService';
 import ConfirmationDialog from '../ConfirmationDialog';
 import { supabase } from '../../services/supabaseClient';
 import { useAuth } from '../../contexts/AuthContext';
@@ -110,13 +118,29 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
         setIsConfirmingDeploy(true);
     };
 
+    const resetForm = () => {
+        setName('');
+        setRole('');
+        setIcon('🤖');
+        setSelectedSkills(new Set());
+        setIsDeployed(false);
+    };
+
+    if (!user) {
+        return (
+            <div className="h-full w-full flex items-center justify-center bg-bg-tertiary rounded-b-md text-white">
+                <p className="text-text-secondary">Please sign in to access Agent Forge</p>
+            </div>
+        );
+    }
+
     if (isDeployed) {
         return (
             <div className="h-full w-full flex flex-col items-center justify-center bg-bg-tertiary rounded-b-md text-white p-6 text-center animate-fade-in">
                  <SparklesIcon className="w-20 h-20 text-green-400 mb-4" />
                  <h1 className="font-display text-3xl font-bold">Deployment Successful!</h1>
                  <p className="text-text-secondary max-w-sm mt-2">
-                     Your new agent, <span className="font-bold text-white">{name}</span>, is now active and available across the OS.
+                     Your new agent, <span className="font-bold text-white">{name}</span>, has been saved to your collection.
                  </p>
                  <button onClick={() => setIsDeployed(false)} className="mt-6 px-6 py-3 font-bold rounded-lg bg-primary-blue hover:brightness-110 transition-all">
                     Forge Another Agent
@@ -134,46 +158,41 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                 <AgentForgeIcon className="w-8 h-8 text-amber-400"/>
                 <h1 className="font-display text-2xl font-bold">Agent Forge</h1>
             </header>
-            <div className="flex-grow flex flex-col lg:flex-row p-6 gap-6 overflow-hidden">
-                {/* Main Content Area: Persona & Skills */}
-                <main className="flex-1 flex flex-col gap-6 overflow-y-auto lg:pr-3">
-                    <section className="space-y-4 p-4 bg-black/20 rounded-lg border border-border-color">
-                        <h2 className="text-xl font-bold font-display">1. Define Persona</h2>
-                        <div>
-                            <label htmlFor="agent-name" className="text-sm font-medium">Name</label>
-                            <input id="agent-name" type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-bg-tertiary p-2 rounded-md border border-border-color mt-1" />
+            <div className="flex-grow flex flex-col lg:flex-row overflow-hidden">
+                {/* Sidebar: Agent List */}
+                <aside className="w-full lg:w-64 flex-shrink-0 p-4 border-r border-border-color overflow-y-auto">
+                    <h2 className="text-lg font-bold mb-3">Your Agents</h2>
+                    {loading ? (
+                        <div className="flex justify-center py-4">
+                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                        <div>
-                            <label htmlFor="agent-role" className="text-sm font-medium">Role</label>
-                             <div className="flex items-center gap-2 mt-1">
-                                <input id="agent-role" type="text" value={role} onChange={e => setRole(e.target.value)} placeholder="e.g., A helpful poetry assistant" className="w-full bg-bg-tertiary p-2 rounded-md border border-border-color" />
-                                <button onClick={handleSuggestPersona} disabled={isSuggesting || !role} title="Suggest with AI" className="p-2.5 rounded-md bg-accent text-white disabled:opacity-50 flex-shrink-0">
-                                    {isSuggesting ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <SparklesIcon className="w-5 h-5" />}
-                                </button>
-                            </div>
-                        </div>
-                         <div>
-                            <label htmlFor="agent-icon" className="text-sm font-medium">Icon (Emoji)</label>
-                            <input id="agent-icon" type="text" value={icon} onChange={e => setIcon(e.target.value)} className="w-full bg-bg-tertiary p-2 rounded-md border border-border-color mt-1" />
-                        </div>
-                    </section>
-                    
-                    <section className="flex-1 flex flex-col bg-black/20 rounded-lg p-4 border border-border-color min-h-[300px]">
-                        <h2 className="text-xl font-bold font-display mb-4 flex-shrink-0">2. Plug-in Skills</h2>
-                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                            {skills.map(skill => {
-                                const isSelected = selectedSkills.has(skill.id);
-                                const Icon = skill.icon;
-                                return (
-                                    <div key={skill.id} onClick={() => handleSkillToggle(skill.id)} className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${isSelected ? 'bg-accent/20 border-accent' : 'bg-bg-tertiary border-border-color hover:border-white/50'}`}>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <Icon className={`w-5 h-5 ${isSelected ? 'text-accent' : 'text-text-muted'}`} />
-                                            <h4 className="font-semibold text-sm">{skill.name}</h4>
+                    ) : agents.length === 0 ? (
+                        <p className="text-sm text-text-secondary">No agents yet</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {agents.map((agent) => (
+                                <div
+                                    key={agent.id}
+                                    className="p-3 bg-black/20 rounded-lg border border-border-color hover:border-primary-blue/50 transition-colors"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="flex items-center gap-2 flex-grow min-w-0">
+                                            <span className="text-2xl flex-shrink-0">{agent.icon}</span>
+                                            <div className="min-w-0 flex-grow">
+                                                <p className="font-semibold text-sm truncate">{agent.name}</p>
+                                                <p className="text-xs text-text-secondary truncate">{agent.role}</p>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-text-secondary">{skill.description}</p>
+                                        <button
+                                            onClick={() => handleDeleteAgent(agent.id)}
+                                            className="p-1 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
+                                            title="Delete agent"
+                                        >
+                                            <TrashIcon className="w-4 h-4 text-red-400" />
+                                        </button>
                                     </div>
-                                )
-                            })}
+                                </div>
+                            ))}
                         </div>
                     </section>
                 </main>
@@ -186,7 +205,6 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                             <div className="flex items-center justify-center size-14 bg-gradient-to-br from-neon-cyan/20 to-neon-pink/20 rounded-xl">
                                 <span className="text-3xl">{icon}</span>
                             </div>
-                            <p className="text-sm font-bold text-white/90">{name || "Agent Name"}</p>
                         </div>
                     </div>
                      <div className="space-y-4 p-4 bg-black/20 rounded-lg border border-border-color flex-grow">
@@ -219,7 +237,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                 onClose={() => setIsConfirmingDeploy(false)}
                 onConfirm={saveAgent}
                 title="Confirm Agent Deployment"
-                message={`Are you sure you want to deploy agent "${name}"? It will become available across the OS.`}
+                message={`Are you sure you want to deploy agent "${name}"? It will be saved to your collection.`}
                 confirmText="Deploy"
             />
         </div>
