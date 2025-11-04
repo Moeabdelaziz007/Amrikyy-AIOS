@@ -25,6 +25,3 @@ coverage/
 # Build outputs
 dist/
 build/
-
-# Jules Journal data
-data/jules-journal/

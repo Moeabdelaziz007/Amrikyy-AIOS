@@ -17,9 +17,7 @@
     "@google/genai": "^1.28.0",
     "@supabase/supabase-js": "^2.78.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "winston": "^3.18.3",
-    "zod": "^4.1.12"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.6",

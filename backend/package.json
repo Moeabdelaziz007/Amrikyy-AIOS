@@ -28,7 +28,6 @@
     "googleapis": "^164.1.0",
     "helmet": "^7.1.0",
     "multer": "^2.0.2",
-    "private-journal-mcp": "github:Moeabdelaziz007/private-journal-mcp",
     "telegraf": "^4.15.3",
     "ws": "^8.14.2"
   },
