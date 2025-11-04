@@ -2,7 +2,7 @@
  * Gemini AI Service
  * Google Gemini API integration
  */
-import { GoogleGenAI, Content, GenerationConfig, SystemInstruction } from "@google/genai";
+import { GoogleGenAI, Content, GenerationConfig } from "@google/genai";
 
 // Re-export the Content type for external use, aligning with the library
 export type { Content };
@@ -17,7 +17,7 @@ export class GeminiService {
     if (!apiKey) {
       throw new Error("Gemini API key not found. Please set the VITE_API_KEY environment variable.");
     }
-    this.ai = new GoogleGenAI(apiKey);
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   /**
@@ -38,8 +38,8 @@ export class GeminiService {
     try {
       const model = this.ai.getGenerativeModel({
         model: 'gemini-1.5-flash', // Using a standard, available model.
-        ...(systemInstruction && { systemInstruction: { role: 'system', parts: [{ text: systemInstruction }] } as SystemInstruction }),
-        generationConfig,
+        ...(systemInstruction && { systemInstruction }),
+        ...generationConfig,
       });
 
       const chat = model.startChat({ history });
@@ -58,6 +58,24 @@ export class GeminiService {
       }
       throw new Error("An unknown error occurred while contacting the AI.");
     }
+  }
+
+  /**
+   * Chat method for BaseAIService interface
+   */
+  async chat(messages: any[], options?: any): Promise<any> {
+    const history = messages.slice(0, -1).map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }]
+    }));
+    const lastMessage = messages[messages.length - 1];
+    const prompt = lastMessage.content;
+    
+    const text = await this.generateText(prompt, history, options || {});
+    return {
+      content: text,
+      model: 'gemini-1.5-flash'
+    };
   }
 
   // Keeping the other methods as placeholders for now
