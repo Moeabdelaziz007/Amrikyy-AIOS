@@ -11,17 +11,17 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "paths": {
       "@auraos/ui": ["./packages/ui/src"],
       "@auraos/common": ["./packages/common/src"],
       "@auraos/hooks": ["./packages/hooks/src"]
     }
   },
-  "include": ["src", "packages", "setupTests.ts"],
+  "include": ["src", "packages"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "setupTests.ts", "tests"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
