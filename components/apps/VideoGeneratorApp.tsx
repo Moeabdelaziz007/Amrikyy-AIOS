@@ -48,7 +48,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
     // Checks if an API key has been selected on component mount.
     useEffect(() => {
         const checkKey = async () => {
-            // @ts-ignore
+            // @ts-expect-error – `aistudio` is a custom global object not recognized by TypeScript.
             const hasKey = await window.aistudio.hasSelectedApiKey();
             setIsKeySelected(hasKey);
         };
@@ -79,7 +79,7 @@ const VideoGeneratorApp: React.FC<VideoGeneratorAppProps> = ({ userAccount, setU
      * Opens the API key selection dialog and updates the `isKeySelected` state.
      */
     const handleSelectKey = async () => {
-        // @ts-ignore
+        // @ts-expect-error – `aistudio` is a custom global object not recognized by TypeScript.
         await window.aistudio.openSelectKey();
         setIsKeySelected(true); // Assume success to improve UX
     };

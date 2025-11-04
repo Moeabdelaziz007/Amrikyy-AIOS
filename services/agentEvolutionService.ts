@@ -10,7 +10,11 @@
  * Created by: Mohamed Hossameldin Abdelaziz
  */
 
+ updates
+import { generateResponse } from './geminiService';
+=======
 import { geminiService } from '../packages/ai/src/index';
+ main
 
 /**
  * Represents a gene in an agent's behavioral DNA
@@ -427,6 +431,7 @@ Provide a brief, insightful analysis of:
 Keep it concise (3-4 sentences).`;
     
     try {
+      const insights = await generateResponse(agentId, prompt, []);
       const insights = await geminiService.generateText(prompt, []);
       return insights;
     } catch (error) {

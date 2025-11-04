@@ -23,10 +23,18 @@ const VoiceAssistantApp: React.FC<VoiceAssistantAppProps> = ({ onExecuteWorkflow
 
         const vs = voiceServiceRef.current;
 
+ updates
+    const processAudio = async () => {
+        if (audioChunksRef.current.length === 0) {
+            setVoiceState('idle');
+            return;
+        }
+=======
         const handleListeningStart = () => setVoiceState('listening');
         const handleTranscription = (e: any) => setTranscription(e.data.text);
         const handleError = (e: any) => setError(e.data.error.message || 'An unknown error occurred.');
         const handleListeningEnd = () => setVoiceState('idle');
+ main
 
         vs.on('listening-start', handleListeningStart);
         vs.on('transcription-complete', handleTranscription);
