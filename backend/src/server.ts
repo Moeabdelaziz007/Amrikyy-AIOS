@@ -2,23 +2,22 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { createClient } from '@supabase/supabase-js';
+import http from 'http';
+import authRouter from './routes/auth';
+import agentsRouter from './routes/agents';
+import knowledgeRouter from './routes/knowledge';
+import { verifyAuth, AuthenticatedRequest } from './middleware/auth';
+import { generateContent, startChat } from './services/gemini';
+import { supabase } from './services/supabase';
+import { setupWebSocket } from './websocket/server';
+import { launchBot } from './telegram/bot';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
-// Initialize Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+const server = http.createServer(app);
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(helmet());
@@ -33,33 +32,14 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Middleware to verify Supabase JWT
-async function verifyAuth(req, res, next) {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Missing or invalid authorization header' });
-  }
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/agents', verifyAuth, agentsRouter);
+app.use('/api/knowledge', verifyAuth, knowledgeRouter);
 
-  const token = authHeader.split(' ')[1];
-
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    
-    if (error || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    console.error('Auth error:', error);
-    res.status(401).json({ error: 'Authentication failed' });
-  }
-}
 
 // Gemini API endpoints (protected)
-app.post('/api/gemini/generate', verifyAuth, async (req, res) => {
+app.post('/api/gemini/generate', verifyAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const { prompt, model = 'gemini-pro' } = req.body;
 
@@ -67,10 +47,7 @@ app.post('/api/gemini/generate', verifyAuth, async (req, res) => {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const generativeModel = genAI.getGenerativeModel({ model });
-    const result = await generativeModel.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = await generateContent(prompt, model);
 
     res.json({ text, user: req.user.email });
   } catch (error) {
@@ -87,15 +64,7 @@ app.post('/api/gemini/chat', verifyAuth, async (req, res) => {
       return res.status(400).json({ error: 'Messages array is required' });
     }
 
-    const generativeModel = genAI.getGenerativeModel({ model });
-    const chat = generativeModel.startChat({
-      history: messages.slice(0, -1),
-    });
-
-    const lastMessage = messages[messages.length - 1];
-    const result = await chat.sendMessage(lastMessage.parts[0].text);
-    const response = await result.response;
-    const text = response.text();
+    const text = await startChat(messages, model);
 
     res.json({ text });
   } catch (error) {
@@ -105,7 +74,7 @@ app.post('/api/gemini/chat', verifyAuth, async (req, res) => {
 });
 
 // User profile endpoints (examples)
-app.get('/api/user/profile', verifyAuth, async (req, res) => {
+app.get('/api/user/profile', verifyAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const { data, error } = await supabase
       .from('user_profiles')
@@ -124,7 +93,7 @@ app.get('/api/user/profile', verifyAuth, async (req, res) => {
   }
 });
 
-app.put('/api/user/profile', verifyAuth, async (req, res) => {
+app.put('/api/user/profile', verifyAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const { display_name, avatar_url } = req.body;
 
@@ -149,13 +118,21 @@ app.put('/api/user/profile', verifyAuth, async (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Setup WebSocket server
+setupWebSocket(server);
+
+// Launch Telegram bot
+if (process.env.TELEGRAM_BOT_TOKEN) {
+    launchBot();
+}
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
 });

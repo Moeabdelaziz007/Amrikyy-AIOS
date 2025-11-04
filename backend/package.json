@@ -2,13 +2,19 @@
   "name": "amrikyy-aios-backend",
   "version": "1.0.0",
   "description": "Backend API server for Amrikyy AI OS",
-  "main": "src/index.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "start": "node dist/server.js",
+    "build": "tsc",
+    "dev": "nodemon --exec ts-node src/server.ts"
   },
-  "keywords": ["ai", "api", "gemini", "supabase"],
+  "keywords": [
+    "ai",
+    "api",
+    "gemini",
+    "supabase"
+  ],
   "author": "Amrikyy AI OS",
   "license": "MIT",
   "dependencies": {
@@ -17,7 +23,18 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "helmet": "^7.1.0"
+    "helmet": "^7.1.0",
+    "ws": "^8.14.2",
+    "telegraf": "^4.15.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.4",
+    "@types/ws": "^8.5.10",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=18.0.0"
