@@ -1140,4 +1140,174 @@ export const generateDocsSummary = async (query: string, lang: 'en' | 'ar'): Pro
         console.error("AI Docs Summary Error:", error);
         throw new Error(lang === "ar" ? "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي." : "AI request failed.");
     }
-};
+}
+
+/**
+ * Gemini Computer Use API - Screen Understanding and Action
+ * Based on: https://ai.google.dev/gemini-api/docs/computer-use
+ * 
+ * The Computer Use API enables Gemini to:
+ * 1. Understand screenshots and UI elements
+ * 2. Suggest actions based on visual context
+ * 3. Generate step-by-step instructions
+ * 4. Analyze application states
+ */
+
+interface ComputerAction {
+    type: 'click' | 'type' | 'scroll' | 'wait' | 'analyze';
+    description: string;
+    coordinates?: { x: number; y: number };
+    text?: string;
+    confidence: number;
+}
+
+interface ComputerUseResponse {
+    analysis: string;
+    suggestedActions: ComputerAction[];
+    reasoning: string;
+}
+
+/**
+ * Analyze a screenshot and understand the UI elements
+ * @param screenshotBase64 - Base64 encoded screenshot image
+ * @param instruction - What the user wants to accomplish
+ * @returns Analysis and suggested actions
+ */
+export async function analyzeScreenForActions(
+    screenshotBase64: string,
+    instruction: string
+): Promise<ComputerUseResponse> {
+    if (!API_KEY) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+    try {
+        // Remove data URL prefix if present
+        const base64Data = screenshotBase64.replace(/^data:image\/\w+;base64,/, '');
+
+        const prompt = `You are an AI assistant with computer vision capabilities. Analyze this screenshot and help the user accomplish their task.
+
+User's Goal: ${instruction}
+
+Based on the screenshot:
+1. Describe what you see on the screen (UI elements, buttons, text, etc.)
+2. Identify the relevant elements for the user's goal
+3. Suggest specific actions to accomplish the task
+4. Provide step-by-step instructions
+
+Format your response as JSON with this structure:
+{
+  "analysis": "description of the screen",
+  "suggestedActions": [
+    {
+      "type": "click|type|scroll|wait|analyze",
+      "description": "what this action does",
+      "coordinates": {"x": number, "y": number},  // if applicable
+      "text": "text to type",  // if type action
+      "confidence": 0-1
+    }
+  ],
+  "reasoning": "why these actions will achieve the goal"
+}`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp',  // Use latest model with vision capabilities
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: 'image/png',
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }
+            ],
+            config: {
+                temperature: 0.4,  // Lower temperature for more consistent actions
+                candidateCount: 1
+            }
+        });
+
+        // Parse the JSON response
+        const responseText = response.text.trim();
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        
+        if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            return parsed;
+        } else {
+            // Fallback if JSON parsing fails
+            return {
+                analysis: responseText,
+                suggestedActions: [],
+                reasoning: 'Could not parse structured actions from response'
+            };
+        }
+    } catch (error: any) {
+        console.error('Computer Use API error:', error);
+        throw new Error(`Failed to analyze screen: ${error.message}`);
+    }
+}
+
+/**
+ * Analyze an image with custom instructions
+ * @param imageBase64 - Base64 encoded image
+ * @param prompt - Custom analysis prompt
+ * @returns AI analysis of the image
+ */
+export async function analyzeImage(imageBase64: string, prompt: string): Promise<string> {
+    if (!API_KEY) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+    try {
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp',
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: 'image/png',
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return response.text;
+    } catch (error: any) {
+        console.error('Image analysis error:', error);
+        throw new Error(`Failed to analyze image: ${error.message}`);
+    }
+}
+
+/**
+ * Analyze a screenshot with context
+ * @param screenshotBase64 - Base64 encoded screenshot
+ * @param context - Additional context about what to look for
+ * @returns Analysis of the screenshot
+ */
+export async function analyzeScreenshot(
+    screenshotBase64: string,
+    context: string
+): Promise<string> {
+    return analyzeImage(
+        screenshotBase64,
+        `Analyze this screenshot. ${context}\n\nProvide a detailed analysis of what you see and any relevant insights.`
+    );
+}

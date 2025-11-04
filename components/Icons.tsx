@@ -200,6 +200,12 @@ export const TrashIcon: React.FC<{className?: string}> = ({className}) => (<Mate
 /** Download icon. */
 export const DownloadIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>download</MaterialIcon>);
 
+/** Camera icon. */
+export const CameraIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>photo_camera</MaterialIcon>);
+
+/** Screen/Monitor icon. */
+export const ScreenIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>desktop_windows</MaterialIcon>);
+
 /** Edit icon. */
 export const EditIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>edit</MaterialIcon>);
 
