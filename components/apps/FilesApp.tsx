@@ -1,205 +1,244 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { subscribeToAllChanges } from '../../packages/supabase/src';
+import {
+  FileMetadata,
+  getUserFiles,
+  uploadUserFile,
+  deleteUserFile,
+  downloadUserFile,
+  formatFileSize,
+} from '../../services/fileService';
+import { TrashIcon } from '../Icons';
 
-interface FileSystemNode {
-  id: string;
-  name: string;
-  type: 'file' | 'folder';
-  content?: string;
-  children?: FileSystemNode[];
-}
-
-const initialFileSystem: FileSystemNode = {
-  id: 'root',
-  name: 'Home',
-  type: 'folder',
-  children: [
-    {
-      id: 'docs',
-      name: 'Documents',
-      type: 'folder',
-      children: [
-        { id: 'resume', name: 'Resume.pdf', type: 'file' },
-        { id: 'notes', name: 'Meeting Notes.txt', type: 'file', content: '- Discuss Q3 roadmap\n- AI agent integration' },
-      ],
-    },
-    {
-      id: 'pics',
-      name: 'Pictures',
-      type: 'folder',
-      children: [
-        { id: 'vacation', name: 'Vacation.jpg', type: 'file' },
-        { id: 'logo', name: 'Logo.png', type: 'file' },
-      ],
-    },
-    { id: 'readme', name: 'README.md', type: 'file', content: '# Welcome to your file system!' },
-  ],
-};
-
-const findNode = (node: FileSystemNode, id: string): FileSystemNode | null => {
-  if (node.id === id) return node;
-  if (node.children) {
-    for (const child of node.children) {
-      const found = findNode(child, id);
-      if (found) return found;
-    }
-  }
-  return null;
-};
-
-const addNodeToTree = (node: FileSystemNode, parentId: string, newNode: FileSystemNode): FileSystemNode => {
-    if (node.id === parentId) {
-        return { ...node, children: [...(node.children || []), newNode] };
-    }
-    if (node.children) {
-        return { ...node, children: node.children.map(child => addNodeToTree(child, parentId, newNode)) };
-    }
-    return node;
-};
-
-const deleteNodeFromTree = (node: FileSystemNode, nodeId: string): FileSystemNode => {
-    if (node.children) {
-        const newChildren = node.children
-            .filter(child => child.id !== nodeId)
-            .map(child => deleteNodeFromTree(child, nodeId));
-        return { ...node, children: newChildren };
-    }
-    return node;
-};
-
-const FileIcon: React.FC<{ type: 'folder' | 'file'; name: string }> = ({ type, name }) => {
+const FileIcon: React.FC<{ type: string }> = ({ type }) => {
   let iconName = 'draft';
-  if (type === 'folder') {
-    iconName = 'folder';
-  } else {
-    const ext = name.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'pdf': iconName = 'picture_as_pdf'; break;
-      case 'jpg': case 'jpeg': case 'png': case 'gif': iconName = 'image'; break;
-      case 'txt': case 'md': iconName = 'description'; break;
-      default: iconName = 'draft';
-    }
+  const ext = type.toLowerCase();
+  
+  switch (ext) {
+    case 'pdf':
+      iconName = 'picture_as_pdf';
+      break;
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+    case 'webp':
+      iconName = 'image';
+      break;
+    case 'txt':
+    case 'md':
+      iconName = 'description';
+      break;
+    case 'mp4':
+    case 'mov':
+    case 'avi':
+      iconName = 'movie';
+      break;
+    case 'mp3':
+    case 'wav':
+      iconName = 'audio_file';
+      break;
+    case 'zip':
+    case 'rar':
+      iconName = 'folder_zip';
+      break;
+    default:
+      iconName = 'draft';
   }
-  return <span className={`material-symbols-outlined ${type === 'folder' ? 'text-amber-400' : 'text-gray-400'}`}>{iconName}</span>;
+  
+  return <span className="material-symbols-outlined text-gray-400">{iconName}</span>;
 };
-
-const TreeNode: React.FC<{
-  node: FileSystemNode;
-  selectedFolderId: string;
-  onSelectFolder: (id: string) => void;
-  openFolders: Set<string>;
-  onToggleFolder: (id: string) => void;
-}> = ({ node, selectedFolderId, onSelectFolder, openFolders, onToggleFolder }) => {
-  if (node.type !== 'folder') return null;
-
-  const isOpen = openFolders.has(node.id);
-  const isSelected = selectedFolderId === node.id;
-
-  return (
-    <div className="text-sm">
-      <div 
-        onClick={() => onSelectFolder(node.id)}
-        className={`flex items-center gap-2 p-1.5 rounded-md cursor-pointer ${isSelected ? 'bg-accent/20 text-accent' : 'hover:bg-white/5'}`}
-      >
-        <span onClick={(e) => { e.stopPropagation(); onToggleFolder(node.id); }} className="w-4 h-4 flex items-center justify-center">
-            {node.children && node.children.length > 0 && (
-                <span className={`material-symbols-outlined text-base transition-transform ${isOpen ? 'rotate-90' : ''}`}>chevron_right</span>
-            )}
-        </span>
-        <FileIcon type="folder" name={node.name} />
-        <span>{node.name}</span>
-      </div>
-      {isOpen && node.children && (
-        <div className="pl-4 border-l border-white/10 ml-3">
-          {node.children.map(child => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              selectedFolderId={selectedFolderId}
-              onSelectFolder={onSelectFolder}
-              openFolders={openFolders}
-              onToggleFolder={onToggleFolder}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 
 const FilesApp: React.FC = () => {
-    const [fileSystem, setFileSystem] = useState<FileSystemNode>(initialFileSystem);
-    const [selectedFolderId, setSelectedFolderId] = useState<string>('root');
-    const [openFolders, setOpenFolders] = useState<Set<string>>(new Set(['root']));
+    const { user } = useAuth();
+    const [files, setFiles] = useState<FileMetadata[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const selectedFolder = useMemo(() => findNode(fileSystem, selectedFolderId), [fileSystem, selectedFolderId]);
+    const loadFiles = useCallback(async () => {
+        if (!user) return;
+        
+        try {
+            const data = await getUserFiles(user.id);
+            setFiles(data);
+        } catch (error) {
+            console.error('Failed to load files:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [user]);
 
-    const handleToggleFolder = (id: string) => {
-        setOpenFolders(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-                newSet.delete(id);
-            } else {
-                newSet.add(id);
+    useEffect(() => {
+        loadFiles();
+    }, [loadFiles]);
+
+    useEffect(() => {
+        if (!user) return;
+
+        // Subscribe to real-time updates
+        const channel = subscribeToAllChanges('file_metadata', (payload) => {
+            if (payload.eventType === 'INSERT') {
+                setFiles((prev) => [payload.new as FileMetadata, ...prev]);
+            } else if (payload.eventType === 'DELETE') {
+                setFiles((prev) => prev.filter((f) => f.id !== payload.old.id));
+            } else if (payload.eventType === 'UPDATE') {
+                setFiles((prev) =>
+                    prev.map((f) => (f.id === payload.new.id ? (payload.new as FileMetadata) : f))
+                );
             }
-            return newSet;
         });
-    };
-    
-    const handleCreate = (type: 'file' | 'folder') => {
-        const name = prompt(`Enter name for new ${type}:`);
-        if (name) {
-            const newNode: FileSystemNode = {
-                id: `${type}-${Date.now()}`,
-                name,
-                type,
-                children: type === 'folder' ? [] : undefined,
-            };
-            setFileSystem(prev => addNodeToTree(prev, selectedFolderId, newNode));
+
+        return () => {
+            channel.unsubscribe();
+        };
+    }, [user]);
+
+    const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFiles = event.target.files;
+        if (!selectedFiles || !user || uploading) return;
+
+        setUploading(true);
+        try {
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                await uploadUserFile(user.id, file);
+            }
+        } catch (error) {
+            console.error('Failed to upload file:', error);
+            alert('Failed to upload file. Please try again.');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
-    const handleDelete = (nodeId: string, nodeName: string) => {
-        if (confirm(`Are you sure you want to delete "${nodeName}"?`)) {
-            setFileSystem(prev => deleteNodeFromTree(prev, nodeId));
+    const handleDelete = async (file: FileMetadata) => {
+        if (!confirm(`Are you sure you want to delete "${file.name}"?`)) return;
+        
+        try {
+            await deleteUserFile(file.id, file.path);
+        } catch (error) {
+            console.error('Failed to delete file:', error);
+            alert('Failed to delete file. Please try again.');
         }
     };
+
+    const handleDownload = async (file: FileMetadata) => {
+        try {
+            const blob = await downloadUserFile(file);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to download file:', error);
+            alert('Failed to download file. Please try again.');
+        }
+    };
+
+    if (!user) {
+        return (
+            <div className="h-full w-full flex items-center justify-center bg-bg-secondary rounded-b-md text-white">
+                <p className="text-text-secondary">Please sign in to access Files</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="h-full w-full flex bg-bg-secondary rounded-b-md text-white">
-            <aside className="w-64 border-r border-border-color p-3 space-y-1 overflow-y-auto">
-                <TreeNode
-                    node={fileSystem}
-                    selectedFolderId={selectedFolderId}
-                    onSelectFolder={setSelectedFolderId}
-                    openFolders={openFolders}
-                    onToggleFolder={handleToggleFolder}
-                />
-            </aside>
-            <main className="flex-1 flex flex-col">
-                <header className="flex-shrink-0 p-3 border-b border-border-color flex justify-between items-center">
-                    <h2 className="font-semibold">{selectedFolder?.name || '...'}</h2>
-                    <div className="flex items-center gap-2">
-                        <button onClick={() => handleCreate('file')} className="px-2 py-1 text-xs font-semibold rounded-md bg-white/5 hover:bg-white/10 flex items-center gap-1"><span className="material-symbols-outlined text-base">add</span> New File</button>
-                        <button onClick={() => handleCreate('folder')} className="px-2 py-1 text-xs font-semibold rounded-md bg-white/5 hover:bg-white/10 flex items-center gap-1"><span className="material-symbols-outlined text-base">create_new_folder</span> New Folder</button>
-                    </div>
-                </header>
-                <div className="flex-grow p-4 overflow-y-auto">
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
-                        {selectedFolder?.children?.map(item => (
-                            <div key={item.id} className="group relative p-3 flex flex-col items-center justify-center text-center gap-2 rounded-lg hover:bg-white/5 cursor-pointer">
-                                <FileIcon type={item.type} name={item.name} />
-                                <p className="text-xs break-all">{item.name}</p>
-                                <button onClick={() => handleDelete(item.id, item.name)} className="absolute top-1 right-1 p-1 rounded-full bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="material-symbols-outlined text-sm">close</span>
-                                </button>
-                            </div>
-                        ))}
-                        {(!selectedFolder?.children || selectedFolder.children.length === 0) && (
-                            <p className="text-sm text-text-muted col-span-full text-center mt-8">This folder is empty.</p>
+        <div className="h-full w-full flex flex-col bg-bg-secondary rounded-b-md text-white">
+            <header className="flex-shrink-0 p-4 border-b border-border-color flex justify-between items-center">
+                <h2 className="font-semibold text-lg">My Files</h2>
+                <div className="flex items-center gap-2">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="file-upload"
+                    />
+                    <label
+                        htmlFor="file-upload"
+                        className={`px-3 py-2 text-sm font-semibold rounded-md bg-primary-blue hover:brightness-110 flex items-center gap-2 cursor-pointer transition-colors ${
+                            uploading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                        {uploading ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Uploading...
+                            </>
+                        ) : (
+                            <>
+                                <span className="material-symbols-outlined text-base">upload_file</span>
+                                Upload Files
+                            </>
                         )}
-                    </div>
+                    </label>
                 </div>
+            </header>
+            
+            <main className="flex-grow p-4 overflow-y-auto">
+                {loading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                ) : files.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-4">
+                        <span className="material-symbols-outlined text-6xl text-text-secondary">cloud_upload</span>
+                        <p className="text-text-secondary">No files yet. Upload your first file!</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {files.map((file) => {
+                            const ext = file.name.split('.').pop() || '';
+                            return (
+                                <div
+                                    key={file.id}
+                                    className="group relative p-4 flex flex-col items-center gap-3 rounded-lg border border-border-color bg-black/20 hover:border-primary-blue/50 transition-colors"
+                                >
+                                    <div className="w-16 h-16 flex items-center justify-center">
+                                        <FileIcon type={ext} />
+                                    </div>
+                                    <div className="flex-grow w-full text-center">
+                                        <p className="text-sm font-medium truncate" title={file.name}>
+                                            {file.name}
+                                        </p>
+                                        <p className="text-xs text-text-secondary mt-1">
+                                            {formatFileSize(file.size)}
+                                        </p>
+                                        <p className="text-xs text-text-secondary/60 mt-0.5">
+                                            {new Date(file.created_at).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 w-full">
+                                        <button
+                                            onClick={() => handleDownload(file)}
+                                            className="flex-1 px-2 py-1.5 text-xs font-semibold rounded-md bg-white/5 hover:bg-white/10 transition-colors"
+                                        >
+                                            Download
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(file)}
+                                            className="px-2 py-1.5 rounded-md bg-red-500/20 hover:bg-red-500/30 transition-colors"
+                                            title="Delete file"
+                                        >
+                                            <TrashIcon className="w-4 h-4 text-red-400" />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </main>
         </div>
     );
