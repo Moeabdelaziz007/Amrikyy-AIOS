@@ -12,7 +12,6 @@
 
  updates
 import { generateResponse } from './geminiService';
-=======
 import { geminiService } from '../packages/ai/src/index';
  main
 
