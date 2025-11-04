@@ -15,8 +15,10 @@
     "./mcp/client": "./src/mcp/client.ts"
   },
   "dependencies": {
+    "@auraos/common": "workspace:*",
     "@google/genai": "^1.28.0",
-    "@auraos/common": "workspace:*"
+    "winston": "^3.18.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

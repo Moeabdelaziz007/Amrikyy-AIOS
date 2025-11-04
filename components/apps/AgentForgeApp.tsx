@@ -1,19 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CustomAgent, SkillID } from '../../types';
 import { skills } from '../../data/skills';
-import { AgentForgeIcon, SparklesIcon, Trash2Icon } from '../Icons';
+import { AgentForgeIcon, SparklesIcon, TrashIcon } from '../Icons';
 import { suggestAgentPersona } from '../../services/geminiAdvancedService';
 import { useAuth } from '../../contexts/AuthContext';
-import { subscribeToAllChanges } from '../../packages/supabase/src';
-import { 
-  AgentConfig, 
-  getUserAgents, 
-  createAgent, 
-  deleteAgent 
-} from '../../services/agentService';
 import ConfirmationDialog from '../ConfirmationDialog';
 import { supabase } from '../../services/supabaseClient';
-import { useAuth } from '../../contexts/AuthContext';
 
 interface AgentForgeAppProps {
     onClose: () => void;
@@ -30,6 +22,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [isConfirmingDeploy, setIsConfirmingDeploy] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const listAgents = useCallback(async () => {
         if (!user) return;
@@ -43,6 +36,8 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
             setAgents(data.map((d: any) => d.config) || []);
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     }, [user]);
 
@@ -88,6 +83,16 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
     };
 
     const deleteAgent = async (agentId: string) => {
+        try {
+            const { error } = await supabase.from('agents').delete().eq('config->>id', agentId);
+            if (error) throw error;
+            setAgents(agents.filter(a => a.id !== agentId));
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleDeleteAgent = async (agentId: string) => {
         try {
             const { error } = await supabase.from('agents').delete().eq('config->>id', agentId);
             if (error) throw error;
@@ -194,7 +199,10 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                                 </div>
                             ))}
                         </div>
-                    </section>
+                    )}
+                </aside>
+                <main className="flex-grow p-6 overflow-y-auto">
+                    {/* Main content with form can be added here */}
                 </main>
                 
                 {/* Sidebar: Preview & Deploy */}

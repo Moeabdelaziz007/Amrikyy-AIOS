@@ -193,3 +193,6 @@ export const PlayIcon: React.FC<{className?: string}> = ({className}) => (<Mater
 
 /** Stop icon. */
 export const StopIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>stop</MaterialIcon>);
+
+/** Trash icon. */
+export const TrashIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>delete</MaterialIcon>);

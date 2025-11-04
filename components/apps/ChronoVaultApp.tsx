@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChronoVaultIcon, SparklesIcon, SendIcon, Trash2Icon, Edit3Icon, PlusCircleIcon, SearchIcon, TagIcon } from '../Icons';
+import { ChronoVaultIcon, SparklesIcon, SendIcon, /*Trash2Icon,*/ /*Edit3Icon,*/ /*PlusCircleIcon,*/ SearchIcon, TagIcon } from '../Icons';
 import { useAuth } from '../../contexts/AuthContext';
 import QuantumFoamBackground from '../QuantumFoamBackground';
 import { getRecentKnowledge, saveKnowledge, updateKnowledge, deleteKnowledge } from '../../services/knowledgeService';
