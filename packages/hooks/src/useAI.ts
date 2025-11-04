@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * AI Hook
  * React hook for AI interactions

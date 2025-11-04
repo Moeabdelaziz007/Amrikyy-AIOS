@@ -4,16 +4,16 @@
  */
 
 import { IMCPServer, Tool, ToolResponse } from './types';
-import { createLogger } from 'winston';
+import { createLogger, format, transports } from 'winston';
 
 const logger = createLogger({
   level: 'info',
-  format: require('winston').format.combine(
-    require('winston').format.timestamp(),
-    require('winston').format.json()
+  format: format.combine(
+    format.timestamp(),
+    format.json()
   ),
   transports: [
-    new (require('winston').transports.Console)()
+    new transports.Console()
   ]
 });
 

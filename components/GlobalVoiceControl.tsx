@@ -17,7 +17,7 @@ const GlobalVoiceControl: React.FC<GlobalVoiceControlProps> = ({ onCommand }) =>
     const recognitionRef = useRef<any>(null); // SpeechRecognition instance
 
     useEffect(() => {
-        // @ts-ignore
+        // @ts-expect-error - SpeechRecognition API types are not fully standardized across browsers
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             recognitionRef.current = new SpeechRecognition();

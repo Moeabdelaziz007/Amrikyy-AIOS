@@ -1,10 +1,2 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase URL or Anon Key is missing. Authentication features will be disabled.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Re-export from the canonical supabase client location
+export { supabase } from '../../services/supabaseClient';

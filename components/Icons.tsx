@@ -197,6 +197,9 @@ export const StopIcon: React.FC<{className?: string}> = ({className}) => (<Mater
 /** Trash icon. */
 export const TrashIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>delete</MaterialIcon>);
 
+/** Download icon. */
+export const DownloadIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>download</MaterialIcon>);
+
 /** Edit icon. */
 export const EditIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>edit</MaterialIcon>);
 
