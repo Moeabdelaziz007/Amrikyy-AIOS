@@ -199,33 +199,7 @@ const FilesApp: React.FC = () => {
                         </label>
                     </div>
                 </header>
-                <div className="flex-grow p-4 overflow-y-auto">
-                    {isLoading && <p>Loading...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4">
-                        {files.map(item => (
-                            <div key={item.id} className="group relative p-3 flex flex-col items-center justify-center text-center gap-2 rounded-lg hover:bg-white/5 cursor-pointer">
-                                <FileIcon type='file' name={item.name} />
-                                <p className="text-xs break-all">{item.name}</p>
-                                <p className="text-xs text-text-secondary">{formatSize(item.size)}</p>
-                                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleDownloadFile(item)} className="p-1 rounded-full bg-blue-500/80 text-white">
-                                        <span className="material-symbols-outlined text-sm">download</span>
-                                    </button>
-                                    <button onClick={() => handleDeleteFile(item)} className="p-1 rounded-full bg-red-500/80 text-white">
-                                        <span className="material-symbols-outlined text-sm">close</span>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                        {!isLoading && files.length === 0 && (
-                            <p className="text-sm text-text-muted col-span-full text-center mt-8">This folder is empty.</p>
-                        )}
-                    </label>
-                </div>
-            </header>
-
-            <main className="flex-grow p-4 overflow-y-auto">
+                <main className="flex-grow p-4 overflow-y-auto">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
                         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -278,6 +252,7 @@ const FilesApp: React.FC = () => {
                         })}
                     </div>
                 )}
+                </main>
             </main>
         </div>
     );
