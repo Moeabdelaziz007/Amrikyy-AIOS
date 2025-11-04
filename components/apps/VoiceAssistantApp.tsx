@@ -23,18 +23,10 @@ const VoiceAssistantApp: React.FC<VoiceAssistantAppProps> = ({ onExecuteWorkflow
 
         const vs = voiceServiceRef.current;
 
- updates
-    const processAudio = async () => {
-        if (audioChunksRef.current.length === 0) {
-            setVoiceState('idle');
-            return;
-        }
-=======
         const handleListeningStart = () => setVoiceState('listening');
         const handleTranscription = (e: any) => setTranscription(e.data.text);
         const handleError = (e: any) => setError(e.data.error.message || 'An unknown error occurred.');
         const handleListeningEnd = () => setVoiceState('idle');
- main
 
         vs.on('listening-start', handleListeningStart);
         vs.on('transcription-complete', handleTranscription);
@@ -60,9 +52,13 @@ const VoiceAssistantApp: React.FC<VoiceAssistantAppProps> = ({ onExecuteWorkflow
             setTranscription('');
             try {
                 const command = await voiceServiceRef.current.processVoiceInput();
-                const workflow = await generateWorkflowFromPrompt(command.text);
-                onExecuteWorkflow(workflow);
-                setVoiceState('done');
+                if(command.text){
+                    const workflow = await generateWorkflowFromPrompt(command.text);
+                    onExecuteWorkflow(workflow);
+                    setVoiceState('done');
+                } else {
+                    setVoiceState('idle');
+                }
             } catch (e: any) {
                 // Error is already handled by the event listener
                 console.error(e);

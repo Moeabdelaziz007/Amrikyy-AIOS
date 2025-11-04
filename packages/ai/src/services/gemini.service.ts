@@ -7,6 +7,8 @@ import { GoogleGenAI, Content, GenerationConfig } from "@google/genai";
 // Re-export the Content type for external use, aligning with the library
 export type { Content };
 
+import { AIMessage, AIRequestOptions, AIResponse } from './index';
+
 export class GeminiService {
   private ai: GoogleGenAI;
 
@@ -23,34 +25,38 @@ export class GeminiService {
   /**
    * Generates a text response from the Gemini model.
    *
-   * @param {string} prompt - The user's input prompt.
-   * @param {Content[]} history - An array of previous messages in the conversation.
-   * @param {Partial<GenerationConfig>} generationConfig - Optional configuration for content generation.
-   * @param {string} systemInstruction - Optional system instruction to guide the model's behavior.
-   * @returns {Promise<string>} A promise that resolves to the AI's generated text response.
+   * @param {AIMessage[]} messages - An array of messages in the conversation.
+   * @param {AIRequestOptions} [options={}] - Optional configuration for content generation.
+   * @returns {Promise<AIResponse>} A promise that resolves to the AI's response.
    */
-  async generateText(
-    prompt: string,
-    history: Content[],
-    generationConfig: Partial<GenerationConfig> = {},
-    systemInstruction?: string
-  ): Promise<string> {
+  async chat(
+    messages: AIMessage[],
+    options: AIRequestOptions = {}
+  ): Promise<AIResponse> {
     try {
-      const model = this.ai.getGenerativeModel({
-        model: 'gemini-1.5-flash', // Using a standard, available model.
-        ...(systemInstruction && { systemInstruction }),
-        ...generationConfig,
+      const { history, systemInstruction, prompt } = this.transformMessages(messages);
+
+      const generationConfig: Partial<GenerationConfig> = {
+        ...(options.temperature && { temperature: options.temperature }),
+        ...(options.maxTokens && { maxOutputTokens: options.maxTokens }),
+      };
+
+      const chatSession = this.ai.chats.create({
+        model: 'gemini-1.5-flash',
+        history,
+        config: {
+          ...generationConfig,
+          ...(systemInstruction && { systemInstruction }),
+        },
       });
 
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessage(prompt);
-      const response = result.response;
-      const text = response.text();
+      const result = await chatSession.sendMessage({ message: prompt });
+      const text = result.text;
 
       if (!text) {
         throw new Error("The AI returned an empty response. This may be due to content policies or an internal error.");
       }
-      return text;
+      return { content: text, model: 'gemini-1.5-flash' };
     } catch (error) {
       console.error("Error calling Gemini API:", error);
       if (error instanceof Error) {
@@ -60,22 +66,31 @@ export class GeminiService {
     }
   }
 
-  /**
-   * Chat method for BaseAIService interface
-   */
-  async chat(messages: any[], options?: any): Promise<any> {
-    const history = messages.slice(0, -1).map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
-    const lastMessage = messages[messages.length - 1];
-    const prompt = lastMessage.content;
-    
-    const text = await this.generateText(prompt, history, options || {});
-    return {
-      content: text,
-      model: 'gemini-1.5-flash'
-    };
+  private transformMessages(messages: AIMessage[]): { history: Content[], systemInstruction?: string, prompt: string } {
+    const history: Content[] = [];
+    let systemInstruction: string | undefined;
+    let prompt = "";
+
+    messages.forEach((msg, index) => {
+      if (msg.role === 'system') {
+        systemInstruction = msg.content;
+        return;
+      }
+      if (index === messages.length - 1 && msg.role === 'user') {
+        prompt = msg.content;
+      } else {
+        history.push({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }],
+        });
+      }
+    });
+
+    if (!prompt) {
+      throw new Error("The last message in the array must be from the 'user' role.");
+    }
+
+    return { history, systemInstruction, prompt };
   }
 
   // Keeping the other methods as placeholders for now
