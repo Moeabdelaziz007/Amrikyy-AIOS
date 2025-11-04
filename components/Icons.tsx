@@ -187,11 +187,9 @@ export const TrendingUpIcon: React.FC<{className?: string}> = ({className}) => (
 export const ThumbsUpIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>thumb_up</MaterialIcon>);
 /** Thumbs down icon. */
 export const ThumbsDownIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>thumb_down</MaterialIcon>);
-/** Trash icon. */
-export const Trash2Icon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>delete</MaterialIcon>);
-/** Edit icon. */
-export const Edit3Icon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>edit</MaterialIcon>);
-/** Add circle icon. */
-export const PlusCircleIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>add_circle</MaterialIcon>);
-/** Tag icon. */
-export const TagIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>tag</MaterialIcon>);
+
+/** Play icon. */
+export const PlayIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>play_arrow</MaterialIcon>);
+
+/** Stop icon. */
+export const StopIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>stop</MaterialIcon>);

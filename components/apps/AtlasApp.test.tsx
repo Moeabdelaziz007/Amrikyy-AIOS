@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import AtlasApp from './AtlasApp';
 import * as geminiAdvancedService from '../../services/geminiAdvancedService';
-import * as geminiService from '../../services/geminiService';
+import { geminiService } from '../../packages/ai/src/index';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 // Mock contexts
@@ -15,8 +15,10 @@ vi.mock('../../services/geminiAdvancedService', () => ({
   getFinancialNews: vi.fn(),
   getFinancialAnalysis: vi.fn(),
 }));
-vi.mock('../../services/geminiService', () => ({
-  generateResponse: vi.fn(),
+vi.mock('../../packages/ai/src/index', () => ({
+  geminiService: {
+    generateText: vi.fn(),
+  },
 }));
 
 describe('AtlasApp', () => {
@@ -35,7 +37,7 @@ describe('AtlasApp', () => {
       keyMetrics: [{ name: 'Metric 1', value: '100' }],
       recentNews: 'Recent News',
     });
-    (geminiService.generateResponse as vi.Mock).mockResolvedValue('AI Chat Response');
+    (geminiService.generateText as vi.Mock).mockResolvedValue('AI Chat Response');
 
     vi.useFakeTimers();
   });
@@ -109,9 +111,11 @@ describe('AtlasApp', () => {
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
 
     await waitFor(() => {
-      expect(geminiService.generateResponse).toHaveBeenCalledWith(
+      expect(geminiService.generateText).toHaveBeenCalledWith(
         'What is the current market trend?',
-        expect.arrayContaining([expect.objectContaining({ parts: [{ text: expect.any(String) }] })])
+        expect.arrayContaining([expect.objectContaining({ parts: [{ text: expect.any(String) }] })]),
+        {},
+        expect.any(String)
       );
       expect(screen.getByText(/AI Chat Response/i)).toBeInTheDocument();
       expect(screen.getByText(/\*disclaimer: i am an ai assistant/i)).toBeInTheDocument();

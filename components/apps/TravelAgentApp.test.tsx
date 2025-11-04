@@ -34,7 +34,7 @@ vi.mock('@google/genai', async () => {
         id: 'mock-flight-call-id',
       };
       return Promise.resolve<GenerateContentResponse>({
-        // @ts-ignore - Minimal mock for testing, ignoring some optional properties
+        // @ts-expect-error – The mock is intentionally minimal to test specific behavior.
         candidates: [{
           content: { parts: [] },
           functionCalls: [mockFunctionCall],
@@ -44,7 +44,7 @@ vi.mock('@google/genai', async () => {
     }
     // Fallback for other generateContent calls (e.g., from other services)
     return Promise.resolve<GenerateContentResponse>({
-      // @ts-ignore
+      // @ts-expect-error – The mock is intentionally minimal to test specific behavior.
       candidates: [{ content: { parts: [{ text: 'Mock AI response' }] } }],
       text: 'Mock AI response',
     });

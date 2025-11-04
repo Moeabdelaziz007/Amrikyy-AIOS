@@ -1,7 +1,7 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { transcribeAudio, generateWorkflowFromPrompt } from '../../services/geminiAdvancedService';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { generateWorkflowFromPrompt } from '../../services/geminiAdvancedService';
 import { Workflow } from '../../types';
-import { fileToBase64 } from '../../utils/fileUtils';
+import { VoiceService } from '../../packages/voice-service/src/index';
 import VoiceHologram from '../VoiceHologram';
 import { SparklesIcon } from '../Icons';
 
@@ -14,71 +14,62 @@ const VoiceAssistantApp: React.FC<VoiceAssistantAppProps> = ({ onExecuteWorkflow
     const [voiceState, setVoiceState] = useState<VoiceState>('idle');
     const [transcription, setTranscription] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
+    const voiceServiceRef = useRef<VoiceService | null>(null);
 
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-            mediaRecorderRef.current.ondataavailable = (event) => {
-                audioChunksRef.current.push(event.data);
-            };
-            mediaRecorderRef.current.onstop = processAudio;
-            audioChunksRef.current = [];
-            mediaRecorderRef.current.start();
-            setVoiceState('listening');
-            setTranscription('');
-            setError(null);
-        } catch (err) {
-            setError('Microphone access denied. Please allow microphone permissions.');
-            console.error(err);
+    useEffect(() => {
+        if (!voiceServiceRef.current) {
+            voiceServiceRef.current = new VoiceService();
         }
-    };
 
-    const stopRecording = () => {
-        if (mediaRecorderRef.current && voiceState === 'listening') {
-            mediaRecorderRef.current.stop();
-             mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-            setVoiceState('processing');
-        }
-    };
+        const vs = voiceServiceRef.current;
 
+ updates
     const processAudio = async () => {
         if (audioChunksRef.current.length === 0) {
             setVoiceState('idle');
             return;
+        }
+=======
+        const handleListeningStart = () => setVoiceState('listening');
+        const handleTranscription = (e: any) => setTranscription(e.data.text);
+        const handleError = (e: any) => setError(e.data.error.message || 'An unknown error occurred.');
+        const handleListeningEnd = () => setVoiceState('idle');
+ main
+
+        vs.on('listening-start', handleListeningStart);
+        vs.on('transcription-complete', handleTranscription);
+        vs.on('error', handleError);
+        vs.on('listening-end', handleListeningEnd);
+
+        return () => {
+            vs.off('listening-start', handleListeningStart);
+            vs.off('transcription-complete', handleTranscription);
+            vs.off('error', handleError);
+            vs.off('listening-end', handleListeningEnd);
         };
+    }, []);
 
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const audioFile = new File([audioBlob], "recording.webm", { type: audioBlob.type });
-        
-        try {
-            // 1. Transcribe audio
-            const base64Audio = await fileToBase64(audioFile);
-            const transcript = await transcribeAudio(base64Audio.split(',')[1], audioFile.type);
-            setTranscription(transcript);
+    const handleButtonClick = async () => {
+        if (!voiceServiceRef.current) return;
 
-            // 2. Generate workflow from transcription
-            const workflow = await generateWorkflowFromPrompt(transcript);
-            
-            // 3. Execute workflow
-            onExecuteWorkflow(workflow);
-            setVoiceState('done');
-        } catch(e) {
-            setError("Failed to process command.");
-            setVoiceState('idle');
-            console.error(e);
+        if (voiceState === 'listening') {
+            voiceServiceRef.current.stopListening();
+            setVoiceState('processing');
+        } else {
+            setError(null);
+            setTranscription('');
+            try {
+                const command = await voiceServiceRef.current.processVoiceInput();
+                const workflow = await generateWorkflowFromPrompt(command.text);
+                onExecuteWorkflow(workflow);
+                setVoiceState('done');
+            } catch (e: any) {
+                // Error is already handled by the event listener
+                console.error(e);
+                setVoiceState('idle');
+            }
         }
     };
-
-    const handleButtonClick = () => {
-        if (voiceState === 'listening') {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    }
 
     const getButtonText = () => {
         switch (voiceState) {

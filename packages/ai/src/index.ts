@@ -3,9 +3,9 @@
  * AI services and MCP integration.
  */
 
-// Export MCP types and classes
-export { BaseMCPServer } from './mcp/server';
-export { MCPGateway } from './mcp/gateway';
+// Export only client-safe MCP types and classes
+// export { BaseMCPServer } from './mcp/server';  // Server-side
+// export { MCPGateway } from './mcp/gateway';    // Server-side
 export { MCPClient } from './mcp/client';
 export type { Tool, ToolResponse, IMCPServer } from './mcp/types';
 
