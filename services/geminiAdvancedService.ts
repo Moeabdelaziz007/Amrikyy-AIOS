@@ -1311,3 +1311,148 @@ export async function analyzeScreenshot(
         `Analyze this screenshot. ${context}\n\nProvide a detailed analysis of what you see and any relevant insights.`
     );
 }
+
+/**
+ * Gemini Code Execution API
+ * Based on: https://ai.google.dev/gemini-api/docs/code-execution
+ * 
+ * Execute code in a sandboxed environment and return results
+ */
+export async function executeCode(
+    code: string,
+    language: 'python' | 'javascript' = 'python'
+): Promise<{ output: string; error?: string }> {
+    if (!API_KEY) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+    try {
+        const prompt = language === 'python' 
+            ? `Execute this Python code and return the output:\n\`\`\`python\n${code}\n\`\`\``
+            : `Execute this JavaScript code and return the output:\n\`\`\`javascript\n${code}\n\`\`\``;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp',
+            contents: prompt,
+            config: {
+                tools: [{ codeExecution: {} }]
+            }
+        });
+
+        return {
+            output: response.text
+        };
+    } catch (error: any) {
+        console.error('Code execution error:', error);
+        return {
+            output: '',
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Gemini Music Generation API
+ * Based on: https://ai.google.dev/gemini-api/docs/music-generation
+ * 
+ * Generate music from text descriptions
+ */
+export async function generateMusic(
+    prompt: string,
+    duration: number = 10
+): Promise<{ audioUrl: string; description: string }> {
+    if (!API_KEY) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+    try {
+        // Note: This is a placeholder for the actual music generation API
+        // The actual implementation will depend on Google's final API spec
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp',
+            contents: `Generate a music description for: ${prompt}. Duration: ${duration} seconds.`,
+        });
+
+        return {
+            audioUrl: '', // Placeholder - actual API will return audio URL
+            description: response.text
+        };
+    } catch (error: any) {
+        console.error('Music generation error:', error);
+        throw new Error(`Failed to generate music: ${error.message}`);
+    }
+}
+
+/**
+ * Gemini Live API - Real-time audio/video interactions
+ * Based on: https://ai.google.dev/gemini-api/docs/live
+ * 
+ * Start a live session for real-time interactions
+ */
+export async function startLiveSession(): Promise<{ sessionId: string; status: string }> {
+    if (!API_KEY) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    // Note: This is a placeholder for the actual Live API
+    // The actual implementation will use WebSocket or similar real-time protocol
+    return {
+        sessionId: `live-${Date.now()}`,
+        status: 'ready'
+    };
+}
+
+/**
+ * Process live audio input
+ */
+export async function processLiveAudio(
+    audioData: Blob,
+    sessionId: string
+): Promise<{ text: string; response: string }> {
+    if (!API_KEY) {
+        throw new Error('Gemini API key not configured');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+    try {
+        // Convert blob to base64
+        const base64Audio = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                resolve(result.split(',')[1]);
+            };
+            reader.readAsDataURL(audioData);
+        });
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-exp',
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        {
+                            inlineData: {
+                                mimeType: 'audio/webm',
+                                data: base64Audio
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return {
+            text: 'Audio transcribed',
+            response: response.text
+        };
+    } catch (error: any) {
+        console.error('Live audio processing error:', error);
+        throw new Error(`Failed to process audio: ${error.message}`);
+    }
+}
