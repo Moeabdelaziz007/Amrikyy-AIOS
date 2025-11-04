@@ -9,7 +9,6 @@ import searchRouter from './routes/search.js';
 import gmailRouter from './routes/gmail.js';
 import calendarRouter from './routes/calendar.js';
 import workflowsRouter from './routes/workflows.js';
-import julesRouter from './routes/jules.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 
@@ -34,7 +33,6 @@ app.use('/api/search', searchRouter);
 app.use('/api/gmail', gmailRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/workflows', workflowsRouter);
-app.use('/api/jules', julesRouter);
 
 
 // Create HTTP server

@@ -78,22 +78,22 @@ export class WorkflowEngine extends EventEmitter {
 
      switch (action.type) {
        case 'http_request':
-         result = await this.executeHttpRequest(action, context);
+         result = await this.executeHttpRequest(action);
          break;
        case 'email':
-         result = await this.executeEmail(action, context);
+         result = await this.executeEmail(action);
          break;
        case 'notification':
-         result = await this.executeNotification(action, context);
+         result = await this.executeNotification(action);
          break;
        case 'database':
-         result = await this.executeDatabase(action, context);
+         result = await this.executeDatabase(action);
          break;
        case 'ai_task':
-         result = await this.executeAiTask(action, context);
+         result = await this.executeAiTask(action);
          break;
        case 'custom':
-         result = await this.executeCustom(action, context);
+         result = await this.executeCustom(action);
          break;
        default:
          throw new Error(`Unknown action type: ${action.type}`);
@@ -111,37 +111,37 @@ export class WorkflowEngine extends EventEmitter {
  /**
   * Action executors (to be implemented)
   */
- private async executeHttpRequest(action: Action, _context: ExecutionContext): Promise<any> {
+ private async executeHttpRequest(action: Action): Promise<any> {
    const { url, method, headers, body } = action.config;
    const response = await fetch(url, { method, headers, body: JSON.stringify(body) });
    return response.json();
  }
 
- private async executeEmail(action: Action, _context: ExecutionContext): Promise<any> {
+ private async executeEmail(action: Action): Promise<any> {
    // TODO: Integrate with email service
    console.log('Sending email:', action.config);
    return { sent: true };
  }
 
- private async executeNotification(action: Action, _context: ExecutionContext): Promise<any> {
+ private async executeNotification(action: Action): Promise<any> {
    // TODO: Integrate with notification system
    console.log('Sending notification:', action.config);
    return { sent: true };
  }
 
- private async executeDatabase(action: Action, _context: ExecutionContext): Promise<any> {
+ private async executeDatabase(action: Action): Promise<any> {
    // TODO: Integrate with Supabase
    console.log('Database operation:', action.config);
    return { success: true };
  }
 
- private async executeAiTask(action: Action, _context: ExecutionContext): Promise<any> {
+ private async executeAiTask(action: Action): Promise<any> {
    // TODO: Integrate with @auraos/ai package
    console.log('AI task:', action.config);
    return { result: 'AI response' };
  }
 
- private async executeCustom(action: Action, _context: ExecutionContext): Promise<any> {
+ private async executeCustom(action: Action): Promise<any> {
    // TODO: Execute custom function
    console.log('Custom action:', action.config);
    return { success: true };

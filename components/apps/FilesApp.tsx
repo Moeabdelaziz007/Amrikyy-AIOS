@@ -15,7 +15,7 @@ interface FileMetadata {
 
 const BUCKET_NAME = 'user_files';
 
-const FileIcon: React.FC<{ type: 'folder' | 'file'; name: string }> = ({ type, name }) => {
+const FileIcon: React.FC<{ type: string }> = ({ type }) => {
   let iconName = 'draft';
   const ext = type.toLowerCase();
   
@@ -51,8 +51,9 @@ const FileIcon: React.FC<{ type: 'folder' | 'file'; name: string }> = ({ type, n
       iconName = 'draft';
   }
   
-  return <span className="material-symbols-outlined text-gray-400">{iconName}</span>;
+  return <span className="material-symbols-outlined text-gray-400 text-5xl">{iconName}</span>;
 };
+
 
 const FilesApp: React.FC = () => {
     const { user } = useAuth();
@@ -169,7 +170,6 @@ const FilesApp: React.FC = () => {
         return `${(size / 1048576).toFixed(1)} MB`;
     }
 
-    // This is a simplified folder navigation. A real app would need a more robust tree structure.
     const folders = useMemo(() => {
         const folderSet = new Set<string>();
         files.forEach(file => {
