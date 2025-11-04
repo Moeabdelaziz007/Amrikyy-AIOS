@@ -11,3 +11,4 @@ export * from './useTTS';
 export * from './useRealTimeData';
 export * from './useSound';
 export * from './useTaskManager';
+export * from './useWorkflowBuilder';
