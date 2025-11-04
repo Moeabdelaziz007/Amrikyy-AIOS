@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-import { Workflow, WorkflowExecution } from '../../packages/automation/src/index.js';
+import { Workflow, WorkflowExecution } from '../../../packages/automation/dist/index.js';
 
 export async function saveWorkflow(workflow: Omit<Workflow, 'createdAt' | 'updatedAt'>): Promise<Workflow> {
  const { data, error } = await supabase
