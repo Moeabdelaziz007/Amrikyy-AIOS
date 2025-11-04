@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { supabase } from '../services/supabase'; // Placeholder for Supabase client
+import { supabase } from '../services/supabase.js'; // Placeholder for Supabase client
 
 export interface AuthenticatedRequest extends Request {
   user?: any; // Define a more specific type for the user object
