@@ -13,11 +13,17 @@ export class GeminiService {
   private ai: GoogleGenAI;
 
   constructor() {
-    // In a browser environment, API keys are exposed. For production,
-    // this should be handled via a backend proxy.
-    const apiKey = import.meta.env.VITE_API_KEY;
+    // Support both frontend (Vite) and backend (Node.js) environments
+    // In frontend/Vite: uses import.meta.env.VITE_API_KEY
+    // In backend/Node.js: uses process.env.GEMINI_API_KEY
+    const apiKey = typeof import.meta !== 'undefined' && import.meta.env
+      ? import.meta.env.VITE_API_KEY
+      : (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
+    
     if (!apiKey) {
-      throw new Error("Gemini API key not found. Please set the VITE_API_KEY environment variable.");
+      throw new Error(
+        "Gemini API key not found. Please set VITE_API_KEY (frontend) or GEMINI_API_KEY (backend) environment variable."
+      );
     }
     this.ai = new GoogleGenAI({ apiKey });
   }
