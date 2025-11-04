@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChronoVaultIcon, SparklesIcon, SendIcon, /*Trash2Icon,*/ /*Edit3Icon,*/ /*PlusCircleIcon,*/ SearchIcon, TagIcon } from '../Icons';
+import { ChronoVaultIcon, SparklesIcon, SendIcon, TrashIcon, EditIcon, AddIcon, SearchIcon, TagIcon } from '../Icons';
 import { useAuth } from '../../contexts/AuthContext';
 import QuantumFoamBackground from '../QuantumFoamBackground';
 import { getRecentKnowledge, saveKnowledge, updateKnowledge, deleteKnowledge } from '../../services/knowledgeService';
@@ -160,8 +160,8 @@ const ChronoVaultApp: React.FC = () => {
                                     <div className="flex justify-between items-center text-xs text-text-secondary mt-2">
                                         <span>{new Date(entry.created_at).toLocaleDateString()}</span>
                                         <div className="flex gap-3">
-                                            <button onClick={() => setEditingEntry(entry)} className="hover:text-primary-cyan"><Edit3Icon size={16}/></button>
-                                             <button onClick={() => handleDeleteKnowledge(entry.id)} className="hover:text-primary-pink"><Trash2Icon size={16}/></button>
+                                             <button onClick={() => setEditingEntry(entry)} className="hover:text-primary-cyan"><EditIcon/></button>
+                                              <button onClick={() => handleDeleteKnowledge(entry.id)} className="hover:text-primary-pink"><TrashIcon/></button>
                                         </div>
                                     </div>
                                 </div>
@@ -171,7 +171,7 @@ const ChronoVaultApp: React.FC = () => {
                 </main>
                  <aside className="w-full md:w-80 flex-shrink-0 bg-black/30 backdrop-blur-sm p-4 md:p-6 border-t md:border-t-0 md:border-l border-white/10 overflow-y-auto">
                     <KnowledgeForm
-                        onSubmit={editingEntry ? (d) => updateKnowledge(editingEntry.id, d) : (d) => saveKnowledge(d.title, d.content, d.tags)}
+                         onSubmit={editingEntry ? (d) => handleUpdateKnowledge(editingEntry.id, d) : (d) => handleSaveKnowledge(d.title, d.content, d.tags)}
                         initialData={editingEntry}
                         onCancel={() => setEditingEntry(null)}
                         key={editingEntry?.id || 'new'}
@@ -207,7 +207,7 @@ const KnowledgeForm: React.FC<KnowledgeFormProps> = ({ onSubmit, initialData, on
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl font-bold font-display mb-3 flex items-center gap-2">
-                {initialData ? <Edit3Icon/> : <PlusCircleIcon/>}
+                 {initialData ? <EditIcon/> : <AddIcon/>}
                 {initialData ? 'Edit Entry' : 'Add New Knowledge'}
             </h2>
             <div>
