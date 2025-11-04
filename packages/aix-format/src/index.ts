@@ -1,22 +1,71 @@
 /**
  * @Moeabdelaziz007/aix-format
- * AIX (Agent Intelligence eXchange) Format
+ * AIX (Agent Intelligence eXchange) Format - All-in-One
  * 
  * Created by Mohamed Hossameldin Abdelaziz
  * Part of Amrikyy AI OS
  * 
- * AIX is a standardized YAML-based format for defining AI agents with:
- * - Metadata and versioning
- * - Persona and behavior configuration
- * - Skills and capabilities
- * - Evolutionary learning parameters
- * - Memory management
- * - API integrations
- * - Security constraints
+ * Complete AIX format implementation with:
+ * - Parser & Generator
+ * - Easy Builder API
+ * - Templates & Presets
+ * - Validation
+ * - All utilities in one file
  */
 
 import { parse as parseYAML, stringify as stringifyYAML } from 'yaml';
 import { z } from 'zod';
+
+// ============================================
+// CONSTANTS & PRESETS
+// ============================================
+
+export const MCP_PRESETS = {
+  'content-creator': ['text_generation', 'image_analysis', 'content_planning', 'seo_optimization', 'social_media'],
+  'data-analyst': ['data_analysis', 'visualization', 'statistical_computing', 'spreadsheet_processing', 'report_generation'],
+  'developer': ['code_generation', 'code_analysis', 'debugging', 'documentation', 'git_operations'],
+  'researcher': ['web_search', 'document_analysis', 'data_extraction', 'summarization', 'citation_management'],
+  'creative': ['image_generation', 'music_composition', 'creative_writing', 'brainstorming', 'style_transfer'],
+  'support': ['conversation', 'problem_solving', 'knowledge_base', 'ticket_management', 'sentiment_analysis'],
+  'travel': ['flight_search', 'hotel_booking', 'itinerary_planning', 'maps_navigation', 'translation'],
+  'finance': ['budget_analysis', 'expense_tracking', 'investment_advice', 'market_analysis', 'reporting'],
+} as const;
+
+export const PERSONA_PRESETS = {
+  friendly: 'You are a warm, approachable AI assistant. Use casual language, emoji when appropriate, and maintain a positive, encouraging tone.',
+  professional: 'You are a professional AI assistant. Maintain a formal tone, provide structured responses, and focus on efficiency and accuracy.',
+  creative: 'You are a creative AI assistant. Think outside the box, suggest innovative ideas, and embrace experimentation and artistic expression.',
+  technical: 'You are a technical AI expert. Provide detailed, precise information with technical accuracy. Include code examples and best practices.',
+  analytical: 'You are an analytical AI assistant. Break down complex problems systematically, provide data-driven insights, and explain reasoning clearly.',
+  empathetic: 'You are an empathetic AI assistant. Show understanding and compassion, actively listen, and provide supportive, thoughtful responses.',
+} as const;
+
+export const GENE_PRESETS = {
+  balanced: [
+    { id: 'responsiveness', name: 'Response Speed', value: 0.8, weight: 0.8 },
+    { id: 'creativity', name: 'Creative Thinking', value: 0.7, weight: 0.7 },
+    { id: 'precision', name: 'Accuracy', value: 0.8, weight: 0.8 },
+    { id: 'adaptability', name: 'Adaptability', value: 0.7, weight: 0.7 },
+  ],
+  fast: [
+    { id: 'responsiveness', name: 'Response Speed', value: 0.95, weight: 0.9 },
+    { id: 'creativity', name: 'Creative Thinking', value: 0.5, weight: 0.5 },
+    { id: 'precision', name: 'Accuracy', value: 0.7, weight: 0.6 },
+    { id: 'adaptability', name: 'Adaptability', value: 0.8, weight: 0.7 },
+  ],
+  creative: [
+    { id: 'responsiveness', name: 'Response Speed', value: 0.7, weight: 0.6 },
+    { id: 'creativity', name: 'Creative Thinking', value: 0.95, weight: 0.9 },
+    { id: 'precision', name: 'Accuracy', value: 0.6, weight: 0.5 },
+    { id: 'adaptability', name: 'Adaptability', value: 0.9, weight: 0.8 },
+  ],
+  precise: [
+    { id: 'responsiveness', name: 'Response Speed', value: 0.6, weight: 0.6 },
+    { id: 'creativity', name: 'Creative Thinking', value: 0.5, weight: 0.5 },
+    { id: 'precision', name: 'Accuracy', value: 0.95, weight: 0.95 },
+    { id: 'adaptability', name: 'Adaptability', value: 0.7, weight: 0.7 },
+  ],
+} as const;
 
 // ============================================
 // SCHEMA DEFINITIONS
@@ -381,5 +430,272 @@ export default {
   validate: validateAIX,
   download: downloadAIX,
   createFilename: createAIXFilename,
+  extractMeta,
+};
+
+// ============================================
+// BUILDER API - Easy Agent Creation
+// ============================================
+
+export class AIXBuilder {
+  private config: Partial<AIXGeneratorConfig> = {
+    skillIDs: [],
+    tags: [],
+  };
+
+  /** Set agent name (required) */
+  name(name: string): this {
+    this.config.name = name;
+    return this;
+  }
+
+  /** Set agent role (required) */
+  role(role: string): this {
+    this.config.role = role;
+    return this;
+  }
+
+  /** Set description */
+  description(description: string): this {
+    this.config.description = description;
+    return this;
+  }
+
+  /** Set icon emoji */
+  icon(icon: string): this {
+    this.config.icon = icon;
+    return this;
+  }
+
+  /** Set custom persona instructions */
+  persona(instructions: string): this {
+    this.config.persona = instructions;
+    return this;
+  }
+
+  /** Use preset persona */
+  quickPersona(type: keyof typeof PERSONA_PRESETS): this {
+    this.config.persona = PERSONA_PRESETS[type];
+    return this;
+  }
+
+  /** Set AI model */
+  model(model: string): this {
+    this.config.model = model;
+    return this;
+  }
+
+  /** Set temperature (0-2) */
+  temperature(temp: number): this {
+    this.config.temperature = Math.max(0, Math.min(2, temp));
+    return this;
+  }
+
+  /** Quick creativity presets */
+  creativity(level: 'low' | 'medium' | 'high' | 'maximum'): this {
+    const temps = { low: 0.3, medium: 0.7, high: 1.2, maximum: 2.0 };
+    this.config.temperature = temps[level];
+    return this;
+  }
+
+  /** Set author */
+  author(author: string): this {
+    this.config.author = author;
+    return this;
+  }
+
+  /** Set framework */
+  framework(framework: string): this {
+    this.config.framework = framework;
+    return this;
+  }
+
+  /** Add single MCP tool */
+  mcp(tool: string): this {
+    if (!this.config.skillIDs) this.config.skillIDs = [];
+    this.config.skillIDs.push(tool);
+    return this;
+  }
+
+  /** Add multiple MCP tools */
+  mcps(...tools: string[]): this {
+    tools.forEach(tool => this.mcp(tool));
+    return this;
+  }
+
+  /** Use MCP preset */
+  mcpPreset(preset: keyof typeof MCP_PRESETS): this {
+    return this.mcps(...MCP_PRESETS[preset]);
+  }
+
+  /** Add tag */
+  tag(tag: string): this {
+    if (!this.config.tags) this.config.tags = [];
+    this.config.tags.push(tag);
+    return this;
+  }
+
+  /** Add multiple tags */
+  tags(...tags: string[]): this {
+    tags.forEach(t => this.tag(t));
+    return this;
+  }
+
+  /** Validate configuration */
+  validate(): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    if (!this.config.name) errors.push('Name required');
+    if (!this.config.role) errors.push('Role required');
+    if (!this.config.skillIDs?.length) errors.push('At least one MCP tool required');
+    return { valid: errors.length === 0, errors };
+  }
+
+  /** Build AIX content */
+  build(): string {
+    const validation = this.validate();
+    if (!validation.valid) {
+      throw new Error(`AIX validation failed: ${validation.errors.join(', ')}`);
+    }
+    return generateAIX(this.config as AIXGeneratorConfig);
+  }
+
+  /** Get configuration object */
+  getConfig(): AIXGeneratorConfig {
+    const validation = this.validate();
+    if (!validation.valid) {
+      throw new Error(`AIX validation failed: ${validation.errors.join(', ')}`);
+    }
+    return this.config as AIXGeneratorConfig;
+  }
+}
+
+// ============================================
+// QUICK HELPERS
+// ============================================
+
+/** Create new agent builder */
+export function aix() {
+  return new AIXBuilder();
+}
+
+/** Quick agent templates */
+export const quick = {
+  /** Content creator */
+  contentCreator: (name: string) =>
+    aix()
+      .name(name)
+      .role('Content Creator & Writer')
+      .icon('✍️')
+      .quickPersona('creative')
+      .mcpPreset('content-creator')
+      .creativity('high')
+      .tags('content', 'writing', 'creative'),
+
+  /** Data analyst */
+  dataAnalyst: (name: string) =>
+    aix()
+      .name(name)
+      .role('Data Analyst & Insights Expert')
+      .icon('📊')
+      .quickPersona('analytical')
+      .mcpPreset('data-analyst')
+      .creativity('low')
+      .tags('data', 'analytics', 'insights'),
+
+  /** Developer */
+  developer: (name: string) =>
+    aix()
+      .name(name)
+      .role('Software Development Assistant')
+      .icon('👨‍💻')
+      .quickPersona('technical')
+      .mcpPreset('developer')
+      .creativity('medium')
+      .tags('coding', 'development', 'programming'),
+
+  /** Researcher */
+  researcher: (name: string) =>
+    aix()
+      .name(name)
+      .role('Research & Information Specialist')
+      .icon('🔬')
+      .quickPersona('analytical')
+      .mcpPreset('researcher')
+      .creativity('medium')
+      .tags('research', 'information', 'analysis'),
+
+  /** Creative */
+  creative: (name: string) =>
+    aix()
+      .name(name)
+      .role('Creative & Artistic Assistant')
+      .icon('🎨')
+      .quickPersona('creative')
+      .mcpPreset('creative')
+      .creativity('maximum')
+      .tags('creative', 'art', 'design'),
+
+  /** Support */
+  support: (name: string) =>
+    aix()
+      .name(name)
+      .role('Customer Support Specialist')
+      .icon('💬')
+      .quickPersona('empathetic')
+      .mcpPreset('support')
+      .creativity('medium')
+      .tags('support', 'customer-service', 'help'),
+
+  /** Travel */
+  travel: (name: string) =>
+    aix()
+      .name(name)
+      .role('Travel Planning Specialist')
+      .icon('✈️')
+      .quickPersona('friendly')
+      .mcpPreset('travel')
+      .creativity('medium')
+      .tags('travel', 'planning', 'destinations'),
+
+  /** Finance */
+  finance: (name: string) =>
+    aix()
+      .name(name)
+      .role('Financial Advisor & Budget Expert')
+      .icon('💰')
+      .quickPersona('professional')
+      .mcpPreset('finance')
+      .creativity('low')
+      .tags('finance', 'budget', 'money'),
+};
+
+// ============================================
+// EXPORTS
+// ============================================
+
+export default {
+  // Core functions
+  parse: parseAIX,
+  parseFile: parseAIXFile,
+  generate: generateAIX,
+  validate: validateAIX,
+  download: downloadAIX,
+  
+  // Builder
+  aix,
+  builder: AIXBuilder,
+  
+  // Quick templates
+  quick,
+  
+  // Presets
+  presets: {
+    mcp: MCP_PRESETS,
+    persona: PERSONA_PRESETS,
+    genes: GENE_PRESETS,
+  },
+  
+  // Utilities
+  createFilename,
   extractMeta,
 };
