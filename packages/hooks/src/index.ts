@@ -8,3 +8,5 @@ export type {
 } from './useLearningLoop';
 export * from './useVoiceInput';
 export * from './useTTS';
+export * from './useRealTimeData';
+export * from './useSound';
