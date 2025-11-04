@@ -1,0 +1,24 @@
+{
+  "name": "@auraos/ai",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./mcp/server": "./src/mcp/server.ts",
+    "./mcp/types": "./src/mcp/types.ts",
+    "./mcp/gateway": "./src/mcp/gateway.ts",
+    "./mcp/client": "./src/mcp/client.ts"
+  },
+  "dependencies": {
+    "@google/genai": "^1.28.0",
+    "@auraos/common": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
