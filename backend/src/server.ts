@@ -10,12 +10,6 @@ import gmailRouter from './routes/gmail.js';
 import calendarRouter from './routes/calendar.js';
 import workflowsRouter from './routes/workflows.js';
 import projectsRouter from './routes/projects.js';
-import specializedAgentsRouter from './routes/specialized-agents.js';
-import creativeRouter from './routes/creative.js';
-import storeRouter from './routes/store.js';
-import marketplaceRouter from './routes/marketplace.js';
-import chatRouter from './routes/chat.js';
-import developerRouter from './routes/developer.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 
@@ -41,12 +35,6 @@ app.use('/api/gmail', gmailRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/workflows', workflowsRouter);
 app.use('/api/projects', projectsRouter);
-app.use('/api/agents', specializedAgentsRouter);
-app.use('/api/creative', creativeRouter);
-app.use('/api/store', storeRouter);
-app.use('/api/marketplace', marketplaceRouter);
-app.use('/api/chat', chatRouter);
-app.use('/api/developer', developerRouter);
 
 
 // Create HTTP server
