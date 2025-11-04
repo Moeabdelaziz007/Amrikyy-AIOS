@@ -5,7 +5,26 @@ import { SearchResult } from './googleSearchService.js';
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+import { generateImages } from "@google/generative-ai/node";
+
+export async function generateImage(prompt: string) {
+    try {
+        const { generatedImages } = await generateImages({
+            model: 'imagen-4.0-generate-001',
+            prompt: prompt,
+            numberOfImages: 1,
+            outputMimeType: 'image/png',
+        });
+
+        const base64ImageBytes = generatedImages[0].image.imageBytes;
+        return `data:image/png;base64,${base64ImageBytes}`;
+    } catch (error) {
+        console.error('Gemini Image API error:', error);
+        throw new Error('Failed to generate image');
+    }
+}
 
 export async function generateContent(prompt: string) {
   try {

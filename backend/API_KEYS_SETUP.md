@@ -44,9 +44,24 @@
 ## Priority
 
 **High Priority (needed for core features):**
-- ✅ GEMINI_API_KEY (already have)
-- ✅ SUPABASE credentials (already have)
-- ✅ TELEGRAM_BOT_TOKEN (already have)
+
+- **GEMINI_API_KEY**
+  - **Purpose:** Powers all core AI features (chat, analysis, image generation).
+  - **How to get:**
+    1. Visit [Google AI Studio](https://makersuite.google.com/).
+    2. Sign in with your Google account.
+    3. Click on **"Get API key"** in the top left corner.
+    4. Click **"Create API key in new project"**.
+    5. Copy the generated API key.
+  - **Required env var:** `GEMINI_API_KEY`
+
+- **SUPABASE credentials**
+  - **Purpose:** Backend database, authentication, and storage.
+  - **Required env vars:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+
+- **TELEGRAM_BOT_TOKEN**
+  - **Purpose:** Powers the integrated Telegram bot.
+  - **Required env var:** `TELEGRAM_BOT_TOKEN`
 
 **Medium Priority (can work without initially):**
 - GOOGLE_SEARCH_API_KEY
