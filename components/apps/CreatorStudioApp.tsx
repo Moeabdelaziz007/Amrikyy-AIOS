@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Project, Message, SharedContent } from '../../types';
 import { CreatorStudioIcon, SendIcon } from '../Icons';
-import { Content } from '@google/genai';
-import { generateResponse } from '../../services/geminiService';
+import { geminiService, Content } from '../../packages/ai/src/index';
 import { agents } from '../../data/agents';
 
 type Tab = 'dashboard' | 'ai_assistant' | 'new_project';
@@ -141,8 +140,13 @@ const AIAssistantView: React.FC = () => {
         setInput('');
 
         try {
-            const history: Content[] = []; 
-            const responseText = await generateResponse(`As a business strategist named Atlas, answer this: ${currentInput}`, history);
+            const history: Content[] = [];
+            const responseText = await geminiService.generateText(
+                currentInput,
+                history,
+                {},
+                "You are Atlas, a business and monetization strategist for the Amrikyy AI OS. Provide expert advice that is insightful, actionable, and tailored to creative entrepreneurs."
+            );
             const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: responseText };
             setMessages(prev => [...prev, aiMessage]);
         } catch (error: any) {

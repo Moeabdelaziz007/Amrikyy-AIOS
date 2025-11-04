@@ -4,8 +4,7 @@ import { FinanceIcon, SparklesIcon, SendIcon } from '../Icons';
 import { marketIndices, defaultWatchlist, MarketIndex, WatchlistItem } from '../../data/finance';
 import { getFinancialNews, getFinancialAnalysis } from '../../services/geminiAdvancedService';
 import { Message, FinancialNews, FinancialAnalysis } from '../../types';
-import { Content } from '@google/genai';
-import { generateResponse } from '../../services/geminiService';
+import { geminiService, Content } from '../../packages/ai/src/index';
 
 /**
  * Defines the available tabs within the Atlas Finance application.
@@ -250,9 +249,14 @@ const AIChatView: React.FC = () => {
             const history: Content[] = messages.map(msg => ({
                 role: msg.sender === 'user' ? 'user' : 'model',
                 parts: [{ text: msg.text }]
-            })); 
-            const responseText = await generateResponse(currentInput, history);
-            
+            }));
+            const responseText = await geminiService.generateText(
+                currentInput,
+                history,
+                {},
+                "You are Atlas, a financial analyst AI. Provide detailed, data-driven financial insights but always include a disclaimer that you are not a financial advisor."
+            );
+
             const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: `${responseText}\n\n*Disclaimer: I am an AI assistant and not a financial advisor. All information is for educational purposes only.*` };
             setMessages(prev => [...prev, aiMessage]);
         } catch (error: any) {

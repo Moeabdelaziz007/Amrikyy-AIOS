@@ -10,7 +10,7 @@
  * Created by: Mohamed Hossameldin Abdelaziz
  */
 
-import { generateText } from './geminiService';
+import { geminiService } from '../packages/ai/src/index';
 
 /**
  * Represents a gene in an agent's behavioral DNA
@@ -427,7 +427,7 @@ Provide a brief, insightful analysis of:
 Keep it concise (3-4 sentences).`;
     
     try {
-      const insights = await generateText('Gemini 2.0 Flash', prompt);
+      const insights = await geminiService.generateText(prompt, []);
       return insights;
     } catch (error) {
       return 'Evolution analysis temporarily unavailable.';

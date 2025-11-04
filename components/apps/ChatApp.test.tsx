@@ -1,12 +1,14 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ChatApp from './ChatApp';
-import * as geminiService from '../../services/geminiService';
+import { geminiService } from '../../packages/ai/src/index';
 import { SystemVoice } from '../../types';
 
 // Mock the geminiService to control its behavior in tests
-vi.mock('../../services/geminiService', () => ({
-  generateResponse: vi.fn(),
+vi.mock('../../packages/ai/src/index', () => ({
+  geminiService: {
+    generateText: vi.fn(),
+  },
 }));
 
 // FIX: Mock audio services to prevent errors in test environment.
@@ -19,7 +21,7 @@ vi.mock('../../utils/audioUtils', () => ({
 }));
 
 describe('ChatApp', () => {
-  const mockGenerateResponse = geminiService.generateResponse as vi.Mock;
+  const mockGenerateText = geminiService.generateText as vi.Mock;
   const mockSpeechSettings = {
     voice: 'Kore' as SystemVoice,
     rate: 1.0,
@@ -28,11 +30,11 @@ describe('ChatApp', () => {
 
   beforeEach(() => {
     // Reset mocks before each test
-    mockGenerateResponse.mockClear();
+    mockGenerateText.mockClear();
   });
 
   it('sends a user message and displays both the user and AI messages', async () => {
-    mockGenerateResponse.mockResolvedValue('This is the AI response.');
+    mockGenerateText.mockResolvedValue('This is the AI response.');
     // FIX: Provide the required speechSettings prop.
     render(<ChatApp speechSettings={mockSpeechSettings} />);
 
@@ -47,9 +49,12 @@ describe('ChatApp', () => {
     expect(screen.getByText('Hello AI!')).toBeInTheDocument();
 
     // Check that the API was called correctly
-    expect(mockGenerateResponse).toHaveBeenCalledWith('Hello AI!', [
-      { role: 'model', parts: [{ text: "Hello! I'm Maya, your AI travel assistant. How can I help you plan your next adventure today?" }] }
-    ]);
+    expect(mockGenerateText).toHaveBeenCalledWith(
+      'Hello AI!',
+      [{ role: 'model', parts: [{ text: "Hello! I'm Maya, your AI travel assistant. How can I help you plan your next adventure today?" }] }],
+      {},
+      expect.any(String)
+    );
 
     // Wait for the AI's response to appear
     await waitFor(() => {
@@ -63,7 +68,7 @@ describe('ChatApp', () => {
     const delayedPromise = new Promise<string>(resolve => {
         resolveResponse = resolve;
     });
-    mockGenerateResponse.mockReturnValue(delayedPromise);
+    mockGenerateText.mockReturnValue(delayedPromise);
     
     // FIX: Provide the required speechSettings prop.
     render(<ChatApp speechSettings={mockSpeechSettings} />);

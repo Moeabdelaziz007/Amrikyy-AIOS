@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CreatorStudioApp from './CreatorStudioApp';
 import { Project, SharedContent } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
-import * as geminiService from '../../services/geminiService'; // Mock for AI Assistant tab
+import { geminiService } from '../../packages/ai/src/index'; // Mock for AI Assistant tab
 
 // Mock contexts
 vi.mock('../../contexts/LanguageContext', () => ({
@@ -11,8 +11,10 @@ vi.mock('../../contexts/LanguageContext', () => ({
 }));
 
 // Mock services
-vi.mock('../../services/geminiService', () => ({
-  generateResponse: vi.fn(),
+vi.mock('../../packages/ai/src/index', () => ({
+  geminiService: {
+    generateText: vi.fn(),
+  },
 }));
 
 describe('CreatorStudioApp', () => {
@@ -28,7 +30,7 @@ describe('CreatorStudioApp', () => {
     (useLanguage as vi.Mock).mockReturnValue({ t: mockT });
     mockOnAddProject.mockClear();
     mockOnShare.mockClear();
-    (geminiService.generateResponse as vi.Mock).mockClear();
+    (geminiService.generateText as vi.Mock).mockClear();
   });
 
   it('renders with "Dashboard" tab active by default and shows project stats', () => {
@@ -76,7 +78,7 @@ describe('CreatorStudioApp', () => {
   });
 
   it('sends message and displays AI response in "AI Assistant" tab', async () => {
-    (geminiService.generateResponse as vi.Mock).mockResolvedValue('AI business advice');
+    (geminiService.generateText as vi.Mock).mockResolvedValue('AI business advice');
     render(<CreatorStudioApp projects={mockProjects} onAddProject={mockOnAddProject} onShare={mockOnShare} />);
     fireEvent.click(screen.getByRole('button', { name: /ai assistant/i }));
 
@@ -85,9 +87,11 @@ describe('CreatorStudioApp', () => {
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
 
     await waitFor(() => {
-      expect(geminiService.generateResponse).toHaveBeenCalledWith(
-        'As a business strategist named Atlas, answer this: How to market my app?',
-        expect.any(Array) // Expecting history to be passed
+      expect(geminiService.generateText).toHaveBeenCalledWith(
+        'How to market my app?',
+        expect.any(Array), // Expecting history to be passed
+        {},
+        expect.any(String)
       );
       expect(screen.getByText('AI business advice')).toBeInTheDocument();
     });
