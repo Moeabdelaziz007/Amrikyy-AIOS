@@ -39,9 +39,9 @@ This guide will walk you through deploying the Amrikyy AI OS to Vercel (frontend
 **Root Directory:** `./` (leave as default)
 
 **Build & Development Settings:**
-- Build Command: `npm run build`
+- Build Command: `pnpm install && pnpm --filter @auraos/ai run build && pnpm --filter @auraos/automation run build && pnpm run build`
 - Output Directory: `dist`
-- Install Command: `npm install`
+- Install Command: `pnpm install`
 
 ### Step 4: Add Environment Variables
 
@@ -114,8 +114,8 @@ Every time you push to your `main` branch, Vercel will automatically:
 **Branch:** `main`  
 **Root Directory:** `backend`  
 **Environment:** `Node`  
-**Build Command:** `npm install`  
-**Start Command:** `node src/index.js`
+**Build Command:** `pnpm install && pnpm --filter @auraos/ai run build && pnpm --filter @auraos/automation run build && pnpm run build`
+**Start Command:** `node dist/server.js`
 
 **Instance Type:** Free (or choose paid for better performance)
 

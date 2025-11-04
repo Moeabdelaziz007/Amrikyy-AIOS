@@ -15,9 +15,9 @@ export class GeminiService {
   constructor() {
     // In a browser environment, API keys are exposed. For production,
     // this should be handled via a backend proxy.
-    const apiKey = import.meta.env.VITE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("Gemini API key not found. Please set the VITE_API_KEY environment variable.");
+      throw new Error("Gemini API key not found. Please set the GEMINI_API_KEY environment variable.");
     }
     this.ai = new GoogleGenAI({ apiKey });
   }
