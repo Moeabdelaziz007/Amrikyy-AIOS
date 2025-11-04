@@ -6,3 +6,5 @@ export type {
   Activity,
   LearningLoopHook
 } from './useLearningLoop';
+export * from './useVoiceInput';
+export * from './useTTS';
