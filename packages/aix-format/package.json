@@ -1,0 +1,38 @@
+{
+  "name": "@Moeabdelaziz007/aix-format",
+  "version": "1.0.0",
+  "description": "AIX (Agent Intelligence eXchange) format parser and generator for Amrikyy AI OS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest"
+  },
+  "keywords": [
+    "aix",
+    "agent",
+    "ai",
+    "format",
+    "parser",
+    "yaml",
+    "amrikyy"
+  ],
+  "author": "Mohamed Hossameldin Abdelaziz <Amrikyy@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "yaml": "^2.3.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moeabdelaziz007/Amrikyy-AIOS.git",
+    "directory": "packages/aix-format"
+  }
+}
