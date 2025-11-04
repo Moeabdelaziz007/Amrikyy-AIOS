@@ -90,6 +90,13 @@ export enum AppID {
   rex = 'rex',
   clio = 'clio',
   pricing = 'pricing',
+  gmail = 'gmail',
+  youtube = 'youtube',
+  weather = 'weather',
+  tripPlanner = 'tripPlanner',
+  agentsDashboard = 'agentsDashboard',
+  nanoBanana = 'nanoBanana',
+  veo = 'veo',
 }
 
 /**

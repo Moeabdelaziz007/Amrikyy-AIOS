@@ -102,7 +102,14 @@ const appComponents: Record<string, React.LazyExoticComponent<React.ComponentTyp
   [AppID.zara]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
   [AppID.rex]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
   [AppID.clio]: lazy(() => import('./components/apps/AgentProfileApp.tsx')),
-  [AppID.pricing]: lazy(() => import('./components/apps/SettingsApp.tsx')),
+  [AppID.pricing]: lazy(() => import('./components/apps/PricingApp.tsx')),
+  [AppID.veo]: lazy(() => import('./components/apps/VeoApp.tsx')),
+  [AppID.nanoBanana]: lazy(() => import('./components/apps/NanoBananaApp.tsx')),
+  [AppID.gmail]: lazy(() => import('./components/apps/GmailApp.tsx')),
+  [AppID.weather]: lazy(() => import('./components/apps/WeatherApp.tsx')),
+  [AppID.youtube]: lazy(() => import('./components/apps/YouTubeApp.tsx')),
+  [AppID.tripPlanner]: lazy(() => import('./components/apps/TripPlannerApp.tsx')),
+  [AppID.agentsDashboard]: lazy(() => import('./components/apps/AgentsDashboardApp.tsx')),
 };
 
 /**
