@@ -63,6 +63,22 @@
   - **Purpose:** Powers the integrated Telegram bot.
   - **Required env var:** `TELEGRAM_BOT_TOKEN`
 
+- **REDIS**
+  - **Purpose:** Caching and real-time data storage for agent memory.
+  - **How to get:**
+    1. Sign up or log in to [Redis Cloud](https://app.redislabs.com/).
+    2. Create a new database.
+    3. Copy the Public endpoint (host and port) and the password for the default user.
+  - **Required env vars:** `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
+
+- **QDRANT**
+  - **Purpose:** Vector database for semantic search and long-term agent memory.
+  - **How to get:**
+    1. Sign up or log in to [Qdrant Cloud](https://cloud.qdrant.io/).
+    2. Create a new cluster.
+    3. Copy the cluster URL and create an API key.
+  - **Required env vars:** `QDRANT_URL`, `QDRANT_API_KEY`
+
 **Medium Priority (can work without initially):**
 - GOOGLE_SEARCH_API_KEY
 - GOOGLE_API_KEY (YouTube)
