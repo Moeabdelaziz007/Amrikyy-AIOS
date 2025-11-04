@@ -1,42 +1,101 @@
+// backend/src/routes/agents.ts
+
 import { Router } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.js';
-import { generateContent, startChat } from '../services/gemini.js';
+import { supabase } from '../services/supabase.js';
+import { verifyAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 const router = Router();
+router.use(verifyAuth);
 
-// Gemini API endpoints (protected)
-router.post('/gemini/generate', async (req: AuthenticatedRequest, res) => {
-  try {
-    const { prompt, model = 'gemini-pro' } = req.body;
+// GET /api/agents
+router.get('/', async (req: AuthenticatedRequest, res) => {
+ try {
+   const userId = req.user.id;
 
-    if (!prompt) {
-      return res.status(400).json({ error: 'Prompt is required' });
-    }
+   const { data, error } = await supabase
+     .from('agents')
+     .select('*')
+     .eq('user_id', userId)
+     .order('created_at', { ascending: false });
 
-    const text = await generateContent(prompt, model);
-
-    res.json({ text, user: req.user.email });
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    res.status(500).json({ error: 'Failed to generate content' });
-  }
+   if (error) throw error;
+   res.json({ agents: data });
+ } catch (error: any) {
+   res.status(500).json({ error: error.message });
+ }
 });
 
-router.post('/gemini/chat', async (req, res) => {
-  try {
-    const { messages, model = 'gemini-pro' } = req.body;
+// POST /api/agents
+router.post('/', async (req: AuthenticatedRequest, res) => {
+ try {
+   const userId = req.user.id;
+   const { name, role, icon, personality, skills } = req.body;
 
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'Messages array is required' });
-    }
+   const { data, error } = await supabase
+     .from('agents')
+     .insert({
+       user_id: userId,
+       name,
+       role,
+       icon,
+       personality,
+       skill_ids: skills || []
+     })
+     .select()
+     .single();
 
-    const text = await startChat(messages, model);
+   if (error) throw error;
+   res.json({ agent: data });
+ } catch (error: any) {
+   res.status(500).json({ error: error.message });
+ }
+});
 
-    res.json({ text });
-  } catch (error) {
-    console.error('Gemini Chat API error:', error);
-    res.status(500).json({ error: 'Failed to process chat' });
-  }
+// PUT /api/agents/:id
+router.put('/:id', async (req: AuthenticatedRequest, res) => {
+ try {
+   const userId = req.user.id;
+   const { id } = req.params;
+   const { name, role, icon, personality, skills } = req.body;
+
+   const { data, error } = await supabase
+     .from('agents')
+     .update({
+       name,
+       role,
+       icon,
+       personality,
+       skill_ids: skills
+     })
+     .eq('id', id)
+     .eq('user_id', userId)
+     .select()
+     .single();
+
+   if (error) throw error;
+   res.json({ agent: data });
+ } catch (error: any) {
+   res.status(500).json({ error: error.message });
+ }
+});
+
+// DELETE /api/agents/:id
+router.delete('/:id', async (req: AuthenticatedRequest, res) => {
+ try {
+   const userId = req.user.id;
+   const { id } = req.params;
+
+   const { error } = await supabase
+     .from('agents')
+     .delete()
+     .eq('id', id)
+     .eq('user_id', userId);
+
+   if (error) throw error;
+   res.json({ message: 'Agent deleted' });
+ } catch (error: any) {
+   res.status(500).json({ error: error.message });
+ }
 });
 
 export default router;
