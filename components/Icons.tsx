@@ -198,19 +198,16 @@ export const StopIcon: React.FC<{className?: string}> = ({className}) => (<Mater
 export const TrashIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>delete</MaterialIcon>);
 
 /** Edit icon. */
-export const Edit3Icon: React.FC<{className?: string; size?: number}> = ({className, size}) => (<MaterialIcon className={className}>edit</MaterialIcon>);
+export const EditIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>edit</MaterialIcon>);
 
-/** Plus circle icon. */
-export const PlusCircleIcon: React.FC<{className?: string; size?: number}> = ({className, size}) => (<MaterialIcon className={className}>add_circle</MaterialIcon>);
-
-/** Trash 2 icon. */
-export const Trash2Icon: React.FC<{className?: string; size?: number}> = ({className, size}) => (<MaterialIcon className={className}>delete</MaterialIcon>);
-
-/** Tag icon. */
-export const TagIcon: React.FC<{className?: string; size?: number}> = ({className, size}) => (<MaterialIcon className={className}>label</MaterialIcon>);
+/** Add/Plus icon. */
+export const AddIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>add_circle</MaterialIcon>);
 
 /** Sun icon. */
 export const SunIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>wb_sunny</MaterialIcon>);
 
-/** Users/Group icon. */
+/** Users icon. */
 export const UsersIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>group</MaterialIcon>);
+
+/** Tag icon. */
+export const TagIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>tag</MaterialIcon>);
