@@ -199,7 +199,7 @@ const FilesApp: React.FC = () => {
                         </label>
                     </div>
                 </header>
-                <main className="flex-grow p-4 overflow-y-auto">
+                <div className="flex-grow p-4 overflow-y-auto">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
                         <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -252,7 +252,7 @@ const FilesApp: React.FC = () => {
                         })}
                     </div>
                 )}
-                </main>
+                </div>
             </main>
         </div>
     );
