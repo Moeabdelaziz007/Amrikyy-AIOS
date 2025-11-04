@@ -1,5 +1,4 @@
 import { supabase } from './client';
-import type { FileObject } from '@supabase/supabase-js';
 
 /**
  * Storage Service
@@ -87,7 +86,7 @@ export async function createSignedUrl(bucket: string, path: string, expiresIn: n
 /**
  * List files in a bucket
  */
-export async function listFiles(bucket: string, path: string = ''): Promise<FileObject[]> {
+export async function listFiles(bucket: string, path: string = ''): Promise<any[]> {
   const { data, error } = await supabase.storage
     .from(bucket)
     .list(path);
