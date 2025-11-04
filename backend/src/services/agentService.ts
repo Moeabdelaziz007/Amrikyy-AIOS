@@ -45,3 +45,15 @@ export const deleteAgent = async (agentId: string, userId: string): Promise<void
         .eq('user_id', userId);
     if (error) throw new Error(error.message);
 };
+
+export const updateAgent = async (agentId: string, userId: string, agentData: Partial<Omit<AIXAgent, 'id' | 'user_id'>>): Promise<AIXAgent> => {
+    const { data, error } = await supabase
+        .from('agents')
+        .update(agentData)
+        .eq('id', agentId)
+        .eq('user_id', userId)
+        .select()
+        .single();
+    if (error) throw new Error(error.message);
+    return data;
+};

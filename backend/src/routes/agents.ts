@@ -50,4 +50,14 @@ router.delete('/:id', async (req: AuthenticatedRequest, res) => {
     }
 });
 
+// PUT /api/agents/:id
+router.put('/:id', async (req: AuthenticatedRequest, res) => {
+    try {
+        const updatedAgent = await agentService.updateAgent(req.params.id, req.user.id, req.body);
+        res.json(updatedAgent);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

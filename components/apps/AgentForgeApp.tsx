@@ -5,7 +5,7 @@ import { AgentForgeIcon, SparklesIcon, TrashIcon, DownloadIcon } from '../Icons'
 import { suggestAgentPersona } from '../../services/geminiAdvancedService';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmationDialog from '../ConfirmationDialog';
-import { supabase } from '../../services/supabaseClient';
+import { getAgents, createAgent, deleteAgent, updateAgent, getTools, getSkills, AIXAgent, Tool, Skill } from '../../services/agentService';
 import { generateAIX, downloadAIX, createAIXFilename, type AIXGeneratorConfig } from '../../packages/aix-format/src/index';
 
 interface AgentForgeAppProps {
@@ -28,10 +28,12 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
     const [isDeployed, setIsDeployed] = useState(false);
     const [isConfirmingDeploy, setIsConfirmingDeploy] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isSuggesting, setIsSuggesting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [personaInstructions, setPersonaInstructions] = useState('');
     const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash');
     const [temperature, setTemperature] = useState(0.7);
+    const [editingAgent, setEditingAgent] = useState<AIXAgent | null>(null);
 
     const listAgents = useCallback(async () => {
         if (!user) return;
@@ -69,9 +71,8 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
             alert("Please provide a name and a persona for your agent.");
             return;
         }
-        
-        const newAgent: CustomAgent = {
-            id: `custom-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`,
+
+        const agentData = {
             name,
             persona,
             tools: selectedTools,
@@ -81,47 +82,26 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
         };
 
         try {
-            // Generate AIX format
-            const aixConfig: AIXGeneratorConfig = {
-                name,
-                role,
-                description: role,
-                skillIDs: Array.from(selectedSkills),
-                icon,
-                persona: personaInstructions,
-                model: selectedModel,
-                temperature,
-                author: user.email || 'Amrikyy User',
-                tags: Array.from(selectedSkills).slice(0, 5),
-            };
-            
-            const aixContent = generateAIX(aixConfig);
-            
-            // Save to database with AIX content
-            const { error } = await supabase.from('agents').insert([
-                { 
-                    user_id: user.id, 
-                    name: newAgent.name, 
-                    config: newAgent,
-                    aix_format: aixContent 
-                }
-            ]);
-            
-            if (error) throw error;
-            setAgents([...agents, newAgent]);
+            if (editingAgent) {
+                const updatedAgent = await updateAgent(editingAgent.id, agentData);
+                setAgents(agents.map(a => a.id === updatedAgent.id ? updatedAgent : a));
+            } else {
+                const newAgent = await createAgent(agentData);
+                setAgents([...agents, newAgent]);
+            }
             setIsDeployed(true);
         } catch (err: any) {
             setError(err.message);
         }
     };
 
-    const downloadAgentAIX = (agent: CustomAgent) => {
+    const downloadAgentAIX = (agent: AIXAgent) => {
         const aixConfig: AIXGeneratorConfig = {
             name: agent.name,
-            role: agent.role,
-            description: agent.role,
-            skillIDs: agent.skillIDs,
-            icon: agent.icon,
+            role: agent.persona,
+            description: agent.persona,
+            skillIDs: agent.skills,
+            icon: '🤖',
             persona: personaInstructions,
             model: selectedModel,
             temperature,
@@ -130,16 +110,6 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
         const aixContent = generateAIX(aixConfig);
         const filename = createAIXFilename(agent.name);
         downloadAIX(aixContent, filename);
-    };
-
-    const deleteAgent = async (agentId: string) => {
-        try {
-            const { error } = await supabase.from('agents').delete().eq('config->>id', agentId);
-            if (error) throw error;
-            setAgents(agents.filter(a => a.id !== agentId));
-        } catch (err: any) {
-            setError(err.message);
-        }
     };
 
     const handleDeleteAgent = async (agentId: string) => {
@@ -205,13 +175,28 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex items-center gap-2 flex-grow min-w-0">
-                                            <span className="text-2xl flex-shrink-0">{agent.icon}</span>
+                                            <span className="text-2xl flex-shrink-0">🤖</span>
                                             <div className="min-w-0 flex-grow">
                                                 <p className="font-semibold text-sm truncate">{agent.name}</p>
-                                                <p className="text-xs text-text-secondary truncate">{agent.role}</p>
+                                                <p className="text-xs text-text-secondary truncate">{agent.persona}</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-1 flex-shrink-0">
+                                            <button
+                                                onClick={() => {
+                                                    setEditingAgent(agent);
+                                                    setName(agent.name);
+                                                    setPersona(agent.persona);
+                                                    setSelectedTools(agent.tools);
+                                                    setSelectedSkills(agent.skills);
+                                                    setCategory(agent.category);
+                                                    setVisibility(agent.visibility);
+                                                }}
+                                                className="p-1 hover:bg-yellow-500/20 rounded transition-colors"
+                                                title="Edit agent"
+                                            >
+                                                <SparklesIcon className="w-4 h-4 text-yellow-400" />
+                                            </button>
                                             <button
                                                 onClick={() => downloadAgentAIX(agent)}
                                                 className="p-1 hover:bg-primary-blue/20 rounded transition-colors"
@@ -241,11 +226,11 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                             <h2 className="text-xl font-bold font-display text-primary-cyan">Basic Information</h2>
                             
                             <div>
-                                <label className="block text-sm font-semibold mb-1.5">Agent Role *</label>
+                                <label className="block text-sm font-semibold mb-1.5">Agent Persona *</label>
                                 <input
                                     type="text"
-                                    value={role}
-                                    onChange={(e) => setRole(e.target.value)}
+                                    value={persona}
+                                    onChange={(e) => setPersona(e.target.value)}
                                     placeholder="e.g., Content Creator, Data Analyst, Travel Planner"
                                     className="w-full px-3 py-2 bg-black/30 border border-white/10 rounded-lg focus:ring-1 focus:ring-primary-blue focus:outline-none"
                                 />
@@ -254,8 +239,13 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
 
                             <div className="flex gap-3">
                                 <button
-                                    onClick={handleSuggestPersona}
-                                    disabled={!role || isSuggesting}
+                                    onClick={async () => {
+                                        setIsSuggesting(true);
+                                        const suggestion = await suggestAgentPersona(persona);
+                                        setPersona(suggestion);
+                                        setIsSuggesting(false);
+                                    }}
+                                    disabled={!persona || isSuggesting}
                                     className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <SparklesIcon className="w-4 h-4" />
