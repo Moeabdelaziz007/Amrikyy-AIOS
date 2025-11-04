@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CustomAgent, SkillID } from '../../types';
 import { skills } from '../../data/skills';
-import { AgentForgeIcon, SparklesIcon, TrashIcon } from '../Icons';
+import { AgentForgeIcon, SparklesIcon, TrashIcon, DownloadIcon } from '../Icons';
 import { suggestAgentPersona } from '../../services/geminiAdvancedService';
 import { useAuth } from '../../contexts/AuthContext';
 import ConfirmationDialog from '../ConfirmationDialog';
 import { supabase } from '../../services/supabaseClient';
+import { generateAIX, downloadAIX, createAIXFilename, type AIXGeneratorConfig } from '../../packages/aix-format/src/index';
 
 interface AgentForgeAppProps {
     onClose: () => void;
@@ -23,6 +24,9 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
     const [isConfirmingDeploy, setIsConfirmingDeploy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [personaInstructions, setPersonaInstructions] = useState('');
+    const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash');
+    const [temperature, setTemperature] = useState(0.7);
 
     const listAgents = useCallback(async () => {
         if (!user) return;
@@ -62,6 +66,7 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
             alert("Please provide a name and a role for your agent.");
             return;
         }
+        
         const newAgent: CustomAgent = {
             id: `custom-${name.toLowerCase().replace(/\s/g, '-')}-${Date.now()}`,
             name,
@@ -71,15 +76,55 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
         };
 
         try {
+            // Generate AIX format
+            const aixConfig: AIXGeneratorConfig = {
+                name,
+                role,
+                description: role,
+                skillIDs: Array.from(selectedSkills),
+                icon,
+                persona: personaInstructions,
+                model: selectedModel,
+                temperature,
+                author: user.email || 'Amrikyy User',
+                tags: Array.from(selectedSkills).slice(0, 5),
+            };
+            
+            const aixContent = generateAIX(aixConfig);
+            
+            // Save to database with AIX content
             const { error } = await supabase.from('agents').insert([
-                { user_id: user.id, name: newAgent.name, config: newAgent }
+                { 
+                    user_id: user.id, 
+                    name: newAgent.name, 
+                    config: newAgent,
+                    aix_format: aixContent 
+                }
             ]);
+            
             if (error) throw error;
             setAgents([...agents, newAgent]);
             setIsDeployed(true);
         } catch (err: any) {
             setError(err.message);
         }
+    };
+
+    const downloadAgentAIX = (agent: CustomAgent) => {
+        const aixConfig: AIXGeneratorConfig = {
+            name: agent.name,
+            role: agent.role,
+            description: agent.role,
+            skillIDs: agent.skillIDs,
+            icon: agent.icon,
+            persona: personaInstructions,
+            model: selectedModel,
+            temperature,
+        };
+        
+        const aixContent = generateAIX(aixConfig);
+        const filename = createAIXFilename(agent.name);
+        downloadAIX(aixContent, filename);
     };
 
     const deleteAgent = async (agentId: string) => {
@@ -129,6 +174,9 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
         setIcon('🤖');
         setSelectedSkills(new Set());
         setIsDeployed(false);
+        setPersonaInstructions('');
+        setSelectedModel('gemini-2.0-flash');
+        setTemperature(0.7);
     };
 
     if (!user) {
@@ -188,54 +236,263 @@ const AgentForgeApp: React.FC<AgentForgeAppProps> = ({ onClose }) => {
                                                 <p className="text-xs text-text-secondary truncate">{agent.role}</p>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleDeleteAgent(agent.id)}
-                                            className="p-1 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
-                                            title="Delete agent"
-                                        >
-                                            <TrashIcon className="w-4 h-4 text-red-400" />
-                                        </button>
+                                        <div className="flex gap-1 flex-shrink-0">
+                                            <button
+                                                onClick={() => downloadAgentAIX(agent)}
+                                                className="p-1 hover:bg-primary-blue/20 rounded transition-colors"
+                                                title="Download AIX"
+                                            >
+                                                <DownloadIcon className="w-4 h-4 text-primary-blue" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteAgent(agent.id)}
+                                                className="p-1 hover:bg-red-500/20 rounded transition-colors"
+                                                title="Delete agent"
+                                            >
+                                                <TrashIcon className="w-4 h-4 text-red-400" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
                 </aside>
-                <main className="flex-grow p-6 overflow-y-auto">
-                    {/* Main content with form can be added here */}
+                <main className="flex-grow p-6 overflow-y-auto space-y-6">
+                    {/* Agent Configuration Form */}
+                    <div className="space-y-6">
+                        {/* Basic Information */}
+                        <section className="space-y-4">
+                            <h2 className="text-xl font-bold font-display text-primary-cyan">Basic Information</h2>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold mb-1.5">Agent Role *</label>
+                                <input
+                                    type="text"
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    placeholder="e.g., Content Creator, Data Analyst, Travel Planner"
+                                    className="w-full px-3 py-2 bg-black/30 border border-white/10 rounded-lg focus:ring-1 focus:ring-primary-blue focus:outline-none"
+                                />
+                                <p className="text-xs text-text-muted mt-1">Describe what your agent does</p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleSuggestPersona}
+                                    disabled={!role || isSuggesting}
+                                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <SparklesIcon className="w-4 h-4" />
+                                    {isSuggesting ? 'Generating...' : 'AI Suggest Persona'}
+                                </button>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold mb-1.5">Agent Name *</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="e.g., ContentBot, DataPro, VoyageAI"
+                                    className="w-full px-3 py-2 bg-black/30 border border-white/10 rounded-lg focus:ring-1 focus:ring-primary-blue focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold mb-1.5">Icon Emoji</label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="text"
+                                        value={icon}
+                                        onChange={(e) => setIcon(e.target.value)}
+                                        maxLength={2}
+                                        className="w-20 px-3 py-2 text-center text-2xl bg-black/30 border border-white/10 rounded-lg focus:ring-1 focus:ring-primary-blue focus:outline-none"
+                                    />
+                                    <div className="flex flex-wrap gap-2">
+                                        {['🤖', '🧠', '💡', '🚀', '⚡', '🎯', '🔮', '✨'].map((e) => (
+                                            <button
+                                                key={e}
+                                                onClick={() => setIcon(e)}
+                                                className="p-2 text-xl hover:bg-white/10 rounded-lg transition-colors"
+                                            >
+                                                {e}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* MCP Tools & Capabilities */}
+                        <section className="space-y-4">
+                            <h2 className="text-xl font-bold font-display text-primary-cyan">MCP Tools & Capabilities</h2>
+                            <p className="text-sm text-text-secondary">Select the tools and skills your agent can use via Model Context Protocol</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {skills.map((skill) => {
+                                    const Icon = skill.icon;
+                                    const isSelected = selectedSkills.has(skill.id);
+                                    return (
+                                        <button
+                                            key={skill.id}
+                                            onClick={() => handleSkillToggle(skill.id)}
+                                            className={`p-3 rounded-lg border-2 transition-all text-left ${
+                                                isSelected
+                                                    ? 'border-primary-cyan bg-primary-cyan/10'
+                                                    : 'border-white/10 bg-black/20 hover:border-white/20'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary-cyan/20' : 'bg-white/5'}`}>
+                                                    <Icon className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-grow min-w-0">
+                                                    <h3 className="font-semibold text-sm">{skill.name}</h3>
+                                                    <p className="text-xs text-text-secondary mt-0.5 line-clamp-2">{skill.description}</p>
+                                                </div>
+                                                {isSelected && (
+                                                    <div className="flex-shrink-0 text-primary-cyan">
+                                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <div className="text-sm text-text-secondary">
+                                Selected: {selectedSkills.size} tool{selectedSkills.size !== 1 ? 's' : ''}
+                            </div>
+                        </section>
+
+                        {/* Advanced Configuration */}
+                        <section className="space-y-4">
+                            <h2 className="text-xl font-bold font-display text-primary-cyan">Advanced Configuration</h2>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                        <span className="text-purple-400">⚙️</span>
+                                        Model Selection
+                                    </h3>
+                                    <select 
+                                        value={selectedModel}
+                                        onChange={(e) => setSelectedModel(e.target.value)}
+                                        className="w-full px-3 py-2 bg-black/30 border border-white/10 rounded-lg focus:ring-1 focus:ring-primary-blue focus:outline-none text-sm"
+                                    >
+                                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fast)</option>
+                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Powerful)</option>
+                                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Balanced)</option>
+                                    </select>
+                                </div>
+
+                                <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                        <span className="text-amber-400">🎯</span>
+                                        Temperature: {temperature.toFixed(1)}
+                                    </h3>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="2"
+                                        step="0.1"
+                                        value={temperature}
+                                        onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                                        className="w-full"
+                                    />
+                                    <div className="flex justify-between text-xs text-text-muted mt-1">
+                                        <span>Precise</span>
+                                        <span>Creative</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                    <span className="text-green-400">🎭</span>
+                                    Persona & System Instructions
+                                </h3>
+                                <textarea
+                                    value={personaInstructions}
+                                    onChange={(e) => setPersonaInstructions(e.target.value)}
+                                    placeholder="Define your agent's personality, tone, and behavior. Example: You are a friendly, helpful assistant specializing in..."
+                                    rows={4}
+                                    className="w-full px-3 py-2 bg-black/30 border border-white/10 rounded-lg focus:ring-1 focus:ring-primary-blue focus:outline-none text-sm resize-none"
+                                ></textarea>
+                                <p className="text-xs text-text-muted mt-1">Optional: Leave blank for auto-generated instructions</p>
+                            </div>
+                        </section>
+                    </div>
                 </main>
                 
                 {/* Sidebar: Preview & Deploy */}
-                <aside className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6">
+                <aside className="w-full lg:w-80 flex-shrink-0 border-l border-border-color flex flex-col p-4 gap-4">
                     <div className="space-y-4 p-4 bg-black/20 rounded-lg border border-border-color">
-                        <h2 className="text-xl font-bold font-display">Live Preview</h2>
-                        <div className="flex flex-col items-center text-center gap-2 p-3 rounded-lg bg-white/5">
-                            <div className="flex items-center justify-center size-14 bg-gradient-to-br from-neon-cyan/20 to-neon-pink/20 rounded-xl">
-                                <span className="text-3xl">{icon}</span>
+                        <h2 className="text-lg font-bold font-display">Live Preview</h2>
+                        <div className="flex flex-col items-center text-center gap-3 p-4 rounded-lg bg-gradient-to-br from-primary-cyan/10 to-primary-purple/10 border border-primary-cyan/20">
+                            <div className="flex items-center justify-center size-16 bg-gradient-to-br from-neon-cyan/20 to-neon-pink/20 rounded-xl border border-white/10">
+                                <span className="text-4xl">{icon}</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg">{name || 'Unnamed Agent'}</h3>
+                                <p className="text-sm text-text-secondary">{role || 'No role defined'}</p>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 justify-center mt-2">
+                                {Array.from(selectedSkills).slice(0, 6).map((skillId) => {
+                                    const skill = skills.find(s => s.id === skillId);
+                                    const Icon = skill?.icon;
+                                    return Icon ? (
+                                        <div key={skillId} className="p-1.5 bg-white/10 rounded" title={skill?.name}>
+                                            <Icon className="w-4 h-4" />
+                                        </div>
+                                    ) : null;
+                                })}
+                                {selectedSkills.size > 6 && (
+                                    <div className="p-1.5 bg-white/10 rounded text-xs">
+                                        +{selectedSkills.size - 6}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
-                     <div className="space-y-4 p-4 bg-black/20 rounded-lg border border-border-color flex-grow">
-                        <h2 className="text-xl font-bold font-display">My Agents</h2>
-                        {error && <p className="text-sm text-red-500">{error}</p>}
-                        <div className="space-y-2">
-                            {agents.map(agent => (
-                                <div key={agent.id} className="flex items-center justify-between p-2 bg-white/5 rounded-md">
-                                    <div className="flex items-center gap-2">
-                                        <span>{agent.icon}</span>
-                                        <span className="text-sm">{agent.name}</span>
-                                    </div>
-                                    <button onClick={() => deleteAgent(agent.id)} className="text-red-500 hover:text-red-400">
-                                        <Trash2Icon size={16}/>
-                                    </button>
-                                </div>
-                            ))}
-                            {agents.length === 0 && <p className="text-sm text-text-secondary">No agents deployed yet.</p>}
+
+                    <div className="space-y-3">
+                        <h2 className="text-sm font-bold text-text-secondary uppercase">Agent Stats</h2>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="p-3 bg-black/20 rounded-lg border border-white/10 text-center">
+                                <div className="text-2xl font-bold text-primary-cyan">{selectedSkills.size}</div>
+                                <div className="text-xs text-text-secondary">Tools</div>
+                            </div>
+                            <div className="p-3 bg-black/20 rounded-lg border border-white/10 text-center">
+                                <div className="text-2xl font-bold text-amber-400">{agents.length}</div>
+                                <div className="text-xs text-text-secondary">Deployed</div>
+                            </div>
                         </div>
                     </div>
-                    <div className="mt-auto">
-                        <button onClick={requestDeploy} className="w-full px-6 py-3 font-bold rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-50" disabled={!name || !role}>
+
+                    {error && (
+                        <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
+                            <p className="text-sm text-red-400">{error}</p>
+                        </div>
+                    )}
+
+                    <div className="mt-auto space-y-2">
+                        <button
+                            onClick={requestDeploy}
+                            disabled={!name || !role}
+                            className="w-full px-6 py-3 font-bold rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <SparklesIcon className="w-5 h-5" />
                             Deploy Agent
+                        </button>
+                        <button
+                            onClick={resetForm}
+                            className="w-full px-6 py-2 font-semibold rounded-lg bg-white/5 hover:bg-white/10 transition-all"
+                        >
+                            Reset Form
                         </button>
                     </div>
                 </aside>
