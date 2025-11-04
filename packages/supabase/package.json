@@ -1,0 +1,24 @@
+{
+  "name": "@auraos/supabase",
+  "version": "1.0.0",
+  "description": "Supabase integration package for Amrikyy AI OS",
+  "main": "src/index.ts",
+  "type": "module",
+  "author": "Mohamed Hossameldin Abdelaziz",
+  "license": "MIT",
+  "keywords": [
+    "supabase",
+    "auraos",
+    "amrikyy",
+    "database",
+    "auth",
+    "storage",
+    "realtime"
+  ],
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0"
+  }
+}
