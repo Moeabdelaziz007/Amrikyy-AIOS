@@ -18,3 +18,5 @@ export type {
   LoadingSpinnerSize,
   LoadingSpinnerVariant,
 } from './components/LoadingComponents';
+export { FloatingOrb, FloatingOrbsBackground } from './components/FloatingOrb';
+export type { FloatingOrbProps, FloatingOrbsBackgroundProps } from './components/FloatingOrb';
