@@ -752,7 +752,824 @@ export default router;
 
 ---
 
-#### Task F: Enhanced Telegram Bot Features
+#### Task F: Google Search API Integration
+
+**Create:** `backend/src/services/searchService.ts`
+
+```typescript
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+export class SearchService {
+  // Web search using Gemini's grounding feature
+  async searchWeb(query: string): Promise<any> {
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      tools: [{
+        googleSearchRetrieval: {
+          dynamicRetrievalConfig: {
+            mode: 'MODE_DYNAMIC',
+            dynamicThreshold: 0.3
+          }
+        }
+      }]
+    });
+    
+    const result = await model.generateContent(query);
+    const response = await result.response;
+    return {
+      text: response.text(),
+      groundingMetadata: response.candidates?.[0]?.groundingMetadata
+    };
+  }
+  
+  // Custom Google Search API (requires separate API key)
+  async customSearch(query: string, numResults: number = 10): Promise<any[]> {
+    const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
+    const searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID;
+    
+    if (!apiKey || !searchEngineId) {
+      throw new Error('Google Custom Search not configured');
+    }
+    
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(query)}&num=${numResults}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    return data.items || [];
+  }
+  
+  // Image search
+  async searchImages(query: string, numResults: number = 10): Promise<any[]> {
+    const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
+    const searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID;
+    
+    if (!apiKey || !searchEngineId) {
+      throw new Error('Google Custom Search not configured');
+    }
+    
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(query)}&searchType=image&num=${numResults}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    return data.items || [];
+  }
+  
+  // News search
+  async searchNews(query: string): Promise<any[]> {
+    const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
+    const searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID;
+    
+    if (!apiKey || !searchEngineId) {
+      throw new Error('Google Custom Search not configured');
+    }
+    
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(query)}&sort=date`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    return data.items || [];
+  }
+}
+
+export const searchService = new SearchService();
+```
+
+**Create Router:** `backend/src/routes/search.ts`
+
+```typescript
+import { Router } from 'express';
+import { verifyAuth } from '../middleware/auth.js';
+import { searchService } from '../services/searchService.js';
+
+const router = Router();
+router.use(verifyAuth);
+
+// POST /api/search/web - Web search with Gemini grounding
+router.post('/web', async (req, res) => {
+  try {
+    const { query } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+    
+    const results = await searchService.searchWeb(query);
+    res.json(results);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/search/custom - Custom Google Search
+router.get('/custom', async (req, res) => {
+  try {
+    const { q, num = 10 } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({ error: 'Query parameter "q" is required' });
+    }
+    
+    const results = await searchService.customSearch(q as string, Number(num));
+    res.json({ results });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/search/images - Image search
+router.get('/images', async (req, res) => {
+  try {
+    const { q, num = 10 } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({ error: 'Query parameter "q" is required' });
+    }
+    
+    const results = await searchService.searchImages(q as string, Number(num));
+    res.json({ results });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/search/news - News search
+router.get('/news', async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({ error: 'Query parameter "q" is required' });
+    }
+    
+    const results = await searchService.searchNews(q as string);
+    res.json({ results });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;
+```
+
+**Environment Variables Needed:**
+```env
+# Google Search API (separate from Gemini)
+GOOGLE_SEARCH_API_KEY=your_custom_search_api_key
+GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id
+```
+
+**To Get Google Custom Search API:**
+1. Go to https://developers.google.com/custom-search/v1/overview
+2. Enable Custom Search API
+3. Create API key
+4. Create Custom Search Engine at https://cse.google.com/cse/
+5. Copy the Search Engine ID
+
+**Checkpoint:** Search API returns web, image, and news results
+
+---
+
+#### Task G: Enhanced Gemini AI Service
+
+**Update:** `backend/src/services/gemini.ts`
+
+```typescript
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+// Safety settings
+const safetySettings = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+];
+
+export class GeminiService {
+  // Text generation
+  async generateText(prompt: string, temperature: number = 0.7): Promise<string> {
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings,
+      generationConfig: {
+        temperature,
+        maxOutputTokens: 8192,
+      }
+    });
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  }
+  
+  // Chat conversation
+  async chat(messages: Array<{ role: string; content: string }>): Promise<string> {
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings
+    });
+    
+    const chat = model.startChat({
+      history: messages.slice(0, -1).map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      }))
+    });
+    
+    const lastMessage = messages[messages.length - 1];
+    const result = await chat.sendMessage(lastMessage.content);
+    return result.response.text();
+  }
+  
+  // Vision - analyze image
+  async analyzeImage(imageData: string, prompt: string = 'Describe this image in detail'): Promise<string> {
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro-vision',
+      safetySettings
+    });
+    
+    // Remove data URL prefix if present
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+    
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: 'image/jpeg'
+        }
+      }
+    ]);
+    
+    return result.response.text();
+  }
+  
+  // Code generation
+  async generateCode(description: string, language: string = 'typescript'): Promise<string> {
+    const prompt = `Generate ${language} code for the following requirement:\n\n${description}\n\nProvide only the code with comments, no explanations.`;
+    
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings,
+      generationConfig: {
+        temperature: 0.2, // Lower temperature for code
+      }
+    });
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  }
+  
+  // Text embedding (for semantic search)
+  async getEmbedding(text: string): Promise<number[]> {
+    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+    
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  }
+  
+  // Summarize text
+  async summarize(text: string, maxLength: number = 200): Promise<string> {
+    const prompt = `Summarize the following text in approximately ${maxLength} words:\n\n${text}`;
+    
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings
+    });
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  }
+  
+  // Extract structured data from text
+  async extractData(text: string, schema: string): Promise<any> {
+    const prompt = `Extract data from the following text according to this schema:\n\nSchema: ${schema}\n\nText: ${text}\n\nReturn only valid JSON.`;
+    
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings,
+      generationConfig: {
+        temperature: 0.1,
+      }
+    });
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response.text();
+    
+    // Extract JSON from markdown code blocks if present
+    const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/) || response.match(/```\n([\s\S]*?)\n```/);
+    const jsonStr = jsonMatch ? jsonMatch[1] : response;
+    
+    return JSON.parse(jsonStr);
+  }
+  
+  // Translate text
+  async translate(text: string, targetLanguage: string): Promise<string> {
+    const prompt = `Translate the following text to ${targetLanguage}:\n\n${text}`;
+    
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings
+    });
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  }
+  
+  // Function calling / Tool use
+  async useTool(prompt: string, tools: any[]): Promise<any> {
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      safetySettings,
+      tools
+    });
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    
+    // Check if function call was made
+    const functionCall = response.candidates?.[0]?.content?.parts?.[0]?.functionCall;
+    
+    return {
+      text: response.text(),
+      functionCall
+    };
+  }
+}
+
+export const geminiService = new GeminiService();
+```
+
+**Create Enhanced AI Router:** `backend/src/routes/ai.ts`
+
+```typescript
+import { Router } from 'express';
+import { verifyAuth } from '../middleware/auth.js';
+import { geminiService } from '../services/gemini.js';
+
+const router = Router();
+router.use(verifyAuth);
+
+// POST /api/ai/generate - Text generation
+router.post('/generate', async (req, res) => {
+  try {
+    const { prompt, temperature = 0.7 } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
+    
+    const text = await geminiService.generateText(prompt, temperature);
+    res.json({ text });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/chat - Chat conversation
+router.post('/chat', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: 'Messages array is required' });
+    }
+    
+    const response = await geminiService.chat(messages);
+    res.json({ response });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/vision - Analyze image
+router.post('/vision', async (req, res) => {
+  try {
+    const { imageData, prompt } = req.body;
+    
+    if (!imageData) {
+      return res.status(400).json({ error: 'Image data is required' });
+    }
+    
+    const analysis = await geminiService.analyzeImage(imageData, prompt);
+    res.json({ analysis });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/code - Generate code
+router.post('/code', async (req, res) => {
+  try {
+    const { description, language = 'typescript' } = req.body;
+    
+    if (!description) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+    
+    const code = await geminiService.generateCode(description, language);
+    res.json({ code });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/embedding - Get text embedding
+router.post('/embedding', async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+    
+    const embedding = await geminiService.getEmbedding(text);
+    res.json({ embedding });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/summarize - Summarize text
+router.post('/summarize', async (req, res) => {
+  try {
+    const { text, maxLength = 200 } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+    
+    const summary = await geminiService.summarize(text, maxLength);
+    res.json({ summary });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/extract - Extract structured data
+router.post('/extract', async (req, res) => {
+  try {
+    const { text, schema } = req.body;
+    
+    if (!text || !schema) {
+      return res.status(400).json({ error: 'Text and schema are required' });
+    }
+    
+    const data = await geminiService.extractData(text, schema);
+    res.json({ data });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/ai/translate - Translate text
+router.post('/translate', async (req, res) => {
+  try {
+    const { text, targetLanguage } = req.body;
+    
+    if (!text || !targetLanguage) {
+      return res.status(400).json({ error: 'Text and target language are required' });
+    }
+    
+    const translation = await geminiService.translate(text, targetLanguage);
+    res.json({ translation });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;
+```
+
+**Checkpoint:** All Gemini AI features working via API
+
+---
+
+#### Task H: YouTube API Integration
+
+**Create:** `backend/src/services/youtubeService.ts`
+
+```typescript
+import { google } from 'googleapis';
+
+const youtube = google.youtube({
+  version: 'v3',
+  auth: process.env.GOOGLE_API_KEY
+});
+
+export class YouTubeService {
+  // Search videos
+  async searchVideos(query: string, maxResults: number = 10): Promise<any[]> {
+    const response = await youtube.search.list({
+      part: ['snippet'],
+      q: query,
+      type: ['video'],
+      maxResults,
+      relevanceLanguage: 'en'
+    });
+    
+    return response.data.items || [];
+  }
+  
+  // Get video details
+  async getVideoDetails(videoId: string): Promise<any> {
+    const response = await youtube.videos.list({
+      part: ['snippet', 'contentDetails', 'statistics'],
+      id: [videoId]
+    });
+    
+    return response.data.items?.[0];
+  }
+  
+  // Get trending videos
+  async getTrending(regionCode: string = 'US', maxResults: number = 10): Promise<any[]> {
+    const response = await youtube.videos.list({
+      part: ['snippet', 'statistics'],
+      chart: 'mostPopular',
+      regionCode,
+      maxResults
+    });
+    
+    return response.data.items || [];
+  }
+  
+  // Get channel details
+  async getChannelDetails(channelId: string): Promise<any> {
+    const response = await youtube.channels.list({
+      part: ['snippet', 'statistics', 'contentDetails'],
+      id: [channelId]
+    });
+    
+    return response.data.items?.[0];
+  }
+}
+
+export const youtubeService = new YouTubeService();
+```
+
+**Create Router:** `backend/src/routes/youtube.ts`
+
+```typescript
+import { Router } from 'express';
+import { verifyAuth } from '../middleware/auth.js';
+import { youtubeService } from '../services/youtubeService.js';
+
+const router = Router();
+router.use(verifyAuth);
+
+// GET /api/youtube/search
+router.get('/search', async (req, res) => {
+  try {
+    const { q, maxResults = 10 } = req.query;
+    
+    if (!q) {
+      return res.status(400).json({ error: 'Query parameter "q" is required' });
+    }
+    
+    const videos = await youtubeService.searchVideos(q as string, Number(maxResults));
+    res.json({ videos });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/youtube/video/:id
+router.get('/video/:id', async (req, res) => {
+  try {
+    const video = await youtubeService.getVideoDetails(req.params.id);
+    res.json({ video });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/youtube/trending
+router.get('/trending', async (req, res) => {
+  try {
+    const { region = 'US', maxResults = 10 } = req.query;
+    
+    const videos = await youtubeService.getTrending(region as string, Number(maxResults));
+    res.json({ videos });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;
+```
+
+**Checkpoint:** YouTube search and video details working
+
+---
+
+#### Task I: Google Drive API Integration
+
+**Create:** `backend/src/services/driveService.ts`
+
+```typescript
+import { google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
+
+export class DriveService {
+  private oauth2Client: OAuth2Client;
+  
+  constructor() {
+    this.oauth2Client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+  }
+  
+  // List files
+  async listFiles(accessToken: string, pageSize: number = 10): Promise<any[]> {
+    this.oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
+    
+    const response = await drive.files.list({
+      pageSize,
+      fields: 'files(id, name, mimeType, createdTime, modifiedTime, size)'
+    });
+    
+    return response.data.files || [];
+  }
+  
+  // Upload file
+  async uploadFile(
+    accessToken: string,
+    fileName: string,
+    mimeType: string,
+    fileContent: Buffer
+  ): Promise<any> {
+    this.oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
+    
+    const response = await drive.files.create({
+      requestBody: {
+        name: fileName,
+        mimeType
+      },
+      media: {
+        mimeType,
+        body: fileContent
+      },
+      fields: 'id, name, mimeType, createdTime'
+    });
+    
+    return response.data;
+  }
+  
+  // Download file
+  async downloadFile(accessToken: string, fileId: string): Promise<Buffer> {
+    this.oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
+    
+    const response = await drive.files.get(
+      { fileId, alt: 'media' },
+      { responseType: 'arraybuffer' }
+    );
+    
+    return Buffer.from(response.data as ArrayBuffer);
+  }
+  
+  // Delete file
+  async deleteFile(accessToken: string, fileId: string): Promise<void> {
+    this.oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
+    
+    await drive.files.delete({ fileId });
+  }
+  
+  // Create folder
+  async createFolder(accessToken: string, folderName: string): Promise<any> {
+    this.oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
+    
+    const response = await drive.files.create({
+      requestBody: {
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder'
+      },
+      fields: 'id, name'
+    });
+    
+    return response.data;
+  }
+}
+
+export const driveService = new DriveService();
+```
+
+**Create Router:** `backend/src/routes/drive.ts`
+
+```typescript
+import { Router } from 'express';
+import { verifyAuth } from '../middleware/auth.js';
+import { driveService } from '../services/driveService.js';
+import { supabase } from '../services/supabase.js';
+import multer from 'multer';
+
+const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.use(verifyAuth);
+
+// GET /api/drive/files
+router.get('/files', async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('user_integrations')
+      .select('access_token')
+      .eq('user_id', req.user.id)
+      .eq('service', 'google')
+      .single();
+    
+    if (!data) {
+      return res.status(401).json({ error: 'Google Drive not connected' });
+    }
+    
+    const files = await driveService.listFiles(data.access_token);
+    res.json({ files });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/drive/upload
+router.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+    
+    const { data } = await supabase
+      .from('user_integrations')
+      .select('access_token')
+      .eq('user_id', req.user.id)
+      .eq('service', 'google')
+      .single();
+    
+    if (!data) {
+      return res.status(401).json({ error: 'Google Drive not connected' });
+    }
+    
+    const file = await driveService.uploadFile(
+      data.access_token,
+      req.file.originalname,
+      req.file.mimetype,
+      req.file.buffer
+    );
+    
+    res.json({ file });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/drive/files/:id
+router.delete('/files/:id', async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('user_integrations')
+      .select('access_token')
+      .eq('user_id', req.user.id)
+      .eq('service', 'google')
+      .single();
+    
+    if (!data) {
+      return res.status(401).json({ error: 'Google Drive not connected' });
+    }
+    
+    await driveService.deleteFile(data.access_token, req.params.id);
+    res.json({ message: 'File deleted' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;
+```
+
+**Install multer for file uploads:**
+```bash
+npm install multer
+npm install -D @types/multer
+```
+
+**Checkpoint:** Google Drive file operations working
+
+---
+
+#### Task J: Enhanced Telegram Bot Features
 
 **Update:** `backend/src/telegram/bot.ts`
 
