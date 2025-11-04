@@ -12,7 +12,7 @@ import workflowsRouter from './routes/workflows.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -41,11 +41,13 @@ const server = http.createServer(app);
 // Setup WebSocket
 setupWebSocket(server);
 
-// Start server
-server.listen(PORT, () => {
- console.log(`✅ Server running on http://localhost:${PORT}`);
- console.log(`✅ WebSocket server ready`);
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+   console.log(`✅ Server running on http://localhost:${PORT}`);
+   console.log(`✅ WebSocket server ready`);
 
- // Launch Telegram bot
- launchBot();
-});
+   // Launch Telegram bot
+   launchBot();
+  });
+}
