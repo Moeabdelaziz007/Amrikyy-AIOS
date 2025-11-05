@@ -1,4 +1,4 @@
-timport React, { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function CreatorPipelineApp() {
   const [title, setTitle] = useState('');
@@ -54,4 +54,3 @@ export default function CreatorPipelineApp() {
     </div>
   );
 }
-

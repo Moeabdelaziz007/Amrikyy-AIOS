@@ -225,3 +225,5 @@ export const TagIcon: React.FC<{className?: string}> = ({className}) => (<Materi
 export const MapsIcon = MapIcon;
 export const VideoAnalyzerIcon = VideoAnalyzeIcon;
 export const TranscriberIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>keyboard_voice</MaterialIcon>);
+/** Dollar sign icon. */
+export const DollarIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>attach_money</MaterialIcon>);

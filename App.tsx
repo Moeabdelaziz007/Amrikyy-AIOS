@@ -71,7 +71,7 @@ const WorkflowDashboardWidget = lazy(() => import('./components/widgets/Workflow
  * This enables code-splitting for application components.
  */
 const appComponents: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
- eak  [AppID.creatorPipeline]: lazy(() => import('./components/apps/CreatorPipelineApp.tsx')),
+  [AppID.creatorPipeline]: lazy(() => import('./components/apps/CreatorPipelineApp.tsx')),
   [AppID.nexusPortal]: lazy(() => import('./components/hubs/NexusPortal.tsx')),
   [AppID.chat]: lazy(() => import('./components/apps/ChatApp.tsx')),
   [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp.tsx')),
@@ -139,7 +139,7 @@ const appComponents: Record<string, React.LazyExoticComponent<React.ComponentTyp
   [AppID.pricing]: lazy(() => import('./components/apps/PricingApp.tsx')),
   [AppID.veo]: lazy(() => import('./components/apps/VeoApp.tsx')),
   [AppID.nanoBanana]: lazy(() => import('./components/apps/NanoBananaApp.tsx')),
-ke a   [AppID.agentFactory]: lazy(() => import('./components/apps/AgentFactoryApp.tsx')),
+  [AppID.agentFactory]: lazy(() => import('./components/apps/AgentFactoryApp.tsx')),
   [AppID.gmail]: lazy(() => import('./components/apps/GmailApp.tsx')),
   [AppID.weather]: lazy(() => import('./components/apps/WeatherApp.tsx')),
   [AppID.youtube]: lazy(() => import('./components/apps/YouTubeApp.tsx')),
