@@ -1,6 +1,8 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 import { mergeConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 import path from 'path';
 
 const config: StorybookConfig = {
@@ -21,34 +23,34 @@ const config: StorybookConfig = {
   },
   async viteFinal(config, { configType }) {
     return mergeConfig(config, {
-      plugins: [react()], // Explicitly add React plugin
+      plugins: [react()], // Ensure React plugin is always active
+      
+      // Crucial: Explicitly configure esbuild for TypeScript transpilation
+      // This ensures .ts and .tsx files, especially in .storybook, are processed
       esbuild: {
-        loader: 'tsx', // Ensure .ts and .tsx files are processed as TSX
+        loader: 'tsx', // Process .ts and .tsx files as TSX
         include: /\.tsx?$/,
+        exclude: /node_modules/, // Exclude node_modules to avoid conflicts
       },
-      // This is crucial for Storybook to correctly process its own config files
-      optimizeDeps: {
-        include: [
-          '@storybook/react-vite',
-          '@storybook/addon-essentials',
-          '@storybook/addon-interactions',
-          '@storybook/addon-links',
-          '@storybook/blocks',
-          '@storybook/react',
-          '@storybook/testing-library',
-          // Explicitly include .storybook files for optimization
-          path.resolve(__dirname, './preview.ts'),
-          path.resolve(__dirname, './main.ts'),
-        ],
-      },
-      // Ensure PostCSS is correctly configured, even if postcss.config.js is present
+      
+      // Ensure PostCSS is correctly configured for Tailwind
       css: {
         postcss: {
           plugins: [
-            require('tailwindcss')(path.resolve(__dirname, '../tailwind.config.js')),
-            require('autoprefixer'),
+            tailwindcss(path.resolve(__dirname, '../tailwind.config.js')),
+            autoprefixer,
           ],
         },
+      },
+      
+      // Optimize dependencies, including Storybook's own config files
+      optimizeDeps: {
+        entries: [
+          path.resolve(__dirname, './preview.ts'),
+          path.resolve(__dirname, './main.ts'),
+          path.resolve(__dirname, '../src/**/*.stories.tsx'),
+          path.resolve(__dirname, '../src/**/*.stories.ts'),
+        ],
       },
     });
   },

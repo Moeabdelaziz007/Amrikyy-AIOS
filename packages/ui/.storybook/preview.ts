@@ -1,4 +1,4 @@
-// import "../src/styles/tailwind.css"; // Temporarily commented out for troubleshooting
+import "../src/styles/tailwind.css"; // Re-enabled
 import type { Preview } from "@storybook/react";
 import { KomabiThemeProvider } from "../src/theme/useTheme";
 import React from 'react';
