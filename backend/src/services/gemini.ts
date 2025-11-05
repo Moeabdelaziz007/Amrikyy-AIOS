@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerationConfig, SafetySetting } from '@google/generative-ai';
 import dotenv from 'dotenv';
 import { SearchResult } from './googleSearchService.js';
 
@@ -7,6 +7,7 @@ dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+// Assuming generateImages is correctly imported and used
 import { generateImages } from "@google/generative-ai/node";
 
 export async function generateImage(prompt: string) {
@@ -20,20 +21,28 @@ export async function generateImage(prompt: string) {
 
         const base64ImageBytes = generatedImages[0].image.imageBytes;
         return `data:image/png;base64,${base64ImageBytes}`;
-    } catch (error) {
-        console.error('Gemini Image API error:', error);
-        throw new Error('Failed to generate image');
+    } catch (error: any) {
+        console.error('Gemini Image API error:', error.message, error.stack);
+        throw new Error(`Failed to generate image: ${error.message}`);
     }
 }
 
-export async function generateContent(prompt: string) {
+export async function generateContent(
+  prompt: string,
+  generationConfig?: GenerationConfig,
+  safetySettings?: SafetySetting[]
+) {
   try {
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig,
+      safetySettings,
+    });
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Failed to generate content');
+  } catch (error: any) {
+    console.error('Gemini API error:', error.message, error.stack);
+    throw new Error(`Failed to generate content: ${error.message}`);
   }
 }
 
@@ -47,9 +56,9 @@ export async function startChat(messages: any[]) {
         const result = await chat.sendMessage(lastMessage.parts[0].text);
         const response = await result.response;
         return response.text();
-    } catch (error) {
-        console.error('Gemini Chat API error:', error);
-        throw new Error('Failed to process chat');
+    } catch (error: any) {
+        console.error('Gemini Chat API error:', error.message, error.stack);
+        throw new Error(`Failed to process chat: ${error.message}`);
     }
 }
 
@@ -114,17 +123,33 @@ export async function summarizeText(text: string, maxWords: number = 200): Promi
 /**
 * Analyze sentiment
 */
-export async function analyzeSentiment(text: string): Promise<string> {
- const prompt = `Analyze the sentiment of this text (positive/negative/neutral) and explain why:\n\n${text}\n\nAnalysis:`;
- return generateContent(prompt);
+export async function analyzeSentiment(text: string): Promise<{ sentiment: string; explanation: string }> {
+  const prompt = `Analyze the sentiment of this text (positive/negative/neutral) and explain why. Return the response as a JSON object with 'sentiment' and 'explanation' keys.\n  Text: ${text}\n  JSON:`;
+  const rawResponse = await generateContent(prompt, { responseMimeType: 'application/json' });
+  try {
+    return JSON.parse(rawResponse);
+  } catch (e: any) {
+    console.error('Failed to parse sentiment analysis JSON:', rawResponse, e.message, e.stack);
+    throw new Error(`Failed to parse sentiment analysis response from Gemini: ${e.message}`);
+  }
 }
 
 /**
 * Extract keywords
 */
-export async function extractKeywords(text: string): Promise<string> {
- const prompt = `Extract the most important keywords from this text:\n\n${text}\n\nKeywords:`;
- return generateContent(prompt);
+export async function extractKeywords(text: string): Promise<string[]> {
+  const prompt = `Extract the most important keywords from this text. Return the response as a JSON array of strings under a 'keywords' key.\n  Text: ${text}\n  JSON:`;
+  const rawResponse = await generateContent(prompt, { responseMimeType: 'application/json' });
+  try {
+    const parsedResponse = JSON.parse(rawResponse);
+    if (Array.isArray(parsedResponse.keywords)) {
+      return parsedResponse.keywords;
+    }
+    throw new Error('Expected an array of keywords in the JSON response.');
+  } catch (e: any) {
+    console.error('Failed to parse keyword extraction JSON:', rawResponse, e.message, e.stack);
+    throw new Error(`Failed to parse keyword extraction response from Gemini: ${e.message}`);
+  }
 }
 
 /**

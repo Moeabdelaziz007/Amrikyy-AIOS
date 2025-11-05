@@ -99,12 +99,15 @@ const StoreApp: React.FC<StoreAppProps> = ({ onAddAgent, installedAgents, userAc
                                     </div>
                                 </div>
                                  <div className="ml-auto text-right">
-                                    {agent.price ? (
-                                        <span className="px-2 py-1 text-xs font-bold bg-amber-500/20 text-amber-400 rounded-full">${agent.price}</span>
-                                    ) : (
-                                        <span className="px-2 py-1 text-xs font-bold bg-green-500/20 text-green-300 rounded-full">Free</span>
-                                    )}
-                                </div>
+                                    {/* Action button for featured cards so tests can interact the same way as discover cards */}
+                                    <button
+                                        disabled={installedAgentIds.has(agent.id)}
+                                        onClick={(e) => { e.stopPropagation(); handleGetAgent(agent); }}
+                                        className={`px-3 py-1 text-xs font-bold rounded-full ${installedAgentIds.has(agent.id) ? 'bg-green-500/20 text-green-300 cursor-not-allowed' : 'bg-primary-blue/20 text-primary-blue hover:bg-primary-blue/40'}`}
+                                    >
+                                        {installedAgentIds.has(agent.id) ? 'Installed' : agent.price ? `$${agent.price}` : 'Get'}
+                                    </button>
+                                 </div>
                             </div>
                         ))}
                     </div>
@@ -129,12 +132,12 @@ const StoreApp: React.FC<StoreAppProps> = ({ onAddAgent, installedAgents, userAc
             </main>
 
             {/* Agent Detail Modal */}
-            {viewingAgent && (
+             {viewingAgent && (
                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center animate-fade-in" onClick={() => setViewingAgent(null)}>
-                    <div className="w-full max-w-lg bg-bg-secondary rounded-2xl border border-border-color shadow-2xl flex flex-col animate-slide-up" onClick={(e) => e.stopPropagation()}>
-                        <div className="p-6 text-center border-b border-border-color">
-                             <div className="text-6xl mx-auto mb-2">{viewingAgent.icon}</div>
-                             <h2 className="text-2xl font-bold font-display">{viewingAgent.name}</h2>
+                    <div role="dialog" aria-modal="true" aria-labelledby={`agent-title-${viewingAgent.id}`} className="w-full max-w-lg bg-bg-secondary rounded-2xl border border-border-color shadow-2xl flex flex-col animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                         <div className="p-6 text-center border-b border-border-color">
+                              <div className="text-6xl mx-auto mb-2">{viewingAgent.icon}</div>
+                             <h2 id={`agent-title-${viewingAgent.id}`} className="text-2xl font-bold font-display">{viewingAgent.name}</h2>
                              <p className="text-sm text-text-secondary">{viewingAgent.author}</p>
                              <div className="flex items-center justify-center gap-1 mt-1 text-yellow-400">
                                 <SparklesIcon className="w-4 h-4" />
@@ -161,3 +164,4 @@ const StoreApp: React.FC<StoreAppProps> = ({ onAddAgent, installedAgents, userAc
 };
 
 export default StoreApp;
+

@@ -1,0 +1,1 @@
+pnpm test --runInBand --reporter=verbose --maxWorkers=1 | tee full_test_log.txtpnpm test --runInBand --reporter=verbose --maxWorkers=1 | tee full_test_log.txt

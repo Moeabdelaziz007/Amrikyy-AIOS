@@ -86,7 +86,7 @@ describe('LoadingScreen', () => {
     render(<LoadingScreen />);
 
     // Advance all timers significantly past total loading time
-    vi.advanceTimersByTime(10000); // Sum of durations is 5700ms
+    await vi.runAllTimersAsync(); // Use runAllTimersAsync
 
     await waitFor(() => {
       const loadingScreenDiv = screen.getByText('Amrikyy AI OS').closest('div');
@@ -97,7 +97,7 @@ describe('LoadingScreen', () => {
 
   it('displays "All Systems Ready!" as the final message', async () => {
     render(<LoadingScreen />);
-    vi.advanceTimersByTime(10000);
+    await vi.runAllTimersAsync(); // Use runAllTimersAsync
     await waitFor(() => {
       expect(screen.getByText('All Systems Ready!')).toBeInTheDocument();
     });
@@ -105,8 +105,9 @@ describe('LoadingScreen', () => {
 
   it('does not display spinning icon for final message', async () => {
     render(<LoadingScreen />);
-    vi.advanceTimersByTime(10000);
+    await vi.runAllTimersAsync(); // Use runAllTimersAsync
     await waitFor(() => {
+      expect(screen.getByText('All Systems Ready!')).toBeInTheDocument();
       const spinningIcon = screen.queryByRole('status', { name: /loading/i });
       expect(spinningIcon).not.toBeInTheDocument();
     });

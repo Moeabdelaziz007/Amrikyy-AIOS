@@ -57,6 +57,7 @@ describe('AtlasApp', () => {
 
   it('defaults to the Dashboard tab and displays mock data', async () => {
     render(<AtlasApp />);
+    await vi.runAllTimersAsync();
     await waitFor(() => {
       expect(screen.getByText('Test News 1')).toBeInTheDocument(); // From mocked getFinancialNews
       expect(screen.getByText('S&P 500')).toBeInTheDocument(); // From data/finance
@@ -82,6 +83,8 @@ describe('AtlasApp', () => {
     const tickerInput = screen.getByPlaceholderText(/enter stock or crypto ticker/i);
     fireEvent.change(tickerInput, { target: { value: 'AAPL' } });
     fireEvent.click(screen.getByRole('button', { name: /analyze/i }));
+
+    await vi.runAllTimersAsync();
 
     await waitFor(() => {
       expect(geminiAdvancedService.getFinancialAnalysis).toHaveBeenCalledWith('AAPL');
@@ -109,6 +112,8 @@ describe('AtlasApp', () => {
     const chatInput = screen.getByPlaceholderText(/ask a financial question/i);
     fireEvent.change(chatInput, { target: { value: 'What is the current market trend?' } });
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
+
+    await vi.runAllTimersAsync();
 
     await waitFor(() => {
       expect(geminiService.generateText).toHaveBeenCalledWith(
@@ -144,6 +149,8 @@ describe('AtlasApp', () => {
     const tickerInput = screen.getByPlaceholderText(/enter stock or crypto ticker/i);
     fireEvent.change(tickerInput, { target: { value: 'FAIL' } });
     fireEvent.click(screen.getByRole('button', { name: /analyze/i }));
+
+    await vi.runAllTimersAsync();
 
     await waitFor(() => {
       expect(screen.getByText('Failed to retrieve analysis. Please check the ticker and try again.')).toBeInTheDocument();
