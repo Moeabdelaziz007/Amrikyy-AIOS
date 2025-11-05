@@ -1,7 +1,5 @@
-    }
-
 import express from 'express';
-
+import multer from 'multer';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() }); // memory storage
@@ -22,25 +20,28 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No audio file provided (field name: audio).' });
 
-    const { originalname, mimetype, size, buffer } = req.file as Express.Multer.File;
+    const { mimetype, size, buffer } = req.file as Express.Multer.File;
 
     if (!ALLOWED_MIME.has(mimetype)) {
+      return res.status(415).json({ error: `Unsupported audio format: ${mimetype}. Allowed: ${Array.from(ALLOWED_MIME).join(', ')}` });
     }
 
     if (size > MAX_BYTES) {
       return res.status(413).json({ error: `Audio file too large (${(size / (1024*1024)).toFixed(2)} MB). Max allowed: ${(MAX_BYTES / (1024*1024)).toFixed(2)} MB.` });
-      return res.status(415).json({ error: `Unsupported audio format: ${mimetype}. Allowed: ${Array.from(ALLOWED_MIME).join(', ')}` });
+    }
+
     if (!GOOGLE_API_KEY) return res.status(500).json({ error: 'Server misconfigured: missing GOOGLE_API_KEY.' });
 
-    const buffer = req.file.buffer;
     const base64 = buffer.toString('base64');
 
     const body = {
       audio: { content: base64 },
       config: {
+        // Use WEBM_OPUS by default for browser WebM recordings; callers can adjust as needed.
         encoding: 'WEBM_OPUS',
         sampleRateHertz: 48000,
-        languageCode: 'en-US'
+        languageCode: 'en-US',
+        enableAutomaticPunctuation: true
       }
     };
 
@@ -71,6 +72,7 @@ router.post('/synthesize', express.json(), async (req, res) => {
     const { text } = req.body || {};
     if (!text) return res.status(400).json({ error: 'Missing `text` in body.' });
     if (!GOOGLE_API_KEY) return res.status(500).json({ error: 'Server misconfigured: missing GOOGLE_API_KEY.' });
+
     const body = {
       input: { text },
       voice: { languageCode: 'en-US', name: 'en-US-Wavenet-D' },
@@ -101,4 +103,3 @@ router.post('/synthesize', express.json(), async (req, res) => {
 });
 
 export default router;
-

@@ -80,4 +80,40 @@ router.get('/emails', async (req: AuthenticatedRequest, res) => {
  }
 });
 
+// GET /api/gmail/status
+router.get('/status', async (req: AuthenticatedRequest, res) => {
+  try {
+    const { data } = await supabase
+      .from('user_integrations')
+      .select('access_token')
+      .eq('user_id', req.user.id)
+      .eq('service', 'gmail')
+      .single();
+
+    if (data) {
+      // Optionally fetch user email from Gmail API
+      res.json({ connected: true, email: 'user@example.com' }); // Placeholder; fetch real email if needed
+    } else {
+      res.json({ connected: false });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/gmail/disconnect
+router.post('/disconnect', async (req: AuthenticatedRequest, res) => {
+  try {
+    await supabase
+      .from('user_integrations')
+      .delete()
+      .eq('user_id', req.user.id)
+      .eq('service', 'gmail');
+
+    res.json({ message: 'Gmail disconnected successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

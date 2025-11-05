@@ -79,7 +79,7 @@ router.delete('/events/:id', async (req: AuthenticatedRequest, res) => {
  }
 });
 
-body// GET /api/calendar/auth-url
+// GET /api/calendar/auth-url
 router.get('/auth-url', (req: AuthenticatedRequest, res) => {
   const authUrl = calendarService.getAuthUrl(req.user.id);
   res.json({ authUrl });
@@ -104,6 +104,41 @@ router.post('/callback', async (req: AuthenticatedRequest, res) => {
     res.json({ message: 'Google Calendar connected successfully' });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// GET /api/calendar/status
+router.get('/status', async (req: AuthenticatedRequest, res) => {
+  try {
+    const { data } = await supabase
+      .from('user_integrations')
+      .select('access_token')
+      .eq('user_id', req.user.id)
+      .eq('service', 'google')
+      .single();
+
+    if (data) {
+      res.json({ connected: true, email: 'user@example.com' }); // Placeholder
+    } else {
+      res.json({ connected: false });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/calendar/disconnect
+router.post('/disconnect', async (req: AuthenticatedRequest, res) => {
+  try {
+    await supabase
+      .from('user_integrations')
+      .delete()
+      .eq('user_id', req.user.id)
+      .eq('service', 'google');
+
+    res.json({ message: 'Google Calendar disconnected successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 });
 
