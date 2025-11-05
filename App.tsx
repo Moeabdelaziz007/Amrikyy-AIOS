@@ -56,6 +56,7 @@ import { bounties as mockBounties } from './data/bounties.ts';
 import LoadingScreen from './components/LoadingScreen.tsx';
 import { initialNexusPosts as mockNexusPosts } from './data/nexus.ts';
 import { TranslationKey } from './i18n.ts';
+import HolographicAI from './components/HolographicAI.tsx';
 
 // Lazy load all application components for code-splitting and performance
 const Window = lazy(() => import('./components/Window.tsx'));
@@ -1138,6 +1139,9 @@ const App: React.FC = () => {
             taskbarTheme={settings.taskbarTheme}
             frequentApps={getFrequentApps(3)}
          />
+
+         {/* Always-on Holographic AI assistant */}
+         <HolographicAI />
       </div>
     </main>
     </AuthProvider>

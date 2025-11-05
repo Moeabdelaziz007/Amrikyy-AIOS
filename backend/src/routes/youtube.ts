@@ -1,4 +1,4 @@
- aimport { Router } from 'express';
+import { Router } from 'express';
 import { supabase } from '../services/supabase.js';
 
 const router = Router();
@@ -25,4 +25,3 @@ router.post('/upload', async (req, res) => {
 });
 
 export default router;
-

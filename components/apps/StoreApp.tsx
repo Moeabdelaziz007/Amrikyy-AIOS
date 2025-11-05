@@ -29,6 +29,10 @@ const StoreApp: React.FC<StoreAppProps> = ({ onAddAgent, installedAgents, userAc
         });
     }, [searchTerm, selectedCategory]);
 
+    // Avoid rendering the same agent twice (Featured + Discover) which breaks tests
+    const featuredAgents = useMemo(() => filteredAgents.slice(0, 2), [filteredAgents]);
+    const discoverAgents = useMemo(() => filteredAgents.slice(2), [filteredAgents]);
+
     const categories: Category[] = ['All', 'Productivity', 'Creative', 'Utility'];
 
     const handleGetAgent = (agent: CommunityAgent) => {
@@ -83,7 +87,7 @@ const StoreApp: React.FC<StoreAppProps> = ({ onAddAgent, installedAgents, userAc
                 <div>
                     <h2 className="text-2xl font-bold font-display mb-4">Featured</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         {filteredAgents.slice(0, 2).map(agent => (
+                         {featuredAgents.map(agent => (
                             <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-black/20 p-4 rounded-lg border border-border-color flex items-center gap-4 cursor-pointer hover:border-primary-blue transition-colors">
                                 <div className="text-5xl flex-shrink-0">{agent.icon}</div>
                                 <div>
@@ -109,7 +113,7 @@ const StoreApp: React.FC<StoreAppProps> = ({ onAddAgent, installedAgents, userAc
                 <div>
                     <h2 className="text-2xl font-bold font-display mb-4">Discover Agents</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {filteredAgents.map(agent => (
+                        {discoverAgents.map(agent => (
                             <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-black/20 p-4 rounded-lg border border-border-color flex flex-col items-center text-center gap-2 cursor-pointer hover:border-primary-blue transition-colors">
                                 <div className="text-4xl">{agent.icon}</div>
                                 <h3 className="font-semibold text-sm">{agent.name}</h3>

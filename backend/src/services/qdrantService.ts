@@ -1,4 +1,4 @@
-rosnimport { QdrantClient } from '@qdrant/js-client-rest';
+import { QdrantClient } from '@qdrant/js-client-rest';
 import fetch from 'node-fetch';
 
 /**

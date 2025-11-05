@@ -1,4 +1,4 @@
-coimport { Router } from 'express';
+import { Router } from 'express';
 import { verifyAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { calendarService } from '../services/calendarService.js';
 import { supabase } from '../services/supabase.js';

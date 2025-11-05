@@ -1,4 +1,4 @@
-otheimport { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 
 const API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
 
@@ -22,4 +22,3 @@ export async function embedText(text: string): Promise<number[]> {
     throw e;
   }
 }
-

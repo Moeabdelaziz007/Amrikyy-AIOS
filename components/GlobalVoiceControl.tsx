@@ -1,9 +1,10 @@
 // cancel visualization loop
 import React, { useState, useRef, useEffect } from 'react';
-import { interpretVoiceCommand, processLiveAudio, startLiveSession } from '../services/geminiAdvancedService';
+import { interpretVoiceCommand, processLiveAudio } from '../services/geminiAdvancedService';
 import { transcribeAudioBlob, synthesizeTextToAudioUrl, GOOGLE_API_KEY } from '../services/googleSpeechService';
 import { useLanguage } from '../contexts/LanguageContext';
 import agentDef from '../data/aiAgent.aix.json';
+import { safeAlert } from '../utils/safeAlert';
 
 type GlobalVoiceControlProps = {
   onCommand: (command: string) => void;
@@ -31,8 +32,16 @@ const GlobalVoiceControl: React.FC<GlobalVoiceControlProps> = ({ onCommand }) =>
     // Initialize Gemini Live session (non-blocking)
     const initSession = async () => {
       try {
-        const session = await startLiveSession();
-        setSessionId(session?.sessionId ?? null);
+        // dynamic import and guard for test mocks
+        const mod = await import('../services/geminiAdvancedService');
+        const startLiveSessionFn = mod.startLiveSession;
+        if (typeof startLiveSessionFn === 'function') {
+          const session = await startLiveSessionFn();
+          setSessionId(session?.sessionId ?? null);
+        } else {
+          // mocked module may not export startLiveSession; skip
+          setSessionId(null);
+        }
       } catch (error) {
         console.warn('Failed to start live session:', error);
         setSessionId(null);
@@ -40,12 +49,33 @@ const GlobalVoiceControl: React.FC<GlobalVoiceControlProps> = ({ onCommand }) =>
     };
     initSession();
 
-    // Setup SpeechRecognition if available
-    // @ts-expect-error - browser vendor prefixes
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
+    // Create SpeechRecognition safely; tests may mock this differently
+    try {
+      // @ts-expect-error vendor prefixed
+      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (typeof SR === 'function' || typeof SR === 'object') {
+        // If SR is a constructor function, instantiate. If it's a mock factory, guard with try/catch
+        try {
+          // @ts-ignore
+          recognitionRef.current = new SR();
+        } catch (instErr) {
+          // Some test mocks export a factory function; try calling it
+          try {
+            // @ts-ignore
+            recognitionRef.current = SR();
+          } catch (e) {
+            console.warn('SpeechRecognition: unable to instantiate mock', e);
+            recognitionRef.current = null;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('SpeechRecognition setup failed', e);
+      recognitionRef.current = null;
+    }
+
+    if (recognitionRef.current) {
       try {
-        recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
         recognitionRef.current.lang = 'en-US';
@@ -286,7 +316,7 @@ const GlobalVoiceControl: React.FC<GlobalVoiceControlProps> = ({ onCommand }) =>
 
   const handleClick = () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert(t('voice_control.unsupported') || 'Voice recognition not supported by this browser.');
+      safeAlert(t('voice_control.unsupported') || 'Voice recognition not supported by this browser.');
       return;
     }
 

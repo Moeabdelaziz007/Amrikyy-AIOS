@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { generateMusic, generateVideo, generateTravelPlan } from '../services/geminiAdvancedService.js';
+import { generateMusic, generateVideo } from '../services/geminiAdvancedService.js';
 import { embedText } from '../services/geminiEmbeddingService.js';
 
 const router = Router();
@@ -34,4 +34,3 @@ router.post('/compose', async (req, res) => {
 });
 
 export default router;
-h q
