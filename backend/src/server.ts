@@ -18,7 +18,6 @@ import chatRouter from './routes/chat.js';
 import speechRouter from './routes/speech.js';
 import embeddingsRouter from './routes/embeddings.js';
 import creatorRouter from './routes/creator.js';
-import youtubeRouter from './routes/youtube.js';
 import geminiRouter from './routes/geminiRoutes.js'; // Import Gemini routes
 import transcriptionRouter from './routes/transcription.js'; // Import Transcription routes
 import { setupWebSocket } from './websocket/server.js';
@@ -57,7 +56,6 @@ app.use('/api/chat', chatRouter);
 app.use('/api/speech', speechRouter);
 app.use('/api/embeddings', embeddingsRouter);
 app.use('/api/creator', creatorRouter);
-app.use('/api/youtube', youtubeRouter);
 app.use('/api/gemini', geminiRouter); // Add Gemini routes
 app.use('/api/transcribe', transcriptionRouter); // Add Transcription routes
 

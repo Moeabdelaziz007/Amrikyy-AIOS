@@ -1,57 +1,19 @@
 {
   "name": "amrikyy-ai-os",
   "private": true,
-  "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:check": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint . --ext ts,tsx --fix",
-    "format": "prettier --write .",
-    "test": "vitest",
-    "test:e2e": "playwright test",
-    "prepare": "husky",
-    "start:mock-server": "node scripts/mock-server.js"
-  },
-  "dependencies": {
-    "@google/genai": "^1.28.0",
-    "@supabase/supabase-js": "^2.78.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "winston": "^3.18.3",
-    "yaml": "^2.8.1",
-    "ytdl-core": "^4.11.5",
-    "zod": "^4.1.12",
-    "swagger-ui-express": "^4.6.0",
-    "yamljs": "^0.3.0"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.6",
-    "@testing-library/react": "^16.0.0",
-    "@types/jest": "^30.0.0",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@types/testing-library__jest-dom": "^5.14.9",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
-    "@vitejs/plugin-react": "^4.3.1",
-    "dotenv": "^17.2.3",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.7",
-    "husky": "^9.0.11",
-    "jest": "^30.2.0",
-    "jsdom": "^24.1.0",
-    "playwright": "^1.56.1",
-    "prettier": "^3.3.2",
-    "ts-jest": "^29.4.5",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.2.2",
-    "vite": "^7.1.12",
-    "vite-plugin-pwa": "^1.1.0",
-    "vitest": "^4.0.7"
-  }
+    "turbo": "^2.0.4"
+  },
+  "packageManager": "pnpm@9.4.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
