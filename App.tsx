@@ -803,6 +803,47 @@ const App: React.FC = () => {
   ], [customAgents, t]);
 
   /**
+   * Handles liking a Nexus post.
+   * @param {string} postId - The ID of the post to like.
+   */
+  const handleLikePost = useCallback((postId: string) => {
+    setNexusPosts(prev => prev.map(post =>
+      post.id === postId ? { ...post, likes: post.likes + 1 } : post
+    ));
+  }, []);
+
+  /**
+   * Adds a new comment to a Nexus post.
+   * @param {string} postId - The ID of the post to comment on.
+   * @param {NexusComment} comment - The comment object to add.
+   */
+  const handleAddComment = useCallback((postId: string, comment: NexusComment) => {
+    setNexusPosts(prev => prev.map(post =>
+      post.id === postId ? { ...post, comments: [...post.comments, comment] } : post
+    ));
+  }, []);
+
+  /**
+   * Boosts a Nexus post, deducting credits and simulating increased views.
+   * @param {string} postId - The ID of the post to boost.
+   * @param {number} cost - The credit cost to boost the post.
+   * @returns {boolean} True if the boost was successful, false otherwise (e.g., insufficient credits).
+   */
+  const handleBoostPost = useCallback((postId: string, cost: number) => {
+    if (userAccount.aiCredits < cost) {
+        addNotification(t('*.insufficient_credits_text', { cost }), 'error');
+        return false;
+    }
+    handleCreditTransaction(-cost, 'boost', `Boosted post "${nexusPosts.find(p => p.id === postId)?.content.title || 'Unknown Post'}"`);
+    addNotification(`Post boosted successfully for ${cost} credits!`, 'success');
+    // Simulate increased views immediately
+    setNexusPosts(prev => prev.map(post =>
+        post.id === postId ? { ...post, views: post.views + 500 } : post
+    ));
+    return true;
+  }, [userAccount.aiCredits, addNotification, t, handleCreditTransaction, nexusPosts]);
+
+  /**
    * Renders the appropriate dashboard widgets based on the selected layout.
    * @param {DashboardLayout} layout - The current dashboard layout.
    * @returns {JSX.Element} The set of dashboard widgets.
@@ -843,47 +884,6 @@ const App: React.FC = () => {
   if (!isOSLoaded) {
     return <LoadingScreen userAccountName={userAccount.name} />;
   }
-
-  /**
-   * Handles liking a Nexus post.
-   * @param {string} postId - The ID of the post to like.
-   */
-  const handleLikePost = useCallback((postId: string) => {
-    setNexusPosts(prev => prev.map(post =>
-      post.id === postId ? { ...post, likes: post.likes + 1 } : post
-    ));
-  }, []);
-
-  /**
-   * Adds a new comment to a Nexus post.
-   * @param {string} postId - The ID of the post to comment on.
-   * @param {NexusComment} comment - The comment object to add.
-   */
-  const handleAddComment = useCallback((postId: string, comment: NexusComment) => {
-    setNexusPosts(prev => prev.map(post =>
-      post.id === postId ? { ...post, comments: [...post.comments, comment] } : post
-    ));
-  }, []);
-
-  /**
-   * Boosts a Nexus post, deducting credits and simulating increased views.
-   * @param {string} postId - The ID of the post to boost.
-   * @param {number} cost - The credit cost to boost the post.
-   * @returns {boolean} True if the boost was successful, false otherwise (e.g., insufficient credits).
-   */
-  const handleBoostPost = useCallback((postId: string, cost: number) => {
-    if (userAccount.aiCredits < cost) {
-        addNotification(t('*.insufficient_credits_text', { cost }), 'error');
-        return false;
-    }
-    handleCreditTransaction(-cost, 'boost', `Boosted post "${nexusPosts.find(p => p.id === postId)?.content.title || 'Unknown Post'}"`);
-    addNotification(`Post boosted successfully for ${cost} credits!`, 'success');
-    // Simulate increased views immediately
-    setNexusPosts(prev => prev.map(post =>
-        post.id === postId ? { ...post, views: post.views + 500 } : post
-    ));
-    return true;
-  }, [userAccount.aiCredits, addNotification, t, handleCreditTransaction, nexusPosts]);
 
   return (
     <AuthProvider>

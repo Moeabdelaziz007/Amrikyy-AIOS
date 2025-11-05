@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * MCP Hook
  * React hook لاستخدام MCP Commands

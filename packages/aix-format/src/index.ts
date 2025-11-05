@@ -420,18 +420,9 @@ export function extractMeta(content: string): Partial<AIXMeta> {
 }
 
 // ============================================
-// EXPORTS
+// EXPORTS (Core functions already exported at their definitions above)
+// Default export at end of file includes all definitions
 // ============================================
-
-export default {
-  parse: parseAIX,
-  parseFile: parseAIXFile,
-  generate: generateAIX,
-  validate: validateAIX,
-  download: downloadAIX,
-  createFilename: createAIXFilename,
-  extractMeta,
-};
 
 // ============================================
 // BUILDER API - Easy Agent Creation

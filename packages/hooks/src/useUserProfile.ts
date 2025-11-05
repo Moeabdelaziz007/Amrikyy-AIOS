@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * User Profile Hook
  * React hook for managing user profile data
