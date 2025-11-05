@@ -71,6 +71,7 @@ const WorkflowDashboardWidget = lazy(() => import('./components/widgets/Workflow
  * This enables code-splitting for application components.
  */
 const appComponents: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+ eak  [AppID.creatorPipeline]: lazy(() => import('./components/apps/CreatorPipelineApp.tsx')),
   [AppID.nexusPortal]: lazy(() => import('./components/hubs/NexusPortal.tsx')),
   [AppID.chat]: lazy(() => import('./components/apps/ChatApp.tsx')),
   [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp.tsx')),
@@ -138,6 +139,7 @@ const appComponents: Record<string, React.LazyExoticComponent<React.ComponentTyp
   [AppID.pricing]: lazy(() => import('./components/apps/PricingApp.tsx')),
   [AppID.veo]: lazy(() => import('./components/apps/VeoApp.tsx')),
   [AppID.nanoBanana]: lazy(() => import('./components/apps/NanoBananaApp.tsx')),
+ke a   [AppID.agentFactory]: lazy(() => import('./components/apps/AgentFactoryApp.tsx')),
   [AppID.gmail]: lazy(() => import('./components/apps/GmailApp.tsx')),
   [AppID.weather]: lazy(() => import('./components/apps/WeatherApp.tsx')),
   [AppID.youtube]: lazy(() => import('./components/apps/YouTubeApp.tsx')),
@@ -768,6 +770,8 @@ const App: React.FC = () => {
    * Memoized list of applications displayed on the desktop grid.
    */
   const desktopApps = useMemo(() => [
+    { id: AppID.creatorPipeline, name: 'Creator Pipeline', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🎬</span> },
+    { id: AppID.agentFactory, name: 'Agent Factory', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🤖</span> },
     { id: AppID.nexusPortal, name: 'Nexus Portal', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🜚</span> },
     { id: AppID.creatorStudio, name: t('desktop_apps.creatorStudio'), icon: CreatorStudioIcon },
     { id: AppID.cognitoBrowser, name: t('desktop_apps.cognitoBrowser'), icon: BrowserIcon },
@@ -795,6 +799,8 @@ const App: React.FC = () => {
    * Memoized list of all applications available in the app launcher.
    */
   const allAppsForLauncher = useMemo(() => [
+    { id: AppID.creatorPipeline, name: 'Creator Pipeline', description: 'Automated content pipeline (NanoBanana, Veo, Music -> YouTube)', category: 'creative', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🎬</span> },
+    { id: AppID.agentFactory, name: 'Agent Factory', description: 'Create sub-agents for Creator and Travel workflows', category: 'developer', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🤖</span> },
     { id: AppID.nexusPortal, name: 'Nexus Portal', description: 'Unified launchpad for all Komabi Hubs', category: 'portal', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🜚</span> },
 
     // AI & Communication
@@ -1053,6 +1059,9 @@ const App: React.FC = () => {
                           } else if (window.appId === AppID.agentForge || window.appId === AppID.avatarStudio) {
                               props.onAddAgent = addCustomAgent;
                               props.onClose = () => closeWindow(window.id);
+                          } else if (window.appId === AppID.agentFactory) {
+                              props.onAddAgent = addCustomAgent;
+                              props.onOpenApp = (appId: any, p?: any) => openWindow(appId, p);
                           } else if (window.appId === AppID.store) {
                               props.onAddAgent = addCustomAgent;
                               props.installedAgents = customAgents;

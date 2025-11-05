@@ -16,6 +16,9 @@ import marketplaceRouter from './routes/marketplace.js';
 import creativeRouter from './routes/creative.js';
 import chatRouter from './routes/chat.js';
 import speechRouter from './routes/speech.js';
+import embeddingsRouter from './routes/embeddings.js';
+import creatorRouter from './routes/creator.js';
+import youtubeRouter from './routes/youtube.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 
@@ -48,6 +51,9 @@ app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/creative', creativeRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/speech', speechRouter);
+app.use('/api/embeddings', embeddingsRouter);
+app.use('/api/creator', creatorRouter);
+app.use('/api/youtube', youtubeRouter);
 
 
 // Create HTTP server

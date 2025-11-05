@@ -39,6 +39,7 @@ export enum AppID {
   voice = 'voice',
   workflow = 'workflow',
   travelAgent = 'travelAgent',
+  creatorPipeline = 'creatorPipeline',
   nexusPortal = 'nexusPortal',
   marketing = 'marketing',
   travelPlanViewer = 'travelPlanViewer',

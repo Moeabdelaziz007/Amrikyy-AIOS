@@ -220,3 +220,27 @@ class RedisService {
 
 // Export singleton instance
 export const redisService = new RedisService();
+
+const REDIS_URL = process.env.REDIS_URL || '';
+let client: Redis.Redis | null = null;
+
+if (REDIS_URL) {
+  client = new Redis(REDIS_URL);
+  client.on('connect', () => console.log('✅ Redis connected'));
+  client.on('error', (e) => console.error('Redis error', e));
+} else {
+  console.warn('REDIS_URL not set. Redis caching disabled.');
+}
+
+export async function setCache(key: string, value: any, ttlSeconds: number = 3600) {
+  if (!client) return;
+  await client.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+}
+
+export async function getCache(key: string) {
+  if (!client) return null;
+  const v = await client.get(key);
+  return v ? JSON.parse(v) : null;
+}
+
+export default client;

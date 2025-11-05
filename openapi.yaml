@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Amrikyy AIOS API
+  description: API documentation for Amrikyy AIOS system.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5173/api
+paths:
+  /speech/synthesize:
+    post:
+      summary: Synthesize text to speech
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: The text to synthesize.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  audioContent:
+                    type: string
+                    description: Base64 encoded audio content.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /speech/transcribe:
+    post:
+      summary: Transcribe audio to text
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: The audio file to transcribe.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcript:
+                    type: string
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '415':
+          description: Unsupported audio format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+

@@ -1,4 +1,5 @@
-import { QdrantClient } from '@qdrant/js-client-rest';
+rosnimport { QdrantClient } from '@qdrant/js-client-rest';
+import fetch from 'node-fetch';
 
 /**
  * Qdrant Vector Database Service
@@ -336,3 +337,39 @@ class QdrantService {
 
 // Export singleton instance
 export const qdrantService = new QdrantService();
+
+/**
+ * Minimal Qdrant helper for upserting agent vectors
+ */
+
+const QDRANT_URL = process.env.QDRANT_URL || '';
+const QDRANT_API_KEY = process.env.QDRANT_API_KEY || '';
+const COLLECTION = process.env.QDRANT_COLLECTION || 'agents_vectors';
+
+if (!QDRANT_URL) console.warn('QDRANT_URL not set. Qdrant calls will be skipped.');
+
+export async function upsertAgentVector(agentId: string, vector: number[], payload: Record<string, any> = {}) {
+  if (!QDRANT_URL) return null;
+
+  const url = `${QDRANT_URL}/collections/${COLLECTION}/points?wait=true`;
+  const body = {
+    points: [
+      {
+        id: agentId,
+        vector,
+        payload
+      }
+    ]
+  };
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (QDRANT_API_KEY) headers['api-key'] = QDRANT_API_KEY;
+
+  const resp = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!resp.ok) {
+    const txt = await resp.text();
+    console.error('Qdrant upsert failed:', resp.status, txt);
+    throw new Error(`Qdrant upsert failed: ${resp.status}`);
+  }
+  return await resp.json();
+}
