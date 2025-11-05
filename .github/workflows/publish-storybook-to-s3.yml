@@ -1,0 +1,73 @@
+name: Publish Storybook to Object Storage
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    name: Build Storybook and publish to S3/R2
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: '18'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install UI package dependencies
+        working-directory: ./packages/ui
+        run: npm ci
+
+      - name: Build Storybook (static)
+        working-directory: ./packages/ui
+        run: npm run build-storybook
+
+      - name: Configure AWS credentials (for S3 or compatible storage)
+        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Install AWS CLI
+        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+
+      - name: Sync Storybook to S3 / R2
+        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY && secrets.S3_BUCKET }}
+        run: |
+          set -e
+          SRC_DIR=packages/ui/storybook-static
+          DEST_BUCKET=${{ secrets.S3_BUCKET }}
+          AWS_REGION=${{ secrets.AWS_REGION || 'us-east-1' }}
+          # Optional endpoint (for Cloudflare R2 or S3-compatible providers): set AWS_ENDPOINT secret to override
+          if [ -n "${{ secrets.AWS_ENDPOINT }}" ]; then
+            aws s3 sync "$SRC_DIR" "s3://$DEST_BUCKET" --delete --acl public-read --region "$AWS_REGION" --endpoint-url "${{ secrets.AWS_ENDPOINT }}"
+          else
+            aws s3 sync "$SRC_DIR" "s3://$DEST_BUCKET" --delete --acl public-read --region "$AWS_REGION"
+          fi
+
+      - name: Upload artifact (fallback)
+        if: ${{ !secrets.AWS_ACCESS_KEY_ID || !secrets.AWS_SECRET_ACCESS_KEY || !secrets.S3_BUCKET }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: packages/ui/storybook-static
+
+      - name: Success log
+        run: |
+          echo "Storybook build finished and published (or uploaded as artifact)."
+
+    # End job
