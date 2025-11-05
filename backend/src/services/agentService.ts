@@ -1,9 +1,11 @@
-r ea// backend/src/services/agentService.ts
+// backend/src/services/agentService.ts
 import { supabase } from './supabaseClient.js';
 import { AIXAgent } from '../types.js';
-ch agentimport { embedText } from './geminiEmbeddingService.js';
+import { embedText } from './geminiEmbeddingService.js';
 import { upsertAgentVector, qdrantService } from './qdrantService.js';
 import { redisService } from './redisService.js';
+import { generateAIX } from '@Moeabdelaziz007/aix-format';
+import { aixGeneratorService } from './aixGeneratorService.js';
 
 export const getAgents = async (userId: string): Promise<AIXAgent[]> => {
     const { data, error } = await supabase
@@ -31,29 +33,62 @@ export const getAgentById = async (agentId: string, userId: string): Promise<AIX
 };
 
 export const createAgent = async (userId: string, agentData: Omit<AIXAgent, 'id' | 'user_id'>): Promise<AIXAgent> => {
-    // Insert agent in Supabase
+    // Generate AIX format content
+    const aixContent = generateAIX({
+        metadata: {
+            id: agentData.id || `agent-${Date.now()}`,
+            name: agentData.name,
+            version: '1.0.0',
+            created_by: userId,
+            created_at: new Date().toISOString()
+        },
+        dna: {
+            role: agentData.role,
+            persona: agentData.persona || { tone: 'professional', language: 'en' },
+            skills: agentData.skillIDs || [],
+            feelingsModel: agentData.feelings || { valence: 0.0, arousal: 0.5, motivation: 0.8, decayRate: 0.01 },
+            memoryConfig: agentData.memory_config || { storeToVectorDB: true, vectorTTL: null, memoryBias: 'balanced', useRedisCache: true },
+            tools: [], // Will be populated based on skills
+            mcp: { permissions: ['read', 'write'], rateLimit: { perMinute: 60 } },
+            rules: [],
+            workflows: [],
+            embeddingHints: { textForEmbed: 'name+role+skills', model: 'embed-english-v1' }
+        }
+    });
+
+    // Insert agent in Supabase with AIX fields
     const { data, error } = await supabase
         .from('agents')
-        .insert([{ ...agentData, user_id: userId }])
+        .insert([{
+            ...agentData,
+            user_id: userId,
+            aix_format: aixContent,
+            dna: agentData.dna || {},
+            persona: agentData.persona || {},
+            feelings: agentData.feelings || { valence: 0.0, arousal: 0.5, motivation: 0.8 },
+            memory_config: agentData.memory_config || { storeToVectorDB: true, vectorTTL: null, memoryBias: 'balanced', useRedisCache: true }
+        }])
         .select()
         .single();
     if (error) throw new Error(error.message);
 
     const created = data as AIXAgent;
 
-    // Build a short metadata text for embedding
+    // Build embedding text
     const metaText = `${created.name} - ${created.role} - Skills: ${Array.isArray(created.skillIDs) ? created.skillIDs.join(', ') : created.skillIDs}`;
 
     try {
         const vector = await embedText(metaText);
-        // upsert into qdrant
+        // Update Supabase with vector
+        await supabase.from('agents').update({ embedding_vector: vector }).eq('id', created.id);
+        // Upsert into Qdrant
         await upsertAgentVector(created.id, vector, { name: created.name, user_id: userId, role: created.role });
     } catch (e) {
         console.error('Embedding/Qdrant error:', e);
     }
 
     try {
-        // cache summary in redis
+        // Cache summary in Redis
         await redisService.cache(`agent_summary:${created.id}`, { id: created.id, name: created.name, role: created.role }, 60 * 60 * 24);
     } catch (e) {
         console.error('Redis cache error:', e);
@@ -77,4 +112,19 @@ export const deleteAgent = async (agentId: string, userId: string): Promise<void
     }
 
     try { await redisService.delete(`agent_summary:${agentId}`); } catch (_) {}
+};
+
+export const updateAgentFeelings = async (agentId: string, event: 'success' | 'failure' | 'idle', userId: string) => {
+    // fetch agent
+    const agent = await getAgentById(agentId, userId);
+    if (!agent) throw new Error('Agent not found');
+
+    const current = agent.dna?.feelingsModel || agent.feelings || { valence: 0.0, arousal: 0.5, motivation: 0.8, decayRate: 0.01 };
+    const updated = aixGeneratorService.updateFeelings(current, event, event === 'idle' ? 60 : 0);
+
+    const { error } = await supabase.from('agents').update({ feelings: updated, 'dna': { ...agent.dna, feelingsModel: updated } }).eq('id', agentId);
+    if (error) throw new Error(error.message);
+
+    // return refreshed agent
+    return await getAgentById(agentId, userId);
 };

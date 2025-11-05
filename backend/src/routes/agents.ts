@@ -1,3 +1,15 @@
+// POST /api/agents/:id/feelings
+router.post('/:id/feelings', async (req: AuthenticatedRequest, res) => {
+    try {
+        const { event } = req.body || {};
+        if (!event) return res.status(400).json({ error: 'Missing event' });
+        const updated = await agentService.updateAgentFeelings(req.params.id, event, req.user.id);
+        res.json(updated);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // backend/src/routes/agents.ts
 import { Router } from 'express';
 import { verifyAuth, AuthenticatedRequest } from '../middleware/auth.js';

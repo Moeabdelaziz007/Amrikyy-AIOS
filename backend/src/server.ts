@@ -21,6 +21,8 @@ import creatorRouter from './routes/creator.js';
 import youtubeRouter from './routes/youtube.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
+import { qdrantService } from './services/qdrantService.js';
+import { redisService } from './services/redisService.js';
 
 export const app = express();
 const PORT = process.env.PORT || 5000;
@@ -64,6 +66,10 @@ setupWebSocket(server);
 
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
+  // Initialize services
+  qdrantService.connect().catch(console.error);
+  redisService.connect().catch(console.error);
+
   server.listen(PORT, () => {
    console.log(`✅ Server running on http://localhost:${PORT}`);
    console.log(`✅ WebSocket server ready`);
