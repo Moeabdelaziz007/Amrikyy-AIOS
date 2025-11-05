@@ -227,3 +227,7 @@ export const VideoAnalyzerIcon = VideoAnalyzeIcon;
 export const TranscriberIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>keyboard_voice</MaterialIcon>);
 /** Dollar sign icon. */
 export const DollarIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>attach_money</MaterialIcon>);
+/** Activity icon. */
+export const ActivityIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>activity</MaterialIcon>);
+/** Memory icon. */
+export const MemoryIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>memory</MaterialIcon>);
