@@ -1,0 +1,2 @@
+ ERROR  Unknown options: 'runInBand', 'maxWorkers'
+For help, run: pnpm help test
