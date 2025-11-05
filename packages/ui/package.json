@@ -9,7 +9,7 @@
     "dev": "concurrently \"tsc -w\" \"tailwindcss -o ./dist/styles.css --watch\"",
     "lint": "eslint .",
     "test": "vitest run",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6006 --config-dir ./.storybook",
     "build-storybook": "storybook build"
   },
   "dependencies": {

@@ -1,23 +1,4 @@
-import "../src/styles/tailwind.css"; // Re-enabled
-import type { Preview } from "@storybook/react";
-import { KomabiThemeProvider } from "../src/theme/useTheme";
-import React from 'react';
+// This file delegates to the JS preview file to avoid Vite serving raw TypeScript
+export * from './preview';
+export { default } from './preview';
 
-const preview: Preview = {
-  parameters: {
-    actions: { argTypesRegex: "^on[A-Z].*" },
-    controls: { expanded: true },
-    layout: "centered",
-  },
-  decorators: [
-    (Story) => (
-      <KomabiThemeProvider>
-        <div className="bg-background text-foreground p-4">
-            <Story />
-        </div>
-      </KomabiThemeProvider>
-    ),
-  ],
-};
-
-export default preview;
