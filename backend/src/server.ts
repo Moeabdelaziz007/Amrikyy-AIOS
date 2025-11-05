@@ -18,22 +18,25 @@ import chatRouter from './routes/chat.js';
 import speechRouter from './routes/speech.js';
 import embeddingsRouter from './routes/embeddings.js';
 import creatorRouter from './routes/creator.js';
-import geminiRouter from './routes/geminiRoutes.js'; // Import Gemini routes
-import transcriptionRouter from './routes/transcription.js'; // Import Transcription routes
+import geminiRouter from './routes/geminiRoutes.js';
+import transcriptionRouter from './routes/transcription.js';
+import codeRouter from './routes/code.js';
+import healthRouter from './routes/health.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 import { qdrantService } from './services/qdrantService.js';
 import { redisService } from './services/redisService.js';
+import { nexusSIA_Service } from './services/nexusSIA_Service.js'; // Import the Nexus SIA Service
 
 export const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' })); // Increase payload size limit for audio data
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Health check
+// Health check (existing)
 app.get('/health', (req, res) => {
  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -56,8 +59,10 @@ app.use('/api/chat', chatRouter);
 app.use('/api/speech', speechRouter);
 app.use('/api/embeddings', embeddingsRouter);
 app.use('/api/creator', creatorRouter);
-app.use('/api/gemini', geminiRouter); // Add Gemini routes
-app.use('/api/transcribe', transcriptionRouter); // Add Transcription routes
+app.use('/api/gemini', geminiRouter);
+app.use('/api/transcribe', transcriptionRouter);
+app.use('/api/code', codeRouter);
+app.use('/api/health', healthRouter);
 
 
 // Create HTTP server
@@ -71,6 +76,9 @@ if (process.env.NODE_ENV !== 'test') {
   // Initialize services
   qdrantService.connect().catch(console.error);
   redisService.connect().catch(console.error);
+
+  // Instantiate the Nexus SIA Service to start its lifecycle
+  nexusSIA_Service;
 
   server.listen(PORT, () => {
    console.log(`✅ Server running on http://localhost:${PORT}`);
