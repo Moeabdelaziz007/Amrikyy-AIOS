@@ -27,6 +27,7 @@ import { launchBot } from './telegram/bot.js';
 import { qdrantService } from './services/qdrantService.js';
 import { redisService } from './services/redisService.js';
 import { nexusSIA_Service } from './services/nexusSIA_Service.js'; // Import the Nexus SIA Service
+import { quantumAgentService } from '../services/src/index.js';
 
 export const app = express();
 const PORT = process.env.PORT || 5000;

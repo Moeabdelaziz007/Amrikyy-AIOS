@@ -4,10 +4,7 @@
  */
 import { GoogleGenAI, Content, GenerationConfig } from "@google/genai";
 
-// Re-export the Content type for external use, aligning with the library
-export type { Content };
-
-import { AIMessage, AIRequestOptions, AIResponse } from './index';
+import { AIMessage, AIRequestOptions, AIResponse } from '../index';
 
 export class GeminiService {
   private ai: GoogleGenAI;
@@ -25,11 +22,12 @@ export class GeminiService {
         "Gemini API key not found. Please set VITE_API_KEY (frontend) or GEMINI_API_KEY (backend) environment variable."
       );
     }
+    
     this.ai = new GoogleGenAI({ apiKey });
   }
 
   /**
-   * Generates a text response from the Gemini model.
+   * Generates a text response from Gemini model.
    *
    * @param {AIMessage[]} messages - An array of messages in the conversation.
    * @param {AIRequestOptions} [options={}] - Optional configuration for content generation.
@@ -62,6 +60,7 @@ export class GeminiService {
       if (!text) {
         throw new Error("The AI returned an empty response. This may be due to content policies or an internal error.");
       }
+
       return { content: text, model: 'gemini-1.5-flash' };
     } catch (error) {
       console.error("Error calling Gemini API:", error);
@@ -72,7 +71,13 @@ export class GeminiService {
     }
   }
 
-  private transformMessages(messages: AIMessage[]): { history: Content[], systemInstruction?: string, prompt: string } {
+  /**
+   * Transforms an array of messages into the format expected by the Gemini API.
+   *
+   * @param {AIMessage[]} messages - The conversation history.
+   * @returns {Object} An object containing history, system instruction, and the last user prompt.
+   */
+  private transformMessages(messages: AIMessage[]): {
     const history: Content[] = [];
     let systemInstruction: string | undefined;
     let prompt = "";
@@ -84,12 +89,13 @@ export class GeminiService {
       }
       if (index === messages.length - 1 && msg.role === 'user') {
         prompt = msg.content;
-      } else {
-        history.push({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }],
-        });
+        return;
       }
+      
+      history.push({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      });
     });
 
     if (!prompt) {
@@ -99,8 +105,8 @@ export class GeminiService {
     return { history, systemInstruction, prompt };
   }
 
-  // Keeping the other methods as placeholders for now
-  async chatStream(_messages: Content[]): Promise<AsyncIterable<any>> {
+  // Placeholder methods for streaming and embedding
+  async chatStream(_messages: AIMessage[]): Promise<AsyncIterable<any>> {
     // Mock implementation
     return (async function* () {
       yield { content: 'Mock streaming response', model: 'gemini-pro' };
@@ -113,5 +119,5 @@ export class GeminiService {
   }
 }
 
-// Export a singleton instance of the service
+// Export a singleton instance
 export const geminiService = new GeminiService();

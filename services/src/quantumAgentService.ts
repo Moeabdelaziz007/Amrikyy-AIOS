@@ -24,6 +24,8 @@ export interface EnhancedAgentResponse {
     topology_score: number;
     validation_method: string;
   };
+  // processing time in ms for the whole operation
+  processing_time?: number;
 }
 
 export interface QuantumAgentConfig {
@@ -58,9 +60,10 @@ export class QuantumAgentService {
         : (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined),
       {
         model: 'gemini-2.0-flash',
-        exploration_depth: this.quantumConfig.explorationDepth,
-        max_hypotheses: this.quantumConfig.maxHypotheses,
-        confidence_threshold: this.quantumConfig.confidenceThreshold,
+        // use the snake_case keys expected by the quantum engine
+        exploration_depth: this.quantumConfig.exploration_depth,
+        max_hypotheses: this.quantumConfig.max_hypotheses,
+        confidence_threshold: this.quantumConfig.confidence_threshold,
         enable_topology_validation: true,
         temperature: 0.8,
       }
@@ -80,7 +83,7 @@ export class QuantumAgentService {
   ): Promise<EnhancedAgentResponse> {
     const startTime = Date.now();
 
-    if (!this.quantumConfig.enableQuantumReasoning) {
+    if (!this.quantumConfig.enable_quantum_reasoning) {
       // Fallback to regular Gemini service
       const response = await geminiService.chat([
         { role: 'user', content: prompt }
@@ -222,6 +225,19 @@ Direct, clear response that addresses the user's problem based on the validated 
    */
   getConfig(): QuantumAgentConfig {
     return { ...this.quantumConfig };
+  }
+
+  /**
+   * Get default configuration
+   */
+  getDefaultConfig(): QuantumAgentConfig {
+    return {
+      enable_quantum_reasoning: true,
+      confidence_threshold: 0.7,
+      show_alternatives: true,
+      max_hypotheses: 5,
+      exploration_depth: 3,
+    };
   }
 
   /**
