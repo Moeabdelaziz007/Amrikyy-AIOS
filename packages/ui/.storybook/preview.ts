@@ -1,4 +1,18 @@
-// This file delegates to the JS preview file to avoid Vite serving raw TypeScript
-export * from './preview';
-export { default } from './preview';
+import type { Preview } from '@storybook/react';
 
+const preview: Preview = {
+  parameters: {
+    actions: { argTypesRegex: "^on[A-Z].*" },
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/i,
+      },
+    },
+    docs: {
+      toc: true,
+    },
+  },
+};
+
+export default preview;

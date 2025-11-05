@@ -1,27 +1,9 @@
-
-    // Add a post transformIndexHtml plugin to rewrite virtual: URLs in iframe.html
-    const iframeRewritePlugin = {
-      name: 'storybook-iframe-rewrite',
-      enforce: 'post',
-      transformIndexHtml(html: string, ctx: any) {
-        if (ctx && ctx.path === '/iframe.html') {
-          return html.replace(
-            'virtual:/@storybook/builder-vite/vite-app.js',
-            '/@id/__x00__virtual:/@storybook/builder-vite/vite-app.js'
-          );
-        }
-        return html;
-import type { StorybookConfig } from "@storybook/react-vite";
-    };
-
-    viteConfig.plugins.push(iframeRewritePlugin as any);
-
-    return viteConfig;
 import path from 'path';
+import type { StorybookConfig } from "@storybook/react-vite";
 
 const config: StorybookConfig = {
   stories: [
-    "../src/**/*.stories.@(js|jsx|ts|tsx|mdx)"
+    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx|mdx)",
   ],
   addons: [
     "@storybook/addon-links",
@@ -35,45 +17,42 @@ const config: StorybookConfig = {
   docs: {
     autodocs: "tag",
   },
-  async viteFinal(viteConfig, { configType }) {
-    const workspaceRoot = path.resolve(__dirname, '../../..');
+  env: (config) => ({
+    ...config,
+    STORYBOOK_DISABLE_TELEMETRY: '1',
+  }),
+  core: {
+    disableTelemetry: true,
+  },
+  viteFinal: async (config, { configType }) => {
+    // Fix for monorepo and virtual module resolution
+    config.server = config.server || {};
+    config.server.fs = config.server.fs || {};
 
-    // Ensure server.fs.allow includes the workspace root so Vite can serve
-    // symlinked packages in a pnpm workspace.
-    viteConfig.server = viteConfig.server || {};
-    viteConfig.server.fs = viteConfig.server.fs || {};
-    viteConfig.server.fs.allow = Array.from(new Set([...(viteConfig.server.fs.allow || []), workspaceRoot]));
-    // allow CORS so the iframe can fetch modules
-    viteConfig.server.cors = true;
+    // allow workspace root (adjust relative levels if your repo layout differs)
+    const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
+    config.server.fs.allow = Array.from(new Set([...(config.server.fs.allow || []), workspaceRoot]));
 
-    // Resolve dedupe to avoid duplicate React copies
-    viteConfig.resolve = viteConfig.resolve || {};
-    viteConfig.resolve.dedupe = Array.from(new Set([...(viteConfig.resolve.dedupe || []), 'react', 'react-dom']));
+    // Ensure proper React handling
+    config.resolve = config.resolve || {};
+    config.resolve.dedupe = Array.from(new Set([...(config.resolve.dedupe || []), 'react', 'react-dom']));
 
-    // Optimize deps for speed and JSX handling
-    viteConfig.optimizeDeps = viteConfig.optimizeDeps || {};
-    viteConfig.optimizeDeps.include = Array.from(new Set([...(viteConfig.optimizeDeps.include || []), 'react', 'react-dom']));
-    viteConfig.optimizeDeps.esbuildOptions = {
-      ...(viteConfig.optimizeDeps.esbuildOptions || {}),
-      jsxFactory: 'React.createElement',
-      jsxFragment: 'React.Fragment',
-    };
+    // Fix virtual module resolution
+    config.optimizeDeps = config.optimizeDeps || {};
+    config.optimizeDeps.include = Array.from(new Set([
+      ...(config.optimizeDeps.include || []),
+      'react',
+      'react-dom',
+    ]));
 
-    // Build commonjs options for monorepo
-    viteConfig.build = viteConfig.build || {};
-    viteConfig.build.commonjsOptions = {
-      ...(viteConfig.build.commonjsOptions || {}),
-      include: [/node_modules/, /packages/],
-    };
-
-    // Ensure we append the React plugin while preserving Storybook's plugins
-    viteConfig.plugins = Array.isArray(viteConfig.plugins) ? viteConfig.plugins : [];
-    // Only add react plugin if not already present
-    if (!viteConfig.plugins.some((p: any) => p && p.name && p.name.includes('plugin-react'))) {
-      viteConfig.plugins.push(react());
+    // Fix for build issues
+    if (configType === 'PRODUCTION') {
+      config.build = config.build || {};
+      config.build.rollupOptions = config.build.rollupOptions || {};
+      config.build.rollupOptions.input = path.resolve(__dirname, 'preview.js');
     }
-      },
-    });
+
+    return config;
   },
 };
 
