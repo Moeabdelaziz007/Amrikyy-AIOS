@@ -7,6 +7,10 @@ import { NotificationProvider } from './contexts/NotificationContext.tsx';
 import { UserBehaviorProvider } from './contexts/UserBehaviorContext.tsx';
 import { GoogleAuthProvider } from './contexts/GoogleAuthContext.tsx';
 import { AuthProvider } from './contexts/AuthContext.tsx';
+import { initializeGlobalErrorHandler } from './utils/globalErrorHandler.ts';
+
+// Initialize the global error handler to report issues to the System Health Monitor
+initializeGlobalErrorHandler();
 
 /**
  * The main entry point of the React application.
