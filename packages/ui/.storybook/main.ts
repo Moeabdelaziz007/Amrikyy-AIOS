@@ -1,8 +1,10 @@
+        commonjsOptions: {
+          include: [/node_modules/, /packages/],
+        },
+      },
 import type { StorybookConfig } from "@storybook/react-vite";
 import { mergeConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
 import path from 'path';
 
 const config: StorybookConfig = {
@@ -22,36 +24,34 @@ const config: StorybookConfig = {
     autodocs: "tag",
   },
   async viteFinal(config, { configType }) {
+    // Make Vite aware of the monorepo workspace root so it can serve/resolve
+    // files that live outside the package (pnpm symlinks / hoisted deps).
+    const workspaceRoot = path.resolve(__dirname, '../../..');
+
     return mergeConfig(config, {
-      plugins: [react()], // Ensure React plugin is always active
-      
-      // Crucial: Explicitly configure esbuild for TypeScript transpilation
-      // This ensures .ts and .tsx files, especially in .storybook, are processed
-      esbuild: {
-        loader: 'tsx', // Process .ts and .tsx files as TSX
-        include: /\.tsx?$/,
-        exclude: /node_modules/, // Exclude node_modules to avoid conflicts
-      },
-      
-      // Ensure PostCSS is correctly configured for Tailwind
-      css: {
-        postcss: {
-          plugins: [
-            tailwindcss(path.resolve(__dirname, '../tailwind.config.js')),
-            autoprefixer,
-          ],
+      plugins: [react()],
+
+      // Allow the Vite dev server to access the repository workspace root.
+      server: {
+        fs: {
+          allow: [workspaceRoot],
         },
       },
-      
-      // Optimize dependencies, including Storybook's own config files
+
+      // Keep Vite's default CSS/PostCSS handling so existing
+      // postcss.config.js / tailwind.config.js are respected.
+
+      // Add some safe dependency optimization for faster cold-starts.
       optimizeDeps: {
-        entries: [
-          path.resolve(__dirname, './preview.ts'),
-          path.resolve(__dirname, './main.ts'),
-          path.resolve(__dirname, '../src/**/*.stories.tsx'),
-          path.resolve(__dirname, '../src/**/*.stories.ts'),
+        include: [
+          'react',
+          'react-dom'
         ],
       },
+
+      // For pnpm monorepos where packages may be symlinked, ensure
+      // CommonJS dependencies are properly included when necessary.
+      build: {
     });
   },
 };
