@@ -26,7 +26,8 @@
       "@amrikyy/ui": ["./packages/ui/src"],
       "@amrikyy/auth": ["./packages/auth/src"],
       "@amrikyy/sdk": ["./packages/sdk/src"],
-      "@amrikyy/config": ["./packages/config"]
+      "@amrikyy/config": ["./packages/config"],
+      "@amrikyy/quantum-reasoning": ["./packages/quantum-reasoning/src"]
     }
   }
 }

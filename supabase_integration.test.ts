@@ -36,7 +36,11 @@ import {
  * Run these tests against a development/test Supabase instance, not production.
  */
 
-describe('Supabase Integration Tests', () => {
+// Integration tests are opt-in. Set RUN_INTEGRATION=true or RUN_INTEGRATION=1 to enable.
+const runIntegration = process.env.RUN_INTEGRATION === 'true' || process.env.RUN_INTEGRATION === '1';
+const describeIf = runIntegration ? describe : describe.skip;
+
+describeIf('Supabase Integration Tests', () => {
   let testUserId: string;
   const testEmail = `test-${Date.now()}@example.com`;
   const testPassword = 'TestPassword123!';

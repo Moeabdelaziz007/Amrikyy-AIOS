@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import yaml from 'js-yaml';
 import { z } from 'zod';
+import { normalizeAixObject } from './aixAdapter.js';
 
 // Zod schema for AIX validation (basic version)
 const aixSchema = z.object({
@@ -28,8 +29,9 @@ export const loadAgentFromAix = async (agentId: string) => {
 
         // Validate with Zod
         const validatedAix = aixSchema.parse(aixData);
-
-        return validatedAix;
+        // normalize legacy keys into canonical shape for backend usage
+        const normalized = normalizeAixObject(validatedAix);
+        return normalized;
     } catch (error) {
         console.error(`Failed to load or parse AIX file for agent ${agentId}:`, error);
         return null;

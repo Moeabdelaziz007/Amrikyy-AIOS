@@ -7,6 +7,9 @@ export type AgentFeelings = {
 };
 
 export const aixGeneratorService = {
+  // Normalize legacy aix object keys if needed
+  // (imported lazily below to avoid circular deps when used from other modules)
+
   updateFeelings(feelings: AgentFeelings, event: 'success' | 'failure' | 'idle', minutesIdle = 0): AgentFeelings {
     const f = { ...feelings };
     const decay = f.decayRate ?? 0.01;
@@ -41,8 +44,13 @@ export const aixGeneratorService = {
 
   generateEmbeddingText(aix: any): string {
     // create a short embedding text based on embeddingHints
-    const meta = aix.metadata || {};
-    const dna = aix.dna || {};
+    // Use normalization helper to accept either meta/persona or metadata/dna shapes
+    // import adapter lazily to avoid cycle in some runtimes
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { normalizeAixObject } = require('./aixAdapter.js');
+    const norm = normalizeAixObject(aix);
+    const meta = norm.meta || {};
+    const dna = norm.dna || {};
     const hint = dna.embeddingHints?.textForEmbed || 'short';
 
     if (hint === 'short') {

@@ -22,6 +22,7 @@ import geminiRouter from './routes/geminiRoutes.js';
 import transcriptionRouter from './routes/transcription.js';
 import codeRouter from './routes/code.js';
 import healthRouter from './routes/health.js';
+import mcpRouter from './routes/mcp.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 import { qdrantService } from './services/qdrantService.js';
@@ -64,6 +65,7 @@ app.use('/api/gemini', geminiRouter);
 app.use('/api/transcribe', transcriptionRouter);
 app.use('/api/code', codeRouter);
 app.use('/api/health', healthRouter);
+app.use('/api/mcp', mcpRouter);
 
 
 // Create HTTP server

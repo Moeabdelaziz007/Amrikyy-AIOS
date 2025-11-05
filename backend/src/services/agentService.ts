@@ -6,6 +6,7 @@ import { upsertAgentVector, qdrantService } from './qdrantService.js';
 import { redisService } from './redisService.js';
 import { generateAIX } from '@Moeabdelaziz007/aix-format';
 import { aixGeneratorService } from './aixGeneratorService.js';
+import { mapAgentDataToAixConfig } from './aixAdapter.js';
 
 export const getAgents = async (userId: string): Promise<AIXAgent[]> => {
     const { data, error } = await supabase
@@ -33,28 +34,10 @@ export const getAgentById = async (agentId: string, userId: string): Promise<AIX
 };
 
 export const createAgent = async (userId: string, agentData: Omit<AIXAgent, 'id' | 'user_id'>): Promise<AIXAgent> => {
-    // Generate AIX format content
-    const aixContent = generateAIX({
-        metadata: {
-            id: agentData.id || `agent-${Date.now()}`,
-            name: agentData.name,
-            version: '1.0.0',
-            created_by: userId,
-            created_at: new Date().toISOString()
-        },
-        dna: {
-            role: agentData.role,
-            persona: agentData.persona || { tone: 'professional', language: 'en' },
-            skills: agentData.skillIDs || [],
-            feelingsModel: agentData.feelings || { valence: 0.0, arousal: 0.5, motivation: 0.8, decayRate: 0.01 },
-            memoryConfig: agentData.memory_config || { storeToVectorDB: true, vectorTTL: null, memoryBias: 'balanced', useRedisCache: true },
-            tools: [], // Will be populated based on skills
-            mcp: { permissions: ['read', 'write'], rateLimit: { perMinute: 60 } },
-            rules: [],
-            workflows: [],
-            embeddingHints: { textForEmbed: 'name+role+skills', model: 'embed-english-v1' }
-        }
-    });
+    // Map legacy agent shape to the AIX package generator config
+    const aixConfig = mapAgentDataToAixConfig(agentData, { userId });
+    // Generate AIX format content (AIX package expects AIXGeneratorConfig)
+    const aixContent = generateAIX(aixConfig);
 
     // Insert agent in Supabase with AIX fields
     const { data, error } = await supabase
