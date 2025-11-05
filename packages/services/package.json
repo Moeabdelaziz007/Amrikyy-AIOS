@@ -1,0 +1,56 @@
+{
+  "name": "@amrikyy/services",
+  "version": "0.1.0",
+  "description": "Shared services for Amrikyy AIOS including Google Workspace, AI integrations, and API clients",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "keywords": [
+    "google",
+    "workspace",
+    "ai",
+    "automation",
+    "creator-studio",
+    "voyage-ai"
+  ],
+  "author": "Amrikyy AIOS Team",
+  "license": "MIT",
+  "dependencies": {
+    "googleapis": "^164.1.0",
+    "@google-cloud/storage": "^7.17.3",
+    "@google-cloud/functions": "^4.2.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.57.0",
+    "vitest": "^0.34.0",
+    "@vitest/coverage-v8": "^0.34.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moeabdelaziz007/Amrikyy-AIOS.git",
+    "directory": "packages/services"
+  },
+  "bugs": {
+    "url": "https://github.com/Moeabdelaziz007/Amrikyy-AIOS/issues"
+  },
+  "homepage": "https://github.com/Moeabdelaziz007/Amrikyy-AIOS/tree/main/packages/services"
+}

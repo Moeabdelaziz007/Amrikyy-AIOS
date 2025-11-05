@@ -1,0 +1,45 @@
+{
+  "name": "@amrikyy/quantum-reasoning",
+  "version": "1.0.0",
+  "description": "Quantum Reasoning Engine for Amrikyy-AIOS based on Gemini0.1DNA",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "keywords": [
+    "quantum",
+    "reasoning",
+    "ai",
+    "gemini",
+    "topology",
+    "multi-hypothesis",
+    "amrikyy"
+  ],
+  "author": "Mohamed Hossameldin Abdelaziz",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^0.21.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "vitest": "^1.0.0",
+    "eslint": "^8.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "@amrikyy/ai": "*"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

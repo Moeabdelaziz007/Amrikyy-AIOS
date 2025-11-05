@@ -6,7 +6,9 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "test:coverage": "turbo run test:coverage"
+    "test:coverage": "turbo run test:coverage",
+    "build:services": "turbo run build --filter=@amrikyy/services",
+    "dev:services": "turbo run dev --filter=@amrikyy/services"
   },
   "devDependencies": {
     "turbo": "^2.0.4"
@@ -15,5 +17,14 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@google-cloud/functions": "^4.2.1",
+    "@google-cloud/storage": "^7.17.3",
+    "@types/gapi.auth2": "^0.0.61",
+    "@types/gapi.client.docs": "^1.0.2",
+    "@types/gapi.client.drive": "^3.0.15",
+    "@types/gapi.client.sheets": "^4.0.20201031",
+    "googleapis": "^164.1.0"
+  }
 }
