@@ -1,4 +1,4 @@
-import { Router } from 'express';
+coimport { Router } from 'express';
 import { verifyAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { calendarService } from '../services/calendarService.js';
 import { supabase } from '../services/supabase.js';
@@ -77,6 +77,34 @@ router.delete('/events/:id', async (req: AuthenticatedRequest, res) => {
  } catch (error: any) {
    res.status(500).json({ error: error.message });
  }
+});
+
+body// GET /api/calendar/auth-url
+router.get('/auth-url', (req: AuthenticatedRequest, res) => {
+  const authUrl = calendarService.getAuthUrl(req.user.id);
+  res.json({ authUrl });
+});
+
+// POST /api/calendar/callback
+router.post('/callback', async (req: AuthenticatedRequest, res) => {
+  try {
+    const { code } = req.body;
+    const tokens = await calendarService.getTokens(code);
+
+    await supabase
+      .from('user_integrations')
+      .upsert({
+        user_id: req.user.id,
+        service: 'google',
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_at: new Date(Date.now() + (tokens.expiry_date || 3600000))
+      });
+
+    res.json({ message: 'Google Calendar connected successfully' });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
 export default router;

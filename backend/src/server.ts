@@ -15,6 +15,7 @@ import developerRouter from './routes/developer.js';
 import marketplaceRouter from './routes/marketplace.js';
 import creativeRouter from './routes/creative.js';
 import chatRouter from './routes/chat.js';
+import speechRouter from './routes/speech.js';
 import { setupWebSocket } from './websocket/server.js';
 import { launchBot } from './telegram/bot.js';
 
@@ -24,6 +25,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For handling multipart/form-data
 
 // Health check
 app.get('/health', (req, res) => {
@@ -45,6 +47,7 @@ app.use('/api/developer', developerRouter);
 app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/creative', creativeRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/speech', speechRouter);
 
 
 // Create HTTP server

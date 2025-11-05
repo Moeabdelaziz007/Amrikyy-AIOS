@@ -324,4 +324,64 @@ router.get('/health', async (req: Request, res: Response) => {
  }
 });
 
+/**
+ * POST /api/ai/travel-plan
+ * Generate a structured travel plan (itinerary, hotels, restaurants, tickets)
+ * Body: { destination, startDate, endDate, budget, preferences }
+ */
+router.post('/travel-plan', async (req: Request, res: Response) => {
+ try {
+   const { destination, startDate, endDate, budget, preferences } = req.body || {};
+   if (!destination || !startDate || !endDate) {
+     return res.status(400).json({ error: 'destination, startDate and endDate are required' });
+   }
+
+   const prompt = `Create a detailed day-by-day travel itinerary for a trip to ${destination} from ${startDate} to ${endDate} with a budget of ${budget}. Preferences: ${JSON.stringify(preferences || {})}.
+
+Return a JSON object with the following shape:
+{
+  "tripTitle": string,
+  "destination": string,
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
+  "budget": number,
+  "itinerary": [ { "day": number, "title": string, "activities": [ { "time": string, "title": string, "details": string } ] } ],
+  "hotels": [ { "name": string, "rating": number, "price": string, "bookingUrl": string } ],
+  "restaurants": [ { "name": string, "cuisine": string, "priceLevel": string, "url": string } ],
+  "notes": string
+}
+
+Only return the JSON (no additional explanation).`;
+
+   const raw = await generateContent(prompt);
+
+   // Attempt to parse JSON from model output
+   let parsed: any = null;
+   try {
+     // Find first JSON object in response
+     const start = raw.indexOf('{');
+     const substr = start >= 0 ? raw.slice(start) : raw;
+     parsed = JSON.parse(substr);
+   } catch (err) {
+     // Fallback: return the raw text inside 'notes'
+     parsed = {
+       tripTitle: `Trip to ${destination}`,
+       destination,
+       startDate,
+       endDate,
+       budget: Number(budget || 0),
+       itinerary: [],
+       hotels: [],
+       restaurants: [],
+       notes: raw
+     };
+   }
+
+   res.json(parsed);
+ } catch (error: any) {
+   console.error('Travel plan generation error:', error.message);
+   res.status(500).json({ error: 'Failed to generate travel plan', message: error.message });
+ }
+});
+
 export default router;

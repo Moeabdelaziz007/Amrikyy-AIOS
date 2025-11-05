@@ -220,3 +220,8 @@ export const UsersIcon: React.FC<{className?: string}> = ({className}) => (<Mate
 
 /** Tag icon. */
 export const TagIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>tag</MaterialIcon>);
+
+/** Provide aliases / expected export names used in other files */
+export const MapsIcon = MapIcon;
+export const VideoAnalyzerIcon = VideoAnalyzeIcon;
+export const TranscriberIcon: React.FC<{className?: string}> = ({className}) => (<MaterialIcon className={className}>keyboard_voice</MaterialIcon>);

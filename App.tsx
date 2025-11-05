@@ -1,24 +1,56 @@
-import React, { useState, useCallback, Suspense, lazy, useEffect, useMemo } from 'react';
-import { WindowInstance, AppID, Settings, TravelPlan, Workflow, Alarm, Automation, Theme, CustomAgent, CommunityAgent, UserAccount, DashboardLayout, CalendarEvent, DriveFile, GmailMessage, Project, Task, PaymentMethod, AgoraListing, SharedContent, CreatorBounty, NexusPost, SocialPost, WeatherCondition, NexusComment, CreditTransaction, CreditTransactionType } from './types.ts';
-import Dock from './components/Dock.tsx';
-import AppLauncher from './components/AppLauncher.tsx';
-import PoweredByGemini from './components/PoweredByGemini.tsx';
-import { getCalendarEvents, getDriveFiles, getGmailMessages } from './services/googleWorkspaceService.ts';
-import { createCalendarEventFromPlan } from './services/geminiAdvancedService.ts';
-import DesktopAppsGrid from './components/DesktopAppsGrid.tsx';
-import { CreatorStudioIcon, BrowserIcon, ChatIcon, TripIcon, WorkflowIcon, SkillForgeIcon, ChronoVaultIcon, WorkspaceIcon, SmartWatchIcon, EventLogIcon, ImageIcon, LunaIcon, FileIcon, SettingsIcon, TerminalIcon, VoiceAssistantIcon, MarketingIcon, AgentForgeIcon, JulesIcon, StoreIcon, LiveConversationIcon, ImageAnalyzerIcon, NotificationCenterIcon, AgoraIcon, NexusChatIcon, DevConsoleIcon, ApiIcon, DevToolkitIcon, GrowthHubIcon, ResourceHubIcon, NewsIcon, ControlPanelIcon, FinanceIcon, CognitiveCanvasIcon, VeridianIdIcon, TranslateIcon, NexusGoIcon, NexusProfileIcon, AvatarStudioIcon, TravelServicesIcon, DocsIcon } from './components/Icons.tsx';
-import { useLanguage } from './contexts/LanguageContext.tsx';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext.tsx';
-import AnimatedBackground from './components/AnimatedBackground.tsx';
-import SystemOverviewWidget from './components/SystemOverviewWidget.tsx';
-import { NotificationCenter } from './components/NotificationCenter.tsx';
-import { useNotification } from './contexts/NotificationContext.tsx';
-import CryptoDashboardWidget from './components/CryptoDashboardWidget.tsx';
-import { useUserBehavior } from './contexts/UserBehaviorContext.tsx';
-import GlobalVoiceControl from './components/GlobalVoiceControl.tsx';
 import { useGoogleAuth } from './contexts/GoogleAuthContext.tsx';
-import ProjectsWidget from './components/widgets/ProjectsWidget.tsx';
-import TasksWidget from './components/widgets/TasksWidget.tsx';
+import { useNotification } from './contexts/NotificationContext.tsx';
+import { useLanguage } from './contexts/LanguageContext.tsx';
+import { useUserBehavior } from './contexts/UserBehaviorContext.tsx';
+import {
+  CreatorStudioIcon,
+  BrowserIcon,
+  ChatIcon,
+  TripIcon,
+  WorkflowIcon,
+  SkillForgeIcon,
+  ChronoVaultIcon,
+  WorkspaceIcon,
+  SmartWatchIcon,
+  EventLogIcon,
+  ImageIcon,
+  LunaIcon,
+  FileIcon,
+  SettingsIcon,
+  TerminalIcon,
+  VoiceAssistantIcon,
+  MarketingIcon,
+  AgentForgeIcon,
+  JulesIcon,
+  StoreIcon,
+  LiveConversationIcon,
+  ImageAnalyzerIcon,
+  NotificationCenterIcon,
+  AgoraIcon,
+  NexusChatIcon,
+  DevConsoleIcon,
+  ApiIcon,
+  DevToolkitIcon,
+  GrowthHubIcon,
+  ResourceHubIcon,
+  NewsIcon,
+  ControlPanelIcon,
+  FinanceIcon,
+  CognitiveCanvasIcon,
+  VeridianIdIcon,
+  TranslateIcon,
+  NexusGoIcon,
+  NexusProfileIcon,
+  AvatarStudioIcon,
+  TravelServicesIcon,
+  DocsIcon,
+  WeatherIcon,
+  MapsIcon,
+  VideoAnalyzerIcon,
+  TranscriberIcon
+} from './components/Icons.tsx';
 import CreatePostModal from './components/SharePreview.tsx';
 import { bounties as mockBounties } from './data/bounties.ts';
 import LoadingScreen from './components/LoadingScreen.tsx';
@@ -39,6 +71,7 @@ const WorkflowDashboardWidget = lazy(() => import('./components/widgets/Workflow
  * This enables code-splitting for application components.
  */
 const appComponents: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  [AppID.nexusPortal]: lazy(() => import('./components/hubs/NexusPortal.tsx')),
   [AppID.chat]: lazy(() => import('./components/apps/ChatApp.tsx')),
   [AppID.terminal]: lazy(() => import('./components/apps/TerminalApp.tsx')),
   [AppID.files]: lazy(() => import('./components/apps/FilesApp.tsx')),
@@ -735,6 +768,7 @@ const App: React.FC = () => {
    * Memoized list of applications displayed on the desktop grid.
    */
   const desktopApps = useMemo(() => [
+    { id: AppID.nexusPortal, name: 'Nexus Portal', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🜚</span> },
     { id: AppID.creatorStudio, name: t('desktop_apps.creatorStudio'), icon: CreatorStudioIcon },
     { id: AppID.cognitoBrowser, name: t('desktop_apps.cognitoBrowser'), icon: BrowserIcon },
     { id: AppID.travelAgent, name: t('desktop_apps.travelAgent'), icon: TripIcon },
@@ -761,43 +795,86 @@ const App: React.FC = () => {
    * Memoized list of all applications available in the app launcher.
    */
   const allAppsForLauncher = useMemo(() => [
-    { id: AppID.store, name: t('app_launcher.store'), icon: StoreIcon },
-    { id: AppID.creatorStudio, name: t('app_launcher.creatorStudio'), icon: CreatorStudioIcon },
-    { id: AppID.cognitoBrowser, name: t('app_launcher.cognitoBrowser'), icon: BrowserIcon },
-    { id: AppID.chat, name: t('app_launcher.chat'), icon: ChatIcon },
-    { id: AppID.voice, name: t('app_launcher.voice'), icon: VoiceAssistantIcon },
-    { id: AppID.travelAgent, name: t('app_launcher.travelAgent'), icon: TripIcon },
-    { id: AppID.travelServices, name: t('app_titles.travelServices'), icon: TravelServicesIcon },
-    { id: AppID.workspace, name: t('app_launcher.workspace'), icon: WorkspaceIcon },
-    { id: AppID.smartwatch, name: t('app_launcher.smartwatch'), icon: SmartWatchIcon },
-    { id: AppID.marketing, name: t('app_launcher.marketing'), icon: MarketingIcon },
-    { id: AppID.workflow, name: t('app_launcher.workflow'), icon: WorkflowIcon },
-    { id: AppID.agentForge, name: t('app_launcher.agentForge'), icon: AgentForgeIcon },
-    { id: AppID.atlasFinance, name: t('app_launcher.atlasFinance'), icon: FinanceIcon },
-    { id: AppID.cognitiveCanvas, name: t('app_launcher.cognitiveCanvas'), icon: CognitiveCanvasIcon },
-    { id: AppID.veridianId, name: t('app_titles.veridianId'), icon: VeridianIdIcon },
-    { id: AppID.nexusProfile, name: t('app_titles.nexusProfile'), icon: NexusProfileIcon },
-    { id: AppID.translateHub, name: t('app_titles.translateHub'), icon: TranslateIcon },
-    { id: AppID.nexusGo, name: t('app_titles.nexusGo'), icon: NexusGoIcon },
-    { id: AppID.nexusFeed, name: t('app_titles.nexusFeed'), icon: NexusChatIcon },
-    { id: AppID.avatarStudio, name: t('app_launcher.avatarStudio'), icon: AvatarStudioIcon },
-    { id: AppID.skillForge, name: t('app_launcher.skillForge'), icon: SkillForgeIcon },
-    { id: AppID.chronoVault, name: t('app_launcher.chronoVault'), icon: ChronoVaultIcon },
-    { id: AppID.eventLog, name: t('app_launcher.eventLog'), icon: EventLogIcon },
-    { id: AppID.notificationCenter, name: t('app_launcher.notificationCenter'), icon: NotificationCenterIcon },
-    { id: AppID.jules, name: t('app_launcher.jules'), icon: JulesIcon },
-    { id: AppID.files, name: t('app_launcher.files'), icon: FileIcon },
-    { id: AppID.settings, name: t('app_launcher.settings'), icon: SettingsIcon },
-    { id: AppID.terminal, name: t('app_launcher.terminal'), icon: TerminalIcon },
-    { id: AppID.docsViewer, name: t('app_launcher.docsViewer' as TranslationKey), icon: DocsIcon },
-    { id: AppID.devToolkit, name: t('app_launcher.devToolkit'), icon: DevToolkitIcon },
-    { id: AppID.growthHub, name: t('app_launcher.growthHub'), icon: GrowthHubIcon },
-    { id: AppID.resourceHub, name: t('app_launcher.resourceHub'), icon: ResourceHubIcon },
-    { id: AppID.geminiAiNews, name: t('app_launcher.geminiAiNews'), icon: NewsIcon },
-    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), icon: ControlPanelIcon },
+    { id: AppID.nexusPortal, name: 'Nexus Portal', description: 'Unified launchpad for all Komabi Hubs', category: 'portal', icon: ({className}:{className?:string}) => <span className={`text-2xl ${className||''}`}>🜚</span> },
+
+    // AI & Communication
+    { id: AppID.chat, name: t('app_launcher.chat'), description: 'Chat with AI assistant for questions and tasks', category: 'ai', icon: ChatIcon },
+    { id: AppID.voice, name: t('app_launcher.voice'), description: 'Voice-powered AI assistant', category: 'ai', icon: VoiceAssistantIcon },
+    { id: AppID.nexusChat, name: t('app_titles.nexusChat'), description: 'Real-time collaborative chat', category: 'communication', icon: NexusChatIcon },
+    { id: AppID.liveConversation, name: t('app_launcher.liveConversation'), description: 'Live AI conversation sessions', category: 'ai', icon: LiveConversationIcon },
+
+    // Travel & Lifestyle
+    { id: AppID.travelAgent, name: t('app_launcher.travelAgent'), description: 'AI-powered travel planning and booking', category: 'travel', icon: TripIcon },
+    { id: AppID.travelServices, name: t('app_titles.travelServices'), description: 'Travel services and utilities', category: 'travel', icon: TravelServicesIcon },
+    { id: AppID.maps, name: t('app_titles.maps'), description: 'Interactive maps and navigation', category: 'travel', icon: MapsIcon },
+    { id: AppID.weather, name: t('app_titles.weather'), description: 'Weather forecasts and alerts', category: 'lifestyle', icon: WeatherIcon },
+
+    // Productivity & Work
+    { id: AppID.workspace, name: t('app_launcher.workspace'), description: 'Collaborative workspace for teams', category: 'productivity', icon: WorkspaceIcon },
+    { id: AppID.workflow, name: t('app_launcher.workflow'), description: 'Automate and manage workflows', category: 'productivity', icon: WorkflowIcon },
+    { id: AppID.files, name: t('app_launcher.files'), description: 'File management and storage', category: 'productivity', icon: FileIcon },
+    { id: AppID.docsViewer, name: t('app_launcher.docsViewer' as TranslationKey), description: 'View and edit documents', category: 'productivity', icon: DocsIcon },
+
+    // Creative & Media
+    { id: AppID.creatorStudio, name: t('app_launcher.creatorStudio'), description: 'Content creation and editing suite', category: 'creative', icon: CreatorStudioIcon },
+    { id: AppID.image, name: t('app_titles.image'), description: 'Generate and edit images with AI', category: 'creative', icon: ImageGeneratorIcon },
+    { id: AppID.video, name: t('app_titles.video'), description: 'Create videos with AI assistance', category: 'creative', icon: VideoGeneratorIcon },
+    { id: AppID.audio, name: t('app_titles.audio'), description: 'Audio production and music creation', category: 'creative', icon: AudioStudioIcon },
+    { id: AppID.avatarStudio, name: t('app_launcher.avatarStudio'), description: 'Create and customize avatars', category: 'creative', icon: AvatarStudioIcon },
+
+    // Business & Finance
+    { id: AppID.marketing, name: t('app_launcher.marketing'), description: 'Marketing tools and analytics', category: 'business', icon: MarketingIcon },
+    { id: AppID.atlasFinance, name: t('app_launcher.atlasFinance'), description: 'Financial planning and analysis', category: 'business', icon: FinanceIcon },
+    { id: AppID.growthHub, name: t('app_launcher.growthHub'), description: 'Business growth and analytics', category: 'business', icon: GrowthHubIcon },
+    { id: AppID.store, name: t('app_launcher.store'), description: 'Browse and purchase AI tools', category: 'business', icon: StoreIcon },
+
+    // Development & Tools
+    { id: AppID.devToolkit, name: t('app_launcher.devToolkit'), description: 'Developer tools and utilities', category: 'development', icon: DevToolkitIcon },
+    { id: AppID.terminal, name: t('app_launcher.terminal'), description: 'Command line interface', category: 'development', icon: TerminalIcon },
+    { id: AppID.devConsole, name: t('app_titles.devConsole'), description: 'Developer console and debugging', category: 'development', icon: DevConsoleIcon },
+    { id: AppID.apiDocs, name: t('app_titles.apiDocs'), description: 'API documentation and reference', category: 'development', icon: ApiDocsIcon },
+
+    // Analysis & Intelligence
+    { id: AppID.analyticsHub, name: t('app_launcher.analyticsHub'), description: 'Data analytics and insights', category: 'analytics', icon: AnalyticsHubIcon },
+    { id: AppID.cognitiveCanvas, name: t('app_launcher.cognitiveCanvas'), description: 'AI-powered data visualization', category: 'analytics', icon: CognitiveCanvasIcon },
+    { id: AppID.imageAnalyzer, name: t('app_launcher.imageAnalyzer'), description: 'Analyze images with AI vision', category: 'analytics', icon: ImageAnalyzerIcon },
+    { id: AppID.videoAnalyzer, name: t('app_titles.videoAnalyzer'), description: 'Analyze videos with AI', category: 'analytics', icon: VideoAnalyzerIcon },
+
+    // Agents & AI
+    { id: AppID.agentForge, name: t('app_launcher.agentForge'), description: 'Create and customize AI agents', category: 'ai', icon: AgentForgeIcon },
+    { id: AppID.skillForge, name: t('app_launcher.skillForge'), description: 'Train and manage AI skills', category: 'ai', icon: SkillForgeIcon },
+    { id: AppID.chronoVault, name: t('app_launcher.chronoVault'), description: 'AI memory and knowledge base', category: 'ai', icon: ChronoVaultIcon },
+
+    // Social & Community
+    { id: AppID.nexusFeed, name: t('app_titles.nexusFeed'), description: 'Social feed and community updates', category: 'social', icon: NexusChatIcon },
+    { id: AppID.nexusProfile, name: t('app_titles.nexusProfile'), description: 'Manage your social profile', category: 'social', icon: NexusProfileIcon },
+    { id: AppID.nexusGo, name: t('app_titles.nexusGo'), description: 'Social networking and connections', category: 'social', icon: NexusGoIcon },
+
+    // Utilities & System
+    { id: AppID.cognitoBrowser, name: t('app_launcher.cognitoBrowser'), description: 'AI-enhanced web browser', category: 'utilities', icon: BrowserIcon },
+    { id: AppID.smartwatch, name: t('app_launcher.smartwatch'), description: 'Smart watch companion app', category: 'utilities', icon: SmartWatchIcon },
+    { id: AppID.notificationCenter, name: t('app_launcher.notificationCenter'), description: 'Manage notifications and alerts', category: 'utilities', icon: NotificationCenterIcon },
+    { id: AppID.eventLog, name: t('app_launcher.eventLog'), description: 'System event logs and monitoring', category: 'utilities', icon: EventLogIcon },
+    { id: AppID.controlPanel, name: t('app_launcher.controlPanel'), description: 'System control and settings', category: 'utilities', icon: ControlPanelIcon },
+    { id: AppID.settings, name: t('app_launcher.settings'), description: 'Application and system settings', category: 'utilities', icon: SettingsIcon },
+
+    // Translation & Language
+    { id: AppID.translateHub, name: t('app_titles.translateHub'), description: 'Translate text and documents', category: 'language', icon: TranslateIcon },
+    { id: AppID.transcriber, name: t('app_titles.transcriber'), description: 'Convert speech to text', category: 'language', icon: TranscriberIcon },
+
+    // News & Information
+    { id: AppID.geminiAiNews, name: t('app_launcher.geminiAiNews'), description: 'Latest AI news and updates', category: 'news', icon: NewsIcon },
+    { id: AppID.resourceHub, name: t('app_launcher.resourceHub'), description: 'Educational resources and guides', category: 'news', icon: ResourceHubIcon },
+
+    // Identity & Security
+    { id: AppID.veridianId, name: t('app_titles.veridianId'), description: 'Digital identity management', category: 'security', icon: VeridianIdIcon },
+
+    // Agents (custom)
     ...customAgents.map(agent => ({
         id: agent.id as AppID,
         name: agent.name,
+        description: `${agent.role} - Custom AI agent`,
+        category: 'agents',
         icon: ({ className }: { className?: string }) => <span className={`text-2xl ${className ?? ''}`}>{agent.icon}</span>
     }))
   ], [customAgents, t]);
@@ -1059,3 +1136,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

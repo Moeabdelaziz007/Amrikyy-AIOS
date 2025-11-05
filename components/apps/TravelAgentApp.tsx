@@ -84,37 +84,201 @@ const PlanTripView: React.FC<{startTravelWorkflow: TravelAgentAppProps['startTra
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [budget, setBudget] = useState('2500');
+    const [interests, setInterests] = useState<string>('sightseeing, food, nightlife');
+    const [hotelPreference, setHotelPreference] = useState<'budget'|'mid'|'luxury'>('mid');
+    const [includeNightlife, setIncludeNightlife] = useState(true);
+    const [includeRestaurants, setIncludeRestaurants] = useState(true);
+    const [includeTours, setIncludeTours] = useState(true);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedPlan, setGeneratedPlan] = useState<TravelPlan | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     /**
      * Handles the creation of a new trip by validating input and starting the workflow.
      */
-    const handleCreateTrip = () => {
-        if (destination && startDate && endDate && budget) {
+    const handleCreateTrip = async () => {
+        setErrorMessage(null);
+        if (!destination || !startDate || !endDate || !budget) {
+            setErrorMessage('Please fill out all required fields.');
+            return;
+        }
+
+        setIsGenerating(true);
+        setGeneratedPlan(null);
+
+        // Build a rich request object for the workflow / AI planner
+        const request = {
+            destination,
+            startDate,
+            endDate,
+            budget: Number(budget),
+            preferences: {
+                interests: interests.split(',').map(s => s.trim()),
+                hotelPreference,
+                includeNightlife,
+                includeRestaurants,
+                includeTours
+            }
+        };
+
+        try {
+            // Use the existing startTravelWorkflow to open the workflow UI; also call backend AI planner if available
             startTravelWorkflow({ destination, startDate, endDate, budget });
-        } else {
-            alert("Please fill out all fields before creating a trip.");
+
+            // Try to call backend planner for an immediate plan (best-effort; backend may not be implemented)
+            const resp = await fetch('/api/ai/travel-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            });
+            if (resp.ok) {
+                const plan = await resp.json();
+                setGeneratedPlan(plan as TravelPlan);
+            } else {
+                // Backend missing: fall back to a lightweight client-side skeleton plan
+                const skeleton: TravelPlan = buildSkeletonPlan(destination, startDate, endDate, request.preferences);
+                setGeneratedPlan(skeleton);
+            }
+        } catch (err: any) {
+            console.error('Failed to generate plan', err);
+            setErrorMessage(err?.message || 'Failed to generate plan. Try again.');
+        } finally {
+            setIsGenerating(false);
         }
     };
 
     return (
-        <div className="h-full w-full flex items-center justify-center p-6">
-            <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-xl p-8 shadow-xl backdrop-blur-sm">
-                <h2 className="font-display text-3xl font-bold mb-6 text-center">Plan Your Next Adventure</h2>
-                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleCreateTrip(); }}>
-                    <div>
-                        <label htmlFor="destination" className="block text-sm font-medium text-text-secondary mb-2">Destination</label>
-                        <input type="text" id="destination" placeholder="e.g., Paris, France" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={destination} onChange={(e) => setDestination(e.target.value)} required />
+        <div className="h-full w-full flex items-start justify-center p-6">
+            <div className="w-full max-w-3xl bg-white/5 border border-white/10 rounded-xl p-6 shadow-xl backdrop-blur-sm">
+                <h2 className="font-display text-3xl font-bold mb-4 text-center">Plan Your Next Adventure</h2>
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreateTrip(); }}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="md:col-span-2">
+                            <label htmlFor="destination" className="block text-sm font-medium text-text-secondary mb-2">Destination</label>
+                            <input type="text" id="destination" placeholder="e.g., Paris, France" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={destination} onChange={(e) => setDestination(e.target.value)} required />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Budget: ${budget}</label>
+                            <input type="range" min="500" max="10000" value={budget} onChange={(e) => setBudget(e.target.value)} className="w-full h-2 bg-black/20 rounded-lg" />
+                        </div>
                     </div>
-                    <div className="flex space-x-4">
-                        <div className="flex-1"><label htmlFor="start-date" className="block text-sm font-medium text-text-secondary mb-2">Start Date</label><input type="date" id="start-date" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={startDate} onChange={(e) => setStartDate(e.target.value)} required /></div>
-                        <div className="flex-1"><label htmlFor="end-date" className="block text-sm font-medium text-text-secondary mb-2">End Date</label><input type="date" id="end-date" className="w-full bg-black/20 border border-white/10 rounded-md p-3 focus:ring-2 focus:ring-primary-blue focus:outline-none" value={endDate} onChange={(e) => setEndDate(e.target.value)} required /></div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label htmlFor="start-date" className="block text-sm font-medium text-text-secondary mb-2">Start Date</label>
+                            <input type="date" id="start-date" className="w-full bg-black/20 border border-white/10 rounded-md p-3" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+                        </div>
+                        <div>
+                            <label htmlFor="end-date" className="block text-sm font-medium text-text-secondary mb-2">End Date</label>
+                            <input type="date" id="end-date" className="w-full bg-black/20 border border-white/10 rounded-md p-3" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+                        </div>
                     </div>
-                    <div><label htmlFor="budget" className="block text-sm font-medium text-text-secondary mb-2">Budget: ${budget}</label><input type="range" id="budget" min="500" max="10000" value={budget} onChange={(e) => setBudget(e.target.value)} className="w-full h-2 bg-black/20 rounded-lg appearance-none cursor-pointer accent-primary-blue" /></div>
-                    <button type="submit" className="w-full font-bold py-3 px-4 rounded-lg bg-gradient-to-r from-primary-blue to-primary-purple hover:brightness-110 active:scale-95 transition-all duration-200">Create Trip with AI ✨</button>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="md:col-span-2">
+                            <label htmlFor="interests" className="block text-sm font-medium text-text-secondary mb-2">Interests (comma-separated)</label>
+                            <input id="interests" type="text" value={interests} onChange={(e) => setInterests(e.target.value)} className="w-full bg-black/20 border border-white/10 rounded-md p-3" placeholder="e.g., museums, food, nightlife, hiking" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Hotel Preference</label>
+                            <select value={hotelPreference} onChange={(e) => setHotelPreference(e.target.value as any)} className="w-full bg-black/20 border border-white/10 rounded-md p-3">
+                                <option value="budget">Budget</option>
+                                <option value="mid">Comfort / Mid</option>
+                                <option value="luxury">Luxury</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <label className="inline-flex items-center gap-2"><input type="checkbox" checked={includeRestaurants} onChange={(e) => setIncludeRestaurants(e.target.checked)} /> Include restaurants</label>
+                        <label className="inline-flex items-center gap-2"><input type="checkbox" checked={includeNightlife} onChange={(e) => setIncludeNightlife(e.target.checked)} /> Include nightlife</label>
+                        <label className="inline-flex items-center gap-2"><input type="checkbox" checked={includeTours} onChange={(e) => setIncludeTours(e.target.checked)} /> Include tours & activities</label>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <button type="submit" disabled={isGenerating} className="flex-1 font-bold py-3 px-4 rounded-lg bg-gradient-to-r from-primary-blue to-primary-purple hover:brightness-110 active:scale-95 transition-all duration-200">{isGenerating ? 'Generating plan…' : 'Create Detailed Plan ✨'}</button>
+                        <button type="button" onClick={() => { setDestination(''); setStartDate(''); setEndDate(''); setBudget('2500'); setInterests(''); setGeneratedPlan(null); }} className="px-4 py-3 rounded-lg bg-black/20">Reset</button>
+                    </div>
+
+                    {errorMessage && <p className="text-sm text-red-400 mt-2">{errorMessage}</p>}
                 </form>
+
+                {/* Generated itinerary preview */}
+                {generatedPlan && (
+                    <div className="mt-6 border-t border-white/10 pt-4">
+                        <ItineraryPreview plan={generatedPlan} />
+                    </div>
+                )}
             </div>
         </div>
     )
+};
+
+/**
+ * Utility to build a simple skeleton itinerary when backend isn't available
+ */
+const buildSkeletonPlan = (destination: string, start: string, end: string, prefs: any): TravelPlan => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const days = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / (1000*60*60*24)) + 1);
+    const itinerary = [] as any[];
+    for (let i = 0; i < days; i++) {
+        itinerary.push({ day: i+1, title: `Day ${i+1} in ${destination}`, activities: [
+            { time: '09:00', title: `Morning: Explore local sights`, details: '' },
+            { time: '13:00', title: `Lunch at recommended restaurant`, details: '' },
+            { time: '15:00', title: `Afternoon: Museum / Tour`, details: '' },
+            { time: '20:00', title: `Evening: Nightlife or show`, details: '' }
+        ]});
+    }
+    return {
+        tripTitle: `Trip to ${destination}`,
+        destination,
+        startDate: start,
+        endDate: end,
+        budget: Number(prefs?.budget || 0),
+        itinerary,
+        notes: 'Skeleton plan generated locally. For richer results, connect backend AI planner.'
+    } as TravelPlan;
+};
+
+/**
+ * Simple itinerary preview with export
+ */
+const ItineraryPreview: React.FC<{plan: TravelPlan}> = ({ plan }) => {
+    const exportJson = () => {
+        const blob = new Blob([JSON.stringify(plan, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `${(plan.tripTitle || 'itinerary').replace(/\s+/g,'_')}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    };
+
+    return (
+        <div className="bg-black/20 border border-white/10 rounded-xl p-4">
+            <div className="flex items-start justify-between">
+                <div>
+                    <h3 className="font-display text-xl font-bold">{plan.tripTitle}</h3>
+                    <p className="text-sm text-text-secondary">{plan.destination} • {plan.startDate} - {plan.endDate}</p>
+                </div>
+                <div className="flex gap-2">
+                    <button onClick={exportJson} className="px-3 py-1 bg-white/5 rounded">Export JSON</button>
+                    <button onClick={() => window.print()} className="px-3 py-1 bg-white/5 rounded">Print</button>
+                </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+                {plan.itinerary?.map((day: any) => (
+                    <div key={day.day} className="bg-black/10 p-3 rounded-lg">
+                        <h4 className="font-semibold">{day.title}</h4>
+                        <ul className="mt-2 space-y-1 text-sm text-text-secondary">
+                            {day.activities.map((act: any, idx: number) => (
+                                <li key={idx}><strong>{act.time}</strong> — {act.title} {act.details ? `· ${act.details}` : ''}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
 /**

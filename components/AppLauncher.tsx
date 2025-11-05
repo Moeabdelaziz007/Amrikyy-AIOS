@@ -1,56 +1,147 @@
-import React, { useState, useMemo } from 'react';
+                className="w-full h-full md:max-w-6xl md:h-[80vh] bg-bg-primary/80 rounded-none md:rounded-2xl border border-border-color shadow-2xl flex flex-col p-4 sm:p-6 animate-slide-up"
 import { AppID } from '../types';
 import { SparklesIcon } from './Icons';
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-text-primary">App Launcher</h2>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        aria-label="Close app launcher"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Search */}
 
 /**
- * Defines the structure for an application definition used in the App Launcher.
+                    <label htmlFor="app-search-input" className="sr-only">Search apps and agents</label>
  */
-interface AppDef {
+                        id="app-search-input"
     /** The unique identifier for the application. */
     id: AppID;
     /** The display name of the application. */
     name: string;
+    /** A short description of what the app does. */
+    description: string;
+                        role="searchbox"
+    category: string;
     /** The React component for the application's icon. */
+
+                {/* Category Tabs */}
+                <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto">
+                    {categories.map(category => (
+                        <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                                selectedCategory === category
+                                    ? 'bg-primary-blue text-white'
+                                    : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-text-primary'
+                            }`}
+                        >
+                            {category === 'all' ? 'All Apps' : category.charAt(0).toUpperCase() + category.slice(1)}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Apps Grid */}
     icon: React.FC<{ className: string }>;
-}
+                    {Object.entries(appsByCategory).map(([category, apps]) => (
+                        <div key={category} className="mb-8">
+                            <h3 className="text-lg font-semibold text-text-primary mb-4 capitalize">
+                                {category}
+                            </h3>
+                            <div role="grid" aria-label={`${category} applications`} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                {apps.map(app => {
+                                    const Icon = app.icon;
+                                    return (
+                                        <button
+                                            key={app.id}
+                                            onClick={() => onOpen(app.id)}
+                                            className="group flex flex-col items-center justify-start gap-3 text-center p-4 rounded-xl bg-bg-secondary hover:bg-bg-tertiary transition-all duration-200 hover:scale-105"
+                                            aria-label={`Open ${app.name}`}
+                                            title={app.description}
+                                        >
+                                            <div className="w-12 h-12 rounded-xl bg-bg-primary flex items-center justify-center text-text-secondary group-hover:text-text-primary transition-colors">
+                                                <Icon className="w-6 h-6" />
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="text-sm font-medium text-text-primary leading-tight">
+                                                    {app.name}
+                                                </span>
+                                                <span className="text-xs text-text-muted leading-tight line-clamp-2">
+                                                    {app.description}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
 
-/**
- * Props for the AppLauncher component.
- */
-interface AppLauncherProps {
-    /** Callback function to open an application by its ID. */
-    onOpen: (appId: AppID) => void;
-    /** Callback function to close the App Launcher. */
-    onClose: () => void;
-    /** An array of all available applications to display. */
-    allApps: AppDef[];
-}
-
-/**
- * The AppLauncher component provides a full-screen overlay for browsing and launching applications.
- * It includes a search bar to filter apps and displays them in a grid.
- * @param {AppLauncherProps} props - The component props.
- * @returns {JSX.Element} The rendered AppLauncher component.
- */
-const AppLauncher: React.FC<AppLauncherProps> = ({ onOpen, onClose, allApps }) => {
+                    {filteredApps.length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <SparklesIcon className="w-12 h-12 text-text-muted mb-4" />
+                            <p className="text-center text-text-muted">
+                                {searchTerm ? 'No apps found matching your search.' : 'No apps in this category.'}
+                            </p>
+                        </div>
+                    )}
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
     /**
-     * Memoized list of applications, filtered by the current search term.
-     * Re-calculates only when `searchTerm` or `allApps` changes.
+     * Get unique categories from all apps.
+     */
+    const categories = useMemo(() => {
+        const cats = ['all', ...Array.from(new Set(allApps.map(app => app.category)))];
+        return cats;
+    }, [allApps]);
+
+    /**
+     * Memoized list of applications, filtered by search term and category.
      */
     const filteredApps = useMemo(() => {
-        if (!searchTerm) return allApps;
-        return allApps.filter(app => app.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [searchTerm, allApps]);
+        let apps = allApps;
+
+        if (selectedCategory !== 'all') {
+            apps = apps.filter(app => app.category === selectedCategory);
+        }
+
+        if (searchTerm) {
+            apps = apps.filter(app =>
+                app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                app.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        return apps;
+    }, [searchTerm, selectedCategory, allApps]);
+
+    /**
+     * Group filtered apps by category for display.
+     */
+    const appsByCategory = useMemo(() => {
+        const grouped: Record<string, AppDef[]> = {};
+        filteredApps.forEach(app => {
+            if (!grouped[app.category]) {
+                grouped[app.category] = [];
+            }
+            grouped[app.category].push(app);
+        });
+        return grouped;
+    }, [filteredApps]);
 
     return (
         <div 
             className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xl flex items-center justify-center animate-fade-in"
             onClick={onClose}
-            role="dialog" // ARIA role for a dialog
-            aria-modal="true" // Indicates that this modal blocks content behind it
-            aria-label="App Launcher" // Accessible label for the dialog
+            role="dialog"
+            aria-modal="true"
+            aria-label="App Launcher"
         >
             <div 
                 className="w-full h-full md:max-w-2xl md:h-[70vh] bg-bg-primary/80 rounded-none md:rounded-2xl border border-border-color shadow-2xl flex flex-col p-4 sm:p-6 animate-slide-up"

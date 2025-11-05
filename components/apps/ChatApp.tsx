@@ -31,7 +31,7 @@ interface ChatAppProps {
  */
 const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 'initial-1', sender: 'ai', text: "Hello! I'm Maya, your AI travel assistant. How can I help you plan your next adventure today?" }
+    { id: 'initial-1', sender: 'ai', text: "Hello! I'm your AI assistant powered by Google Gemini. I'm here to help you with any questions, tasks, or creative projects. What can I help you with today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -93,7 +93,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
         currentInput,
         chatHistory,
         {},
-        "You are Maya, a helpful AI assistant for the Amrikyy AI OS, specializing in travel intelligence. Be friendly, helpful, and concise."
+        "You are a helpful AI assistant for the Amrikyy AI OS. Be friendly, knowledgeable, and provide accurate information on any topic. Help users with questions, tasks, creative projects, and general assistance."
       );
       const aiMessage: Message = { id: `ai-${Date.now()}`, sender: 'ai', text: aiResponseText };
 
@@ -133,11 +133,11 @@ const ChatApp: React.FC<ChatAppProps> = ({ speechSettings }) => {
   };
 
   const handlePositiveFeedback = (message: Message) => {
-    recordPositiveFeedback(agentId, 'chat-response', { message: message.text });
+    recordPositiveFeedback('general-chat', 'chat-response', { message: message.text });
   };
 
   const handleNegativeFeedback = (message: Message) => {
-    recordNegativeFeedback(agentId, 'chat-response', { message: message.text });
+    recordNegativeFeedback('general-chat', 'chat-response', { message: message.text });
   };
 
   /**

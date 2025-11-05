@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+ import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -80,6 +80,21 @@ export class CalendarService {
      calendarId: 'primary',
      eventId
    });
+ }
+connect like all travel agent
+ // Get authorization URL for user
+ getAuthUrl(userId: string): string {
+   return this.oauth2Client.generateAuthUrl({
+     access_type: 'offline',
+     scope: SCOPES,
+     state: userId
+   });
+ }
+
+ // Exchange code for tokens
+ async getTokens(code: string) {
+   const { tokens } = await this.oauth2Client.getToken(code);
+   return tokens;
  }
 }
 
