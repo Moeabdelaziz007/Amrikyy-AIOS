@@ -394,6 +394,16 @@ Amrikyy AI OS includes **50+ integrated applications** across various categories
   - Edit and export transcripts
 - **Key Features**: Real-time transcription, speaker identification, timestamps
 
+#### **NanoBanana (AI Pattern Generator)**
+- **Purpose**: Nano-scale AI art and pattern generator
+- **How to Use**: 
+  1. Launch NanoBanana from the app launcher
+  2. Select a pattern style (Geometric, Fractal, Abstract, or Mandala)
+  3. Enter a creative prompt (e.g., "sunset waves", "cosmic energy")
+  4. Click "Generate" to create unique AI-powered patterns
+  5. Export as SVG or PNG format
+- **Key Features**: Multiple art styles, AI-powered pattern generation, SVG rendering, color customization, real-time preview
+
 ### 🚀 Productivity & Workflow Apps
 
 #### **Creator Studio**
@@ -681,6 +691,16 @@ Amrikyy AI OS includes **50+ integrated applications** across various categories
   - Emergency assistance contacts
 - **Key Features**: Booking integration, insurance, documentation
 
+#### **Trip Planner**
+- **Purpose**: Enhanced trip planning with visual itinerary builder
+- **How to Use**: 
+  1. Open Trip Planner from the dock
+  2. Enter destination, start date, and end date
+  3. Set total budget and number of travelers
+  4. Click "Generate Itinerary" to create a day-by-day plan
+  5. Review activities, adjust budget allocation, and export plan
+- **Key Features**: Multi-day itinerary generation, budget tracking per day, visual timeline, traveler management, editable trip plans
+
 #### **Translate Hub**
 - **Purpose**: Real-time translation and language services
 - **How to Use**: 
@@ -754,6 +774,16 @@ Amrikyy AI OS includes **50+ integrated applications** across various categories
 - **Key Features**: Live streaming, avatars, translation, recording
 
 ### 🎯 Agent Management Apps
+
+#### **Agents Dashboard**
+- **Purpose**: Central dashboard to manage and monitor all AI agents
+- **How to Use**: 
+  1. Launch Agents Dashboard from the app launcher
+  2. View all active, idle, and error-state agents at a glance
+  3. Switch between Grid and List view for different perspectives
+  4. Click on any agent to see detailed stats (CPU, memory, uptime, tasks)
+  5. Start, stop, or restart agents from the dashboard
+- **Key Features**: Real-time agent monitoring, performance metrics (CPU/memory/uptime), task tracking, grid/list views, agent status indicators, per-agent controls
 
 #### **Agent Forge**
 - **Purpose**: Create and customize AI agents
