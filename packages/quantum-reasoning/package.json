@@ -33,8 +33,10 @@
     "eslint": "^8.57.0",
     "@types/node": "^20.0.0"
   },
-  "peerDependencies": {
-    "@amrikyy/ai": "*"
+  "dependencies": {
+    "@auraos/ai": "workspace:*",
+    "@google/generative-ai": "^0.21.0",
+    "zod": "^3.22.4"
   },
   "files": [
     "dist",
