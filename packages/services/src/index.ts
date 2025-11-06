@@ -1,22 +1,7 @@
-// Google Workspace Services
-export {
-  GoogleWorkspaceService,
-  getGoogleWorkspaceService,
-  type GoogleWorkspaceConfig,
-  type GoogleAuthTokens,
-  type DriveFile,
-  type DocumentContent,
-  type SpreadsheetData,
-} from './services/google/workspace.service';
+/* AUTO-GENERATED - cleaned exports for @amrikyy/services */
 
-// Authentication Components
+// Re-export runtime symbols
+export { GoogleWorkspaceService, getGoogleWorkspaceService } from './services/google/workspace.service';
 export { GoogleAuth, useGoogleAuth } from './components/GoogleAuth';
 
-// Re-export main types for convenience
-export type {
-  GoogleWorkspaceConfig,
-  GoogleAuthTokens,
-  DriveFile,
-  DocumentContent,
-  SpreadsheetData,
-} from './services/google/workspace.service';
+// NOTE: Type re-exports removed to avoid duplicate identifier errors. Import types directly from './services/google/workspace.service' where needed.

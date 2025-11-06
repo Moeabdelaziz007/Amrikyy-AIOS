@@ -1,4 +1,6 @@
 // src/adapters/base/adapter.factory.ts
+import { BaseAdapter, AdapterRequest, AdapterResponse } from './adapter.interface';
+
 export class AdapterFactory {
   private static adapters: Map<string, BaseAdapter> = new Map();
 
