@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node', // Use node environment for backend tests
+    setupFiles: [], // No setup files needed
   },
 });

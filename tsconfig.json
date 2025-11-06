@@ -5,7 +5,8 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
+  "moduleResolution": "bundler",
+  "baseUrl": ".",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,7 +19,8 @@
     "paths": {
       "@auraos/ui": ["./packages/ui/src"],
       "@auraos/common": ["./packages/common/src"],
-      "@auraos/hooks": ["./packages/hooks/src"]
+      "@auraos/hooks": ["./packages/hooks/src"],
+      "@amrikyy/ui": ["./packages/ui/src"]
     }
   },
   "include": ["src", "packages"],
